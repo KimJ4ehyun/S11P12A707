@@ -6,4 +6,5 @@ spring:
     name: top
   profiles:
     active: local
+    include: oauth
 
