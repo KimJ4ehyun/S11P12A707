@@ -13,9 +13,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class HourFocusTimes {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long hourFocusTimeId;
+    @Column(name="hour_focus_time_id")
+    private Long id;
 
     private int focusTime;
 

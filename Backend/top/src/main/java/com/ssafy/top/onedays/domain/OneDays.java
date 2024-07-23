@@ -3,7 +3,6 @@ package com.ssafy.top.onedays.domain;
 import com.ssafy.top.users.domain.Users;
 import jakarta.persistence.*;
 import lombok.*;
-import java.sql.Date;
 import java.time.LocalDate;
 
 @Entity
@@ -12,9 +11,11 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Builder
 public class OneDays {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long OneDayId;
+    @Column(name="one_day_id")
+    private Long id;
 
     private LocalDate dateData;
 
