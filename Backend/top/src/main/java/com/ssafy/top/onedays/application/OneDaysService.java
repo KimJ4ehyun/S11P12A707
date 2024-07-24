@@ -13,7 +13,6 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -61,28 +60,39 @@ public class OneDaysService {
 
         return String.format("%s:%02d:%02d", formattedHours, minutes, seconds);
     }
-
     public Object findFocusTimeListByLoginIdAndPeriod(String loginId, String period) {
+        return findFocusTimeList(loginId, period, null);
+    }
+
+    public Object findFocusTimeListByLoginIdAndMonth(String loginId, int month) {
+        return findFocusTimeList(loginId, null, month);
+    }
+
+    public Object findFocusTimeList(String loginId, String period, Integer month) {
         Long userId = usersRepository.findByLoginId(loginId)
                 .orElseThrow(() -> new NoSuchElementException("해당 로그인 아이디가 존재하지 않습니다: " + loginId))
                 .getId();
         LocalDate currentDay = LocalDate.now();
         LocalDate today = currentDay;
 
-        if (period.equals("day")){
-            Long oneDayId = oneDaysRepository.findByUserIdAndDateData(userId, today)
-                    .map(OneDays::getId)
-                    .orElseThrow(() -> new NoSuchElementException("해당 날짜에 해당하는 데이터가 없습니다: " + today));
-            List<HourFocusTimes> hourFocusTimesList = hourFocusTimesRepository.findByOneDaysId(oneDayId);
-            FocusTimeListDayResponse[] focusTimeListDayResponses = new FocusTimeListDayResponse[hourFocusTimesList.size()];
-            for (int i = 0; i < focusTimeListDayResponses.length; i++) {
-                focusTimeListDayResponses[i] = new FocusTimeListDayResponse(hourFocusTimesList.get(i).getTimeUnit(), hourFocusTimesList.get(i).getFocusTime());
+        if(period != null){
+            if (period.equals("day")){
+                Long oneDayId = oneDaysRepository.findByUserIdAndDateData(userId, today)
+                        .map(OneDays::getId)
+                        .orElseThrow(() -> new NoSuchElementException("해당 날짜에 해당하는 데이터가 없습니다: " + today));
+                List<HourFocusTimes> hourFocusTimesList = hourFocusTimesRepository.findByOneDaysId(oneDayId);
+                FocusTimeListDayResponse[] focusTimeListDayResponses = new FocusTimeListDayResponse[hourFocusTimesList.size()];
+                for (int i = 0; i < focusTimeListDayResponses.length; i++) {
+                    focusTimeListDayResponses[i] = new FocusTimeListDayResponse(hourFocusTimesList.get(i).getTimeUnit(), hourFocusTimesList.get(i).getFocusTime());
+                }
+                return focusTimeListDayResponses;
+            } else if (period.equals("week")) {
+                currentDay = currentDay.minusWeeks(1).plusDays(1);
+            } else if (period.equals("month")) {
+                currentDay = currentDay.minusMonths(1).plusDays(1);
             }
-            return focusTimeListDayResponses;
-        } else if (period.equals("week")) {
-            currentDay = currentDay.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
-        } else if (period.equals("month")) {
-            currentDay = currentDay.withDayOfMonth(1);
+        } else if (month != null){
+            currentDay = currentDay.minusMonths(month).plusDays(1);
         }
 
         LocalDate yesterday = today.minusDays(1);
