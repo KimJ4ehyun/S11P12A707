@@ -1,5 +1,6 @@
 package com.ssafy.top.users.presentation;
 
+import com.ssafy.top.global.domain.CommonResponseDto;
 import com.ssafy.top.users.application.UsersService;
 import com.ssafy.top.users.dto.response.UsersResponse;
 import lombok.RequiredArgsConstructor;
@@ -16,10 +17,10 @@ public class UsersController {
     private final UsersService usersService;
 
     @GetMapping("/user")
-    public ResponseEntity<List<UsersResponse>> findUsersByNickname(@RequestParam String nickname) {
+    public ResponseEntity<?> findUsersByNickname(@RequestParam String nickname) {
         Long userId = 1L;
 
-        List<UsersResponse> response = usersService.getUsersByLoginId(userId, nickname);
+        CommonResponseDto<List<UsersResponse>> response = usersService.getUsersByLoginId(userId, nickname);
 
         return ResponseEntity.ok(response);
     }
