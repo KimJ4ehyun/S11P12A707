@@ -70,8 +70,10 @@ public class OneDaysService {
         LocalDate today = currentDay;
 
         if (period.equals("day")){
-            List<HourFocusTimes> hourFocusTimesList =
-                    hourFocusTimesRepository.findByOneDaysId(oneDaysRepository.findByUserIdAndDateData(userId, today).getId());
+            Long oneDayId = oneDaysRepository.findByUserIdAndDateData(userId, today)
+                    .map(OneDays::getId)
+                    .orElseThrow(() -> new NoSuchElementException("해당 날짜에 해당하는 데이터가 없습니다: " + today));
+            List<HourFocusTimes> hourFocusTimesList = hourFocusTimesRepository.findByOneDaysId(oneDayId);
             FocusTimeListDayResponse[] focusTimeListDayResponses = new FocusTimeListDayResponse[hourFocusTimesList.size()];
             for (int i = 0; i < focusTimeListDayResponses.length; i++) {
                 focusTimeListDayResponses[i] = new FocusTimeListDayResponse(hourFocusTimesList.get(i).getTimeUnit(), hourFocusTimesList.get(i).getFocusTime());
@@ -97,8 +99,11 @@ public class OneDaysService {
 
     public int findTodayTotalFocusTimeByUserIdAndDateData(Long userId, LocalDate today){
         int totalFocusTime = 0;
-        List<HourFocusTimes> hourFocusTimesList =
-                hourFocusTimesRepository.findByOneDaysId(oneDaysRepository.findByUserIdAndDateData(userId, today).getId());
+        Long oneDayId = oneDaysRepository.findByUserIdAndDateData(userId, today)
+                .map(OneDays::getId)
+                .orElseThrow(() -> new NoSuchElementException("해당 날짜에 해당하는 데이터가 없습니다: " + today));
+
+        List<HourFocusTimes> hourFocusTimesList = hourFocusTimesRepository.findByOneDaysId(oneDayId);
 
         for (HourFocusTimes hourFocusTime : hourFocusTimesList) {
             totalFocusTime += hourFocusTime.getFocusTime();
