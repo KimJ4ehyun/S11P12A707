@@ -16,4 +16,10 @@ public interface UsersRepository extends JpaRepository<Users, Long> {
             "where a.id != :userId and a.nickname like '%' || :nickname || '%' " +
             "order by a.nickname")
     List<Object[]> findUsersByNickname(@Param("userId") Long userId, @Param("nickname") String nickname);
+
+    @Query("select a " +
+            "from Users a " +
+            "join Friends b on a.id = b.friendsPK.friendId " +
+            "where b.friendsPK.userId = :userId and b.relation = 'ACCEPTED' ")
+    List<Users> findUsersByUserId(@Param("userId") Long userId);
 }
