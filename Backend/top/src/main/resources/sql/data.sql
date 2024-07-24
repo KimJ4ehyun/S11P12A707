@@ -20,6 +20,13 @@ insert into hour_focus_times (focus_time, time_unit, one_day_id)
 values (1800, 1, 8),
        (2000, 2, 8);
 
+insert into app_focus_times (app, start_time, focus_time, one_day_id)
+values ('Youtube', 3800, 3600, 8),
+       ('Mattermost', 3580, 3800, 8),
+       ('YoutubeMusic', 3600, 5000, 8),
+       ('SSAFY', 3620, 2400, 8),
+       ('IntelliJ', 3640, 2000, 8);
+
 insert into friends (user_id, friend_id, relation)
 values (1, 2, 'ACCEPTED'),
        (2, 1, 'ACCEPTED'),
