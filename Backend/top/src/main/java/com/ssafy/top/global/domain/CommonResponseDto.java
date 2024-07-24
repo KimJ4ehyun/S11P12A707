@@ -2,7 +2,7 @@ package com.ssafy.top.global.domain;
 
 import lombok.*;
 
-@Data
+@Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 public class CommonResponseDto<T> {
