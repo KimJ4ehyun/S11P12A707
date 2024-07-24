@@ -34,12 +34,8 @@ public class OneDaysService {
                 .getId();
         LocalDate today = LocalDate.now();
         LocalDate yesterday = today.minusDays(1);
-        List<HourFocusTimes> hourFocusTimesList =
-                hourFocusTimesRepository.findByOneDaysId(oneDaysRepository.findByUserIdAndDateData(userId, today).getId());
 
-        for (HourFocusTimes hourFocusTime : hourFocusTimesList) {
-            totalFocusTime += hourFocusTime.getFocusTime();
-        }
+        totalFocusTime = findTodayTotalFocusTimeByUserIdAndDateData(userId, today);
 
         if (period.equals("week")) {
             today = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
@@ -56,7 +52,14 @@ public class OneDaysService {
         int minutes = (totalFocusTime % 3600) / 60;
         int seconds = totalFocusTime % 60;
 
-        return String.format("%02d:%02d:%02d", hours, minutes, seconds);
+        String formattedHours;
+        if (hours < 10) {
+            formattedHours = String.format("0%d", hours);
+        } else {
+            formattedHours = String.valueOf(hours);
+        }
+
+        return String.format("%s:%02d:%02d", formattedHours, minutes, seconds);
     }
 
     public Object findFocusTimeListByLoginIdAndPeriod(String loginId, String period) {
@@ -65,6 +68,7 @@ public class OneDaysService {
                 .getId();
         LocalDate currentDay = LocalDate.now();
         LocalDate today = currentDay;
+
         if (period.equals("day")){
             List<HourFocusTimes> hourFocusTimesList =
                     hourFocusTimesRepository.findByOneDaysId(oneDaysRepository.findByUserIdAndDateData(userId, today).getId());
@@ -78,17 +82,28 @@ public class OneDaysService {
         } else if (period.equals("month")) {
             currentDay = currentDay.withDayOfMonth(1);
         }
-        List<OneDays> oneDaysList = oneDaysRepository.findByUserIdAndDateDataBetween(userId, currentDay, today);
-        FocusTimeListResponse[] focusTimeListResponses = new FocusTimeListResponse[oneDaysList.size()];
-        for(int i = 0; i < focusTimeListResponses.length; i++){
+
+        LocalDate yesterday = today.minusDays(1);
+        List<OneDays> oneDaysList = oneDaysRepository.findByUserIdAndDateDataBetween(userId, currentDay, yesterday);
+        FocusTimeListResponse[] focusTimeListResponses = new FocusTimeListResponse[oneDaysList.size()+1];
+        for(int i = 0; i < focusTimeListResponses.length-1; i++){
             String formattedDate = oneDaysList.get(i).getDateData().format(DateTimeFormatter.ofPattern("MM-dd"));
             focusTimeListResponses[i] = new FocusTimeListResponse(formattedDate, oneDaysList.get(i).getFocusTime());
         }
+        String formattedDateToday = today.format(DateTimeFormatter.ofPattern("MM-dd"));
+        focusTimeListResponses[focusTimeListResponses.length-1] = new FocusTimeListResponse(formattedDateToday, findTodayTotalFocusTimeByUserIdAndDateData(userId, today));
         return focusTimeListResponses;
     }
 
-    public static String getDateData(LocalDate date) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM-dd");
-        return date.format(formatter);
+    public int findTodayTotalFocusTimeByUserIdAndDateData(Long userId, LocalDate today){
+        int totalFocusTime = 0;
+        List<HourFocusTimes> hourFocusTimesList =
+                hourFocusTimesRepository.findByOneDaysId(oneDaysRepository.findByUserIdAndDateData(userId, today).getId());
+
+        for (HourFocusTimes hourFocusTime : hourFocusTimesList) {
+            totalFocusTime += hourFocusTime.getFocusTime();
+        }
+        return totalFocusTime;
     }
+
 }
