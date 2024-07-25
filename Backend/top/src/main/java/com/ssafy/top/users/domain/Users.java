@@ -22,4 +22,12 @@ public class Users {
     private String loginId;
 
     private Boolean screenShare;
+
+    public void updateNickname(String nickname) {
+        this.nickname = nickname;
+    }
+
+    public void updateScreenShare(Boolean screenShare) {
+        this.screenShare = screenShare;
+    }
 }
