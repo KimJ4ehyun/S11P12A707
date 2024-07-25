@@ -28,18 +28,19 @@ values ('2023-12-25', 2550, 5, 1),
        ('2024-07-21', 200, 5, 1),
        ('2024-07-22', 100, 5, 1),
        ('2024-07-23', 300, 5, 1),
-       ('2024-07-24', 0, 5, 1);
+       ('2024-07-24', 300, 5, 1),
+       ('2024-07-25', 0, 5, 1);
 
 insert into hour_focus_times (focus_time, time_unit, one_day_id)
-values (1800, 1, 22),
-       (2000, 2, 22);
+values (1800, 1, 23),
+       (2000, 2, 23);
 
 insert into app_focus_times (app, start_time, focus_time, one_day_id)
-values ('Youtube', 3800, 3600, 22),
-       ('Mattermost', 3580, 3800, 22),
-       ('YoutubeMusic', 3600, 5000, 22),
-       ('SSAFY', 3620, 2400, 22),
-       ('IntelliJ', 3640, 2000, 22);
+values ('Youtube', 3800, 3600, 23),
+       ('Mattermost', 3580, 3800, 23),
+       ('YoutubeMusic', 3600, 5000, 23),
+       ('SSAFY', 3620, 2400, 23),
+       ('IntelliJ', 3640, 2000, 23);
 
 insert into friends (user_id, friend_id, relation)
 values (1, 2, 'ACCEPTED'),

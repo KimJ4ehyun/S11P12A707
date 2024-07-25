@@ -1,9 +1,12 @@
 package com.ssafy.top.onedays.application;
 
+import com.ssafy.top.appfocustimes.domain.AppFocusTimes;
+import com.ssafy.top.appfocustimes.dto.response.AppListResponse;
 import com.ssafy.top.hourfocustimes.domain.HourFocusTimes;
 import com.ssafy.top.hourfocustimes.domain.HourFocusTimesRepository;
 import com.ssafy.top.onedays.domain.OneDays;
 import com.ssafy.top.onedays.domain.OneDaysRepository;
+import com.ssafy.top.onedays.dto.response.FocusTimeListCalendarResponse;
 import com.ssafy.top.onedays.dto.response.FocusTimeListDayResponse;
 import com.ssafy.top.onedays.dto.response.FocusTimeListResponse;
 import com.ssafy.top.users.domain.UsersRepository;
@@ -13,6 +16,8 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -76,7 +81,7 @@ public class OneDaysService {
         LocalDate today = currentDay;
 
         if(period != null){
-            if (period.equals("day")){
+            if (period.equals("day")) {
                 Long oneDayId = oneDaysRepository.findByUserIdAndDateData(userId, today)
                         .map(OneDays::getId)
                         .orElseThrow(() -> new NoSuchElementException("해당 날짜에 해당하는 데이터가 없습니다: " + today));
@@ -91,7 +96,7 @@ public class OneDaysService {
             } else if (period.equals("month")) {
                 currentDay = currentDay.minusMonths(1).plusDays(1);
             }
-        } else if (month != null){
+        } else if (month != null) {
             currentDay = currentDay.minusMonths(month).plusDays(1);
         }
 
@@ -121,4 +126,30 @@ public class OneDaysService {
         return totalFocusTime;
     }
 
+    public FocusTimeListCalendarResponse[] findFocusTimeListByLoginIdAndYearAndMonth(String loginId, int year, int month){
+        Long userId = usersRepository.findByLoginId(loginId)
+                .orElseThrow(() -> new NoSuchElementException("해당 로그인 아이디가 존재하지 않습니다: " + loginId))
+                .getId();
+        LocalDate startDate = LocalDate.of(year, month, 1);
+        LocalDate endDate = startDate.with(TemporalAdjusters.lastDayOfMonth());
+        LocalDate today = LocalDate.now();
+
+        List<OneDays> oneDaysList = oneDaysRepository.findByUserIdAndDateDataBetween(userId, startDate, endDate);
+        if (!today.isBefore(startDate) && !today.isAfter(endDate)) {
+            int todayTotalFocusTime = findTodayTotalFocusTimeByUserIdAndDateData(userId, today);
+            for (int i = 0; i < oneDaysList.size(); i++) {
+                if (oneDaysList.get(i).getDateData().equals(today)) {
+                    oneDaysList.set(i, OneDays.builder().dateData(today).focusTime(todayTotalFocusTime).build());
+                    break;
+                }
+            }
+        }
+
+        return oneDaysList.stream()
+                .map(oneDays -> new FocusTimeListCalendarResponse(
+                        oneDays.getDateData().getDayOfMonth(),
+                        oneDays.getFocusTime()
+                ))
+                .toArray(FocusTimeListCalendarResponse[]::new);
+    }
 }
