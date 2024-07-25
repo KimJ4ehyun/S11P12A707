@@ -22,4 +22,9 @@ public interface UsersRepository extends JpaRepository<Users, Long> {
             "join Friends b on a.id = b.friendsPK.friendId " +
             "where b.friendsPK.userId = :userId and b.relation = 'ACCEPTED' ")
     List<Users> findUsersByUserId(@Param("userId") Long userId);
+
+    @Query("select a " +
+            "from Users a " +
+            "where a.nickname = :nickname ")
+    Optional<Users> findUserByNickname(@Param("nickname") String nickname);
 }
