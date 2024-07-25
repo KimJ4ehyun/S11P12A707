@@ -2,15 +2,19 @@ package com.ssafy.top.onedays.presentation;
 
 import com.ssafy.top.global.domain.CommonResponseDto;
 import com.ssafy.top.onedays.application.OneDaysService;
+import com.ssafy.top.onedays.dto.response.FocusTimeListCalendarResponse;
 import com.ssafy.top.onedays.dto.response.FocusTimeListResponse;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import org.apache.coyote.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Arrays;
 
 @RestController
 @RequestMapping("/dash")
@@ -67,4 +71,24 @@ public class OneDaysController {
         CommonResponseDto<FocusTimeListResponse[]> response = new CommonResponseDto<>(data, "스트릭 데이터 조회에 성공했습니다.", 200);
         return ResponseEntity.ok().body(response);
     }
+
+    @GetMapping("/calendar")
+    public ResponseEntity<CommonResponseDto<?>> findFocusTimeListByYearAndMonth(@RequestParam(name="year") int year, @RequestParam(name="month") int month, HttpSession session){
+        if(!(1 <= month && month <= 12)){
+            CommonResponseDto<CommonResponseDto<Object>> response = new CommonResponseDto<>("쿼리 스트링(month)이 잘못 입력되었습니다.", 400);
+            return ResponseEntity.badRequest().body(response);
+        }
+        String loginId = (String) session.getAttribute("loginId");
+        if (loginId == null) {
+            CommonResponseDto<Object> response = new CommonResponseDto<>("유저 정보가 없습니다.", 401);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+        }
+
+        FocusTimeListCalendarResponse[] data = oneDaysService.findFocusTimeListByLoginIdAndYearAndMonth(loginId, year, month);
+        System.out.println(Arrays.toString(data));
+        CommonResponseDto<FocusTimeListCalendarResponse[]> response = new CommonResponseDto<>(data, "캘린더 데이터 조회에 성공했습니다.", 200);
+        return ResponseEntity.ok().body(response);
+
+    }
+
 }
