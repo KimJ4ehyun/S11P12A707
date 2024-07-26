@@ -24,7 +24,7 @@ public class FriendsController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("request/{friendId}")
+    @PostMapping("/request/{friendId}")
     public ResponseEntity<?> requestFriends(
             @PathVariable Long friendId) {
         Long userId = 1L;
@@ -34,7 +34,7 @@ public class FriendsController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("response/{friendId}")
+    @PostMapping("/response/{friendId}")
     public ResponseEntity<?> responseFriends(
             @PathVariable Long friendId) {
         Long userId = 1L;
@@ -44,7 +44,7 @@ public class FriendsController {
         return ResponseEntity.ok(response);
     }
 
-    @DeleteMapping("response/{friendId}")
+    @DeleteMapping("/response/{friendId}")
     public ResponseEntity<?> declineFriends(
             @PathVariable Long friendId) {
         Long userId = 1L;
@@ -54,12 +54,22 @@ public class FriendsController {
         return ResponseEntity.ok(response);
     }
 
-    @DeleteMapping("request/{friendId}")
+    @DeleteMapping("/request/{friendId}")
     public ResponseEntity<?> cancelFriends(
             @PathVariable Long friendId) {
         Long userId = 1L;
 
         CommonResponseDto<?> response = friendsService.cancelFriends(userId, friendId);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/{friendId}")
+    public ResponseEntity<?> deleteFriends(
+            @PathVariable Long friendId) {
+        Long userId = 1L;
+
+        CommonResponseDto<?> response = friendsService.deleteFriends(userId, friendId);
 
         return ResponseEntity.ok(response);
     }

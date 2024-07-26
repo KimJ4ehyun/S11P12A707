@@ -167,4 +167,35 @@ public class FriendsService {
 
         return new CommonResponseDto<>("친구 신청 취소에 성공했습니다.", 204);
     }
+
+    public CommonResponseDto<?> deleteFriends(Long userId, Long friendId) {
+        Users user = usersRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+
+        // 존재하지 않는 사용자와의 친구 삭제
+        Users friend = usersRepository.findById(friendId)
+                .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+
+        FriendsPK userToFriendPK = new FriendsPK(userId, friendId);
+        FriendsPK friendToUserPK = new FriendsPK(friendId, userId);
+
+        Optional<Friends> userToFriend = friendsRepository.findById(userToFriendPK);
+        Optional<Friends> friendToUser = friendsRepository.findById(friendToUserPK);
+
+        if(userToFriend.isEmpty()) {
+            throw new CustomException(BAD_REQUEST);
+        }
+
+        if(friendToUser.isEmpty()) {
+            throw new CustomException(BAD_REQUEST);
+        }
+
+        Friends existingUserToFriend = userToFriend.get();
+        Friends existingFriendToUser = friendToUser.get();
+
+        friendsRepository.delete(existingUserToFriend);
+        friendsRepository.delete(existingFriendToUser);
+
+        return new CommonResponseDto<>("친구 삭제에 성공했습니다.", 204);
+    }
 }
