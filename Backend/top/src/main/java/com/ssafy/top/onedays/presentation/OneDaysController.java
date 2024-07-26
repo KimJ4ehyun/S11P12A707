@@ -1,94 +1,52 @@
 package com.ssafy.top.onedays.presentation;
-
 import com.ssafy.top.global.domain.CommonResponseDto;
 import com.ssafy.top.onedays.application.OneDaysService;
-import com.ssafy.top.onedays.dto.response.FocusTimeListCalendarResponse;
-import com.ssafy.top.onedays.dto.response.FocusTimeListResponse;
+import com.ssafy.top.onedays.dto.request.TimeGoalRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
-import org.apache.coyote.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
-import java.util.Arrays;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/dash")
 @RequiredArgsConstructor
 public class OneDaysController {
 
     private final OneDaysService oneDaysService;
 
-    @GetMapping("/stats/focus-time")
-    public ResponseEntity<CommonResponseDto<String>> findTotalFocusTimeByPeriod(@RequestParam(name = "period") String period, HttpSession session) {
-        if (!(period.equals("day") || period.equals("week") || period.equals("month"))) {
-            CommonResponseDto<String> response = new CommonResponseDto<>("잘못된 쿼리 스트링입니다. - period", 400);
-            return ResponseEntity.badRequest().body(response);
-        }
+    @GetMapping("/dash/stats/focus-time")
+    public ResponseEntity<?> findTotalFocusTimeByPeriod(@RequestParam(name = "period") String period, HttpSession session) {
         String loginId = (String) session.getAttribute("loginId");
-        if (loginId == null) {
-            CommonResponseDto<String> response = new CommonResponseDto<>("유저 정보가 없습니다.", 401);
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
-        }
-        String totalFocusTime = oneDaysService.findTotalFocusTimeByLoginIdAndPeriod(loginId, period);
-        CommonResponseDto<String> response = new CommonResponseDto<>(totalFocusTime, "집중시간 통계 조회에 성공했습니다.", 200);
+        CommonResponseDto<?> response = oneDaysService.findTotalFocusTimeByLoginIdAndPeriod(loginId, period);
         return ResponseEntity.ok().body(response);
     }
 
-    @GetMapping("/stats/focus-time/detail")
+    @GetMapping("/dash/stats/focus-time/detail")
     public ResponseEntity<CommonResponseDto<?>> findFocusTimeListByPeriod(@RequestParam(name = "period") String period, HttpSession session) {
-        if (!(period.equals("day") || period.equals("week") || period.equals("month"))) {
-            CommonResponseDto<String> response = new CommonResponseDto<>("잘못된 쿼리 스트링입니다. - period", 400);
-            return ResponseEntity.badRequest().body(response);
-        }
         String loginId = (String) session.getAttribute("loginId");
-        if (loginId == null) {
-            CommonResponseDto<Object> response = new CommonResponseDto<>("유저 정보가 없습니다.", 401);
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
-        }
-        Object data = oneDaysService.findFocusTimeListByLoginIdAndPeriod(loginId, period);
-        CommonResponseDto<Object> response = new CommonResponseDto<>(data, "집중시간 통계 조회에 성공했습니다.", 200);
+        CommonResponseDto<?> response = oneDaysService.findFocusTimeListByLoginIdAndPeriod(loginId, period);
         return ResponseEntity.ok().body(response);
     }
 
-    @GetMapping("/streak")
+    @GetMapping("/dash/streak")
     public ResponseEntity<CommonResponseDto<?>> findFocusTimeListByMonth(@RequestParam(name="month") int month, HttpSession session){
-
-        if(!(month == 1 || month == 6)){
-            CommonResponseDto<CommonResponseDto<Object>> response = new CommonResponseDto<>("쿼리 스트링(month)이 잘못 입력되었습니다.", 400);
-            return ResponseEntity.badRequest().body(response);
-        }
         String loginId = (String) session.getAttribute("loginId");
-        if (loginId == null) {
-            CommonResponseDto<Object> response = new CommonResponseDto<>("유저 정보가 없습니다.", 401);
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
-        }
-        FocusTimeListResponse[] data = (FocusTimeListResponse[])oneDaysService.findFocusTimeListByLoginIdAndMonth(loginId, month);
-        CommonResponseDto<FocusTimeListResponse[]> response = new CommonResponseDto<>(data, "스트릭 데이터 조회에 성공했습니다.", 200);
+        CommonResponseDto<?> response = oneDaysService.findFocusTimeListByLoginIdAndMonth(loginId, month);
         return ResponseEntity.ok().body(response);
     }
 
-    @GetMapping("/calendar")
-    public ResponseEntity<CommonResponseDto<?>> findFocusTimeListByYearAndMonth(@RequestParam(name="year") int year, @RequestParam(name="month") int month, HttpSession session){
-        if(!(1 <= month && month <= 12)){
-            CommonResponseDto<CommonResponseDto<Object>> response = new CommonResponseDto<>("쿼리 스트링(month)이 잘못 입력되었습니다.", 400);
-            return ResponseEntity.badRequest().body(response);
-        }
+    @GetMapping("/dash/calendar")
+    public ResponseEntity<?> findFocusTimeListByYearAndMonth(@RequestParam(name="year") int year, @RequestParam(name="month") int month, HttpSession session){
         String loginId = (String) session.getAttribute("loginId");
-        if (loginId == null) {
-            CommonResponseDto<Object> response = new CommonResponseDto<>("유저 정보가 없습니다.", 401);
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
-        }
-
-        FocusTimeListCalendarResponse[] data = oneDaysService.findFocusTimeListByLoginIdAndYearAndMonth(loginId, year, month);
-        System.out.println(Arrays.toString(data));
-        CommonResponseDto<FocusTimeListCalendarResponse[]> response = new CommonResponseDto<>(data, "캘린더 데이터 조회에 성공했습니다.", 200);
+        CommonResponseDto<?> response = oneDaysService.findFocusTimeListByLoginIdAndYearAndMonth(loginId, year, month);
         return ResponseEntity.ok().body(response);
+    }
 
+    @PostMapping("/focus-time/goal")
+    public ResponseEntity<?> saveTimeGoal(@RequestBody TimeGoalRequest timeGoal, HttpSession session) {
+        String loginId = (String) session.getAttribute("loginId");
+        CommonResponseDto<?> response = oneDaysService.saveTimeGoal(timeGoal, loginId);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
 }
