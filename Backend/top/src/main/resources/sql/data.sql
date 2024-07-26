@@ -47,5 +47,6 @@ values (1, 2, 'ACCEPTED'),
        (2, 1, 'ACCEPTED'),
        (1, 3, 'ACCEPTED'),
        (3, 1, 'ACCEPTED'),
+       (1, 5, 'WAITING'),
        (2, 4, 'WAITING'),
        (4, 1, 'WAITING');
