@@ -43,4 +43,14 @@ public class FriendsController {
 
         return ResponseEntity.ok(response);
     }
+
+    @DeleteMapping("response/{friendId}")
+    public ResponseEntity<?> declineFriends(
+            @PathVariable Long friendId) {
+        Long userId = 1L;
+
+        CommonResponseDto<?> response = friendsService.declineFriends(userId, friendId);
+
+        return ResponseEntity.ok(response);
+    }
 }
