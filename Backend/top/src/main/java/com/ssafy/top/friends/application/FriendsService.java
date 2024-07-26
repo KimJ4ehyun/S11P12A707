@@ -71,8 +71,6 @@ public class FriendsService {
         
         // 나에게 친구 신청을 건 경우 -> 자동으로 친구
         if(friendToUser.isPresent()) {
-            Friends existingFriendToUser = friendToUser.get();
-
             friendsRepository.updateRelation(friendToUserPK, ACCEPTED);
             friendsRepository.save(new Friends(userToFriendPK, user, friend, ACCEPTED));
         } else {
@@ -80,5 +78,36 @@ public class FriendsService {
         }
 
         return new CommonResponseDto<>("친구 신청에 성공했습니다.", 201);
+    }
+
+    public CommonResponseDto<?> responseFriends(Long userId, Long friendId) {
+        Users user = usersRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+
+        // 존재하지 않는 사용자에게 친구 신청
+        Users friend = usersRepository.findById(friendId)
+                .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+
+        FriendsPK userToFriendPK = new FriendsPK(userId, friendId);
+        FriendsPK friendToUserPK = new FriendsPK(friendId, userId);
+
+        Optional<Friends> friendToUser = friendsRepository.findById(friendToUserPK);
+
+        // 존재하지 않는 친구 신청
+        if(friendToUser.isEmpty()) {
+            throw new CustomException(FRIEND_REQUEST_MISSING);
+        }
+
+        Friends existingFriendToUser = friendToUser.get();
+
+        // 이미 친구
+        if(existingFriendToUser.getRelation().equals(ACCEPTED)) {
+            throw new CustomException(FRIEND_ALREADY_ADDED);
+        }
+
+        friendsRepository.updateRelation(friendToUserPK, ACCEPTED);
+        friendsRepository.save(new Friends(userToFriendPK, user, friend, ACCEPTED));
+
+        return new CommonResponseDto<>("친구 수락에 성공했습니다.", 201);
     }
 }
