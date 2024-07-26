@@ -119,7 +119,6 @@ public class FriendsService {
         Users friend = usersRepository.findById(friendId)
                 .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
 
-        FriendsPK userToFriendPK = new FriendsPK(userId, friendId);
         FriendsPK friendToUserPK = new FriendsPK(friendId, userId);
 
         Optional<Friends> friendToUser = friendsRepository.findById(friendToUserPK);
@@ -139,5 +138,33 @@ public class FriendsService {
         friendsRepository.delete(existingFriendToUser);
 
         return new CommonResponseDto<>("친구 신청 거절에 성공했습니다.", 204);
+    }
+
+    public CommonResponseDto<?> cancelFriends(Long userId, Long friendId) {
+        Users user = usersRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+
+        // 존재하지 않는 사용자에게 친구 신청
+        Users friend = usersRepository.findById(friendId)
+                .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+
+        FriendsPK userToFriendPK = new FriendsPK(userId, friendId);
+
+        Optional<Friends> userToFriend = friendsRepository.findById(userToFriendPK);
+        
+        // 존재하지 않는 친구 신청
+        if(userToFriend.isEmpty()) {
+            throw new CustomException(FRIEND_REQUEST_MISSING);
+        }
+        
+        Friends existingUserToFriend = userToFriend.get();
+        
+        if(existingUserToFriend.getRelation().equals(ACCEPTED)) {
+            throw new CustomException(FRIEND_ALREADY_ADDED);
+        }
+        
+        friendsRepository.delete(existingUserToFriend);
+
+        return new CommonResponseDto<>("친구 신청 취소에 성공했습니다.", 204);
     }
 }
