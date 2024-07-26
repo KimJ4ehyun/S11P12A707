@@ -33,4 +33,14 @@ public class FriendsController {
 
         return ResponseEntity.ok(response);
     }
+
+    @PostMapping("response/{friendId}")
+    public ResponseEntity<?> responseFriends(
+            @PathVariable Long friendId) {
+        Long userId = 1L;
+
+        CommonResponseDto<?> response = friendsService.responseFriends(userId, friendId);
+
+        return ResponseEntity.ok(response);
+    }
 }
