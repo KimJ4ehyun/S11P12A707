@@ -17,10 +17,13 @@ public class OneDays {
     @Column(name="one_day_id")
     private Long id;
 
+    @Column(nullable = false)
     private LocalDate dateData;
 
+    @Column(nullable = false)
     private int focusTime;
 
+    @Column(nullable = false)
     private int targetTime;
 
     @ManyToOne(fetch = FetchType.LAZY)
