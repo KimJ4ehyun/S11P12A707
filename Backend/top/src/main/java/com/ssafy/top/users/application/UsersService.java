@@ -59,6 +59,17 @@ public class UsersService {
         return new CommonResponseDto<>(UserUpdateResponse.toDto(user), "내 정보 수정에 성공했습니다.", 200);
     }
 
+    public CommonResponseDto<Boolean> screenShare(Long userId, Boolean isShare) {
+        Users user = usersRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+
+        updateScreenShare(user, isShare);
+
+        usersRepository.save(user);
+
+        return new CommonResponseDto<>(isShare, "활성화 여부 수정에 성공했습니다.", 200);
+    }
+
     private void updateNickname(Users user, String nickname) {
         if(nickname.contains(" ")) {
             throw new CustomException(WHITESPACE_NOT_ALLOWED);

@@ -44,4 +44,13 @@ public class UsersController {
 
         return ResponseEntity.ok(response);
     }
+
+    @PutMapping("/screenShare/{isShare}")
+    public ResponseEntity<?> screenShare(@PathVariable Boolean isShare) {
+        Long userId = 1L;
+
+        CommonResponseDto<Boolean> response = usersService.screenShare(userId, isShare);
+
+        return ResponseEntity.ok(response);
+    }
 }
