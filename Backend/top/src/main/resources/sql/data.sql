@@ -50,3 +50,8 @@ values (1, 2, 'ACCEPTED'),
        (1, 5, 'WAITING'),
        (2, 4, 'WAITING'),
        (4, 1, 'WAITING');
+
+insert into bans (name, user_id)
+values ('youtube.com', 1),
+       ('leagueoflegends', 1),
+       ('maplestory', 2);

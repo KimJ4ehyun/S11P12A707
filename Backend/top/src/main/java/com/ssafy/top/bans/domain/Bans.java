@@ -2,11 +2,11 @@ package com.ssafy.top.bans.domain;
 
 import com.ssafy.top.users.domain.Users;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
+@Builder
 @Getter
 @Entity
 public class Bans {
@@ -15,6 +15,8 @@ public class Bans {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ban_id")
     private Long id;
+
+    private String name;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
