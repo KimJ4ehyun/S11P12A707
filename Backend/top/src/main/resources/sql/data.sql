@@ -1,10 +1,10 @@
-insert into users (nickname, login_id, screen_share)
-values ('Timo1', 'Timo1@gmail.com', true),
-       ('Timo2', 'Timo2@gmail.com', false),
-       ('Timo3', 'Timo3@gmail.com', true),
-       ('Timo4', 'omiT4@gmail.com', true),
-       ('omiT5', 'omiT5@gmail.com', false),
-       ('omiT6', 'omiT6@gmail.com', false);
+insert into users (nickname, login_id, is_share, is_active)
+values ('Timo1', 'Timo1@gmail.com', true, true),
+       ('Timo2', 'Timo2@gmail.com', false, true),
+       ('Timo3', 'Timo3@gmail.com', true, true),
+       ('Timo4', 'omiT4@gmail.com', true, true),
+       ('omiT5', 'omiT5@gmail.com', false, true),
+       ('omiT6', 'omiT6@gmail.com', false, true);
 
 insert into one_days (date_data, focus_time, target_time, user_id)
 values ('2023-12-25', 2550, 5, 1),

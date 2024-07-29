@@ -17,7 +17,7 @@ public class FriendsResponse {
         return FriendsResponse.builder()
                 .userId(user.getId())
                 .nickname(user.getNickname())
-                .screenShare(user.getScreenShare())
+                .screenShare(user.getIsShare())
                 .build();
     }
 }

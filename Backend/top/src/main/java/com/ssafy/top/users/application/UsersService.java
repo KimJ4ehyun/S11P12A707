@@ -52,7 +52,8 @@ public class UsersService {
                 .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
 
         updateNickname(user, userUpdateRequest.getNickname());
-        updateScreenShare(user, userUpdateRequest.getScreenShare());
+        updateIsShare(user, userUpdateRequest.getIsShare());
+        updateIsActive(user, userUpdateRequest.getIsActive());
 
         usersRepository.save(user);
 
@@ -63,11 +64,22 @@ public class UsersService {
         Users user = usersRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
 
-        updateScreenShare(user, isShare);
+        updateIsShare(user, isShare);
 
         usersRepository.save(user);
 
         return new CommonResponseDto<>(isShare, "활성화 여부 수정에 성공했습니다.", 200);
+    }
+
+    public CommonResponseDto<Boolean> extension(Long userId, Boolean isActive) {
+        Users user = usersRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+
+        updateIsActive(user, isActive);
+
+        usersRepository.save(user);
+
+        return new CommonResponseDto<>(isActive, "크롬 익스텐션 활성화 여부 수정에 성공했습니다.", 200);
     }
 
     private void updateNickname(Users user, String nickname) {
@@ -83,7 +95,11 @@ public class UsersService {
         user.updateNickname(nickname);
     }
 
-    private void updateScreenShare(Users user, Boolean screenShare) {
-        user.updateScreenShare(screenShare);
+    private void updateIsShare(Users user, Boolean isShare) {
+        user.updateIsShare(isShare);
+    }
+
+    private void updateIsActive(Users user, Boolean isActive) {
+        user.updateIsActive(isActive);
     }
 }

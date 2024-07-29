@@ -21,13 +21,19 @@ public class Users {
 
     private String loginId;
 
-    private Boolean screenShare;
+    private Boolean isShare;
+
+    private Boolean isActive;
 
     public void updateNickname(String nickname) {
         this.nickname = nickname;
     }
 
-    public void updateScreenShare(Boolean screenShare) {
-        this.screenShare = screenShare;
+    public void updateIsShare(Boolean isShare) {
+        this.isShare = isShare;
+    }
+
+    public void updateIsActive(Boolean isActive) {
+        this.isActive = isActive;
     }
 }

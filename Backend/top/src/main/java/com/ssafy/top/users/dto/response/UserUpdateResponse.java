@@ -9,12 +9,15 @@ import lombok.Data;
 public class UserUpdateResponse {
     private String nickname;
 
-    private Boolean screenShare;
+    private Boolean isShare;
+
+    private Boolean isActive;
 
     public static UserUpdateResponse toDto(Users user) {
         return UserUpdateResponse.builder()
                 .nickname(user.getNickname())
-                .screenShare(user.getScreenShare())
+                .isShare(user.getIsShare())
+                .isActive(user.getIsActive())
                 .build();
     }
 }
