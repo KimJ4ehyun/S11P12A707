@@ -53,4 +53,13 @@ public class UsersController {
 
         return ResponseEntity.ok(response);
     }
+
+    @PutMapping("/extension/{isActive}")
+    public ResponseEntity<?> extension(@PathVariable Boolean isActive) {
+        Long userId = 1L;
+
+        CommonResponseDto<Boolean> response = usersService.extension(userId, isActive);
+
+        return ResponseEntity.ok(response);
+    }
 }

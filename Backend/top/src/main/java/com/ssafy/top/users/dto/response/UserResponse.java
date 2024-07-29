@@ -17,7 +17,7 @@ public class UserResponse {
         return UserResponse.builder()
                 .nickname(user.getNickname())
                 .loginId(user.getLoginId())
-                .screenShare(user.getScreenShare())
+                .screenShare(user.getIsShare())
                 .build();
     }
 }

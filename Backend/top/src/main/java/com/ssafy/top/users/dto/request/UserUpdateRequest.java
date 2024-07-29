@@ -10,5 +10,8 @@ public class UserUpdateRequest {
     private String nickname;
 
     @AllowedBoolean
-    private Boolean screenShare;
+    private Boolean isShare;
+
+    @AllowedBoolean
+    private Boolean isActive;
 }
