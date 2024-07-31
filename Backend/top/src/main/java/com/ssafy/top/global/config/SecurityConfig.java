@@ -25,8 +25,7 @@ public class SecurityConfig{
 
                 //인증이 필요한 URL와 필요하지 않은 URL 설정
                 .authorizeHttpRequests((authorizeRequest) -> authorizeRequest
-                        .requestMatchers("/login/*", "/logout/*").permitAll()
-                        .anyRequest().authenticated())
+                        .anyRequest().permitAll())
                 .oauth2Login(Customizer.withDefaults());
         return http.build();
     }

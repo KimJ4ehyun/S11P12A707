@@ -34,10 +34,10 @@ public class OauthAttributes {
 
     public Users toEntity() {
         return Users.builder()
-                .nickname("김싸피")
+                .nickname(loginId)
                 .loginId(loginId)
                 .isShare(false)
+                .isActive(true)
                 .build();
-
     }
 }
