@@ -42,10 +42,18 @@ public class OneDaysController {
         return ResponseEntity.ok().body(response);
     }
 
+    @GetMapping("/focus-time/goal")
+    public ResponseEntity<?> findByTimeGoal(HttpSession session) {
+        String loginId = (String) session.getAttribute("loginId");
+        loginId = "Timo1@gmail.com";
+        CommonResponseDto<?> response = oneDaysService.findByLoginId(loginId);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
     @PostMapping("/focus-time/goal")
     public ResponseEntity<?> saveTimeGoal(@RequestBody TimeGoalRequest timeGoal, HttpSession session) {
         String loginId = (String) session.getAttribute("loginId");
-        CommonResponseDto<?> response = oneDaysService.saveTimeGoal(timeGoal, loginId);
+        CommonResponseDto<?> response = oneDaysService.saveTimeGoal(loginId, timeGoal);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
