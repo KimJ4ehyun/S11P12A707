@@ -1,18 +1,13 @@
 package com.ssafy.top.hourfocustimes.presentation;
 
-import com.ssafy.top.appfocustimes.application.AppFocusTimesService;
-import com.ssafy.top.appfocustimes.domain.AppFocusTimes;
-import com.ssafy.top.appfocustimes.dto.response.AppListResponse;
-import com.ssafy.top.global.domain.CommonResponseDto;
 import com.ssafy.top.hourfocustimes.application.HourFocusTimesService;
-import com.ssafy.top.hourfocustimes.dto.request.HourRequest;
+import com.ssafy.top.hourfocustimes.dto.request.FocusTimeRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
+import com.ssafy.top.hourfocustimes.dto.request.HourRequest;
+import org.springframework.http.HttpStatus;
 
 @RestController
 @RequiredArgsConstructor
@@ -27,5 +22,12 @@ public class HourFocusTimesController {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(hourFocusTimesService.save(loginId, hourRequest));
+    }
+
+    @PutMapping("/focus-time")
+    public ResponseEntity<?> updateFocusTime(@RequestBody FocusTimeRequest focusTimeRequest, HttpSession session){
+        String loginId = (String) session.getAttribute("loginId");
+        loginId = "Timo1@gmail.com";
+        return ResponseEntity.ok().body(hourFocusTimesService.updateFocusTime(loginId, focusTimeRequest));
     }
 }

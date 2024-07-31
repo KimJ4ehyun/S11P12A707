@@ -4,15 +4,16 @@ import com.ssafy.top.global.domain.CommonResponseDto;
 import com.ssafy.top.global.exception.CustomException;
 import com.ssafy.top.hourfocustimes.domain.HourFocusTimes;
 import com.ssafy.top.hourfocustimes.domain.HourFocusTimesRepository;
-import com.ssafy.top.hourfocustimes.dto.request.HourRequest;
-import com.ssafy.top.onedays.domain.OneDays;
+import com.ssafy.top.hourfocustimes.dto.request.FocusTimeRequest;
 import com.ssafy.top.onedays.domain.OneDaysRepository;
-import com.ssafy.top.users.domain.Users;
 import com.ssafy.top.users.domain.UsersRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDate;
+import java.time.LocalTime;
+import com.ssafy.top.hourfocustimes.dto.request.HourRequest;
+import com.ssafy.top.onedays.domain.OneDays;
+import com.ssafy.top.users.domain.Users;
 
 import static com.ssafy.top.global.exception.ErrorCode.*;
 
@@ -25,6 +26,30 @@ public class HourFocusTimesService {
     private final OneDaysRepository oneDaysRepository;
 
     private final UsersRepository usersRepository;
+
+    public CommonResponseDto<?> updateFocusTime(String loginId, FocusTimeRequest focusTimeRequest){
+        Long userId = usersRepository.findByLoginId(loginId)
+                .orElseThrow(() -> new CustomException(USER_NOT_FOUND))
+                .getId();
+
+        Long oneDayId = oneDaysRepository.findByUserIdAndDateData(userId, LocalDate.now())
+                .orElseThrow(() -> new CustomException(ONE_DAY_NOT_FOUND))
+                .getId();
+
+        HourFocusTimes hourFocusTimes = hourFocusTimesRepository.findByOneDaysIdAndTimeUnit(oneDayId, LocalTime.now().getHour())
+                .orElseThrow(() -> new CustomException(HOUR_FOCUS_TIME_NOT_FOUND));
+
+        int focusTime = focusTimeRequest.getFocusTime();
+
+        HourFocusTimes updateHourFocusTimes = HourFocusTimes.builder()
+                .id(hourFocusTimes.getId())
+                .focusTime(hourFocusTimes.getFocusTime() + focusTime)
+                .timeUnit(hourFocusTimes.getTimeUnit())
+                .oneDays(hourFocusTimes.getOneDays())
+                .build();
+        hourFocusTimesRepository.save(updateHourFocusTimes);
+        return new CommonResponseDto<>("집중 시간이 업데이트 되었습니다.", 200);
+    }
 
     public CommonResponseDto<?> save(String loginId, HourRequest hourRequest){
         Long userId = usersRepository.findByLoginId(loginId)
