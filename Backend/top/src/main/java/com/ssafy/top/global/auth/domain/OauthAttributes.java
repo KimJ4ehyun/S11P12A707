@@ -36,7 +36,7 @@ public class OauthAttributes {
         return Users.builder()
                 .nickname("김싸피")
                 .loginId(loginId)
-                .screenShare(false)
+                .isShare(false)
                 .build();
 
     }

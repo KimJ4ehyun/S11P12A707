@@ -9,5 +9,5 @@ public interface HourFocusTimesRepository extends JpaRepository<HourFocusTimes, 
 
     List<HourFocusTimes> findByOneDaysId(Long id);
 
-    Optional<HourFocusTimes> findByOneDaysIdAndTimeUnit(Long oneDaysId, int hour);
+    Optional<HourFocusTimes> findByOneDaysIdAndTimeUnit(Long id, int timeUnit);
 }
