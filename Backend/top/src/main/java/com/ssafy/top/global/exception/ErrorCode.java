@@ -21,7 +21,8 @@ public enum ErrorCode {
     INVALID_TIME_GOAL(HttpStatus.BAD_REQUEST, "목표 시간 형식이 잘못되었습니다."),
     DATA_NOT_FOUND(HttpStatus.NOT_FOUND, "조건에 맞는 데이터를 찾을 수 없습니다."),
     INVALID_QUERY_STRING(HttpStatus.BAD_REQUEST, "쿼리 스트링이 잘못 입력되었습니다."),
-
+    
+    ALREADY_EXISTS(HttpStatus.CONFLICT, "해당 데이터가 이미 존재합니다."),
     INVALID_DOMAIN(HttpStatus.BAD_REQUEST, "도메인 형식이 올바르지 않습니다."),
     BAN_ALREADY_ADDED(HttpStatus.CONFLICT, "이미 금지 목록에 포함되어 있습니다.")
     ;

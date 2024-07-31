@@ -1,5 +1,7 @@
 package com.ssafy.top.onedays.application;
 
+import com.ssafy.top.appfocustimes.domain.AppFocusTimes;
+import com.ssafy.top.appfocustimes.dto.response.AppListResponse;
 import com.ssafy.top.global.domain.CommonResponseDto;
 import com.ssafy.top.global.exception.CustomException;
 import com.ssafy.top.hourfocustimes.domain.HourFocusTimes;
@@ -55,8 +57,6 @@ public class OneDaysService {
         int hours = totalFocusTime / 3600;
         int minutes = (totalFocusTime % 3600) / 60;
         int seconds = totalFocusTime % 60;
-
-
 
         return new CommonResponseDto<>(String.format("%02d:%02d:%02d", hours, minutes, seconds), "집중시간 통계 조회에 성공했습니다.", 200);
     }

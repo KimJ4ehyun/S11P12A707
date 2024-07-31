@@ -28,4 +28,12 @@ public class AppFocusTimes {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="one_day_id")
     private OneDays oneDays;
+
+    public void updateStartTime(int startTime) {
+        this.startTime = startTime;
+    }
+
+    public void updateFocusTime(int focusTime) {
+        this.focusTime = focusTime;
+    }
 }
