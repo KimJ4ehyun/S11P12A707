@@ -1,4 +1,4 @@
-package com.ssafy.top.appfocustimes.dto.request;
+package com.ssafy.top.appfocustimes.dto.response;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -8,8 +8,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class AppNameRequest {
+public class AppTimeResponse {
 
-    private String beforeAppName;
-    private String nowAppName;
+    private int appTime;
 }
