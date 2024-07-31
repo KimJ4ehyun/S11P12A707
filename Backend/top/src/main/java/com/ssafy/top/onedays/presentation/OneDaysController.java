@@ -1,4 +1,5 @@
 package com.ssafy.top.onedays.presentation;
+
 import com.ssafy.top.global.domain.CommonResponseDto;
 import com.ssafy.top.onedays.application.OneDaysService;
 import com.ssafy.top.onedays.dto.request.TimeGoalRequest;
@@ -45,7 +46,6 @@ public class OneDaysController {
     @GetMapping("/focus-time/goal")
     public ResponseEntity<?> findByTimeGoal(HttpSession session) {
         String loginId = (String) session.getAttribute("loginId");
-        loginId = "Timo1@gmail.com";
         CommonResponseDto<?> response = oneDaysService.findByLoginId(loginId);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
@@ -54,6 +54,13 @@ public class OneDaysController {
     public ResponseEntity<?> saveTimeGoal(@RequestBody TimeGoalRequest timeGoal, HttpSession session) {
         String loginId = (String) session.getAttribute("loginId");
         CommonResponseDto<?> response = oneDaysService.saveTimeGoal(loginId, timeGoal);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @PutMapping("/focus-time/goal")
+    public ResponseEntity<?> updateTimeGoal(@RequestBody TimeGoalRequest timeGoal, HttpSession session) {
+        String loginId = (String) session.getAttribute("loginId");
+        CommonResponseDto<?> response = oneDaysService.updateTimeGoal(loginId, timeGoal);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
