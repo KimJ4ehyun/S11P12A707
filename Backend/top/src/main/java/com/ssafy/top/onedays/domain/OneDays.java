@@ -29,4 +29,8 @@ public class OneDays {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="user_id")
     private Users user;
+
+    public void updateFocusTime(int focusTime) {
+        this.focusTime = focusTime;
+    }
 }
