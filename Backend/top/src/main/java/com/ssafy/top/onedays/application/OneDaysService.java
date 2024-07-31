@@ -1,7 +1,5 @@
 package com.ssafy.top.onedays.application;
 
-import com.ssafy.top.appfocustimes.domain.AppFocusTimes;
-import com.ssafy.top.appfocustimes.dto.response.AppListResponse;
 import com.ssafy.top.global.domain.CommonResponseDto;
 import com.ssafy.top.global.exception.CustomException;
 import com.ssafy.top.hourfocustimes.domain.HourFocusTimes;
@@ -26,6 +24,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
 import java.util.List;
+import java.util.Optional;
 
 import static com.ssafy.top.global.exception.ErrorCode.*;
 
@@ -167,19 +166,45 @@ public class OneDaysService {
 
     public CommonResponseDto<?> saveTimeGoal(String loginId, TimeGoalRequest timeGoal){
         Users user = getUserByLoginId(loginId);
-        int timeGoalData = timeGoal.getTimeGoal();
-        if (!(0 <= timeGoalData && timeGoalData <= 1440)) {
-            throw new CustomException(INVALID_TIME_GOAL);
+        validateTimeGoal(timeGoal.getTimeGoal());
+
+        Optional<OneDays> oneDays = oneDaysRepository.findByUserIdAndDateData(user.getId(), LocalDate.now());
+        if(oneDays.isPresent()){
+            throw new CustomException(ALREADY_EXISTS);
         }
 
         OneDays oneDay = OneDays.builder()
                 .user(user)
                 .dateData(LocalDate.now())
                 .focusTime(0)
-                .targetTime(timeGoalData*60)
+                .targetTime(timeGoal.getTimeGoal()*60)
                 .build();
+        TimeGoalResponse timeGoalResponse = new TimeGoalResponse(oneDaysRepository.save(oneDay).getTargetTime() / 60);
+        return new CommonResponseDto<>(timeGoalResponse, "정상적으로 목표가 설정되었습니다.", 201);
+    }
 
-        return new CommonResponseDto<>(oneDaysRepository.save(oneDay).getTargetTime() / 60, "정상적으로 목표가 설정되었습니다.", 201);
+    public CommonResponseDto<?> updateTimeGoal(String loginId, TimeGoalRequest timeGoal){
+        Users user = getUserByLoginId(loginId);
+        validateTimeGoal(timeGoal.getTimeGoal());
+
+        OneDays oneDays = oneDaysRepository.findByUserIdAndDateData(user.getId(), LocalDate.now())
+                .orElseThrow(() -> new CustomException(DATA_NOT_FOUND));
+
+        OneDays oneDay = OneDays.builder()
+                .id(oneDays.getId())
+                .user(oneDays.getUser())
+                .dateData(oneDays.getDateData())
+                .focusTime(oneDays.getFocusTime())
+                .targetTime(timeGoal.getTimeGoal()*60)
+                .build();
+        TimeGoalResponse timeGoalResponse = new TimeGoalResponse(oneDaysRepository.save(oneDay).getTargetTime() / 60);
+        return new CommonResponseDto<>(timeGoalResponse, "정상적으로 목표 시간이 수정되었습니다.", 200);
+    }
+
+    private void validateTimeGoal(int timeGoalData) {
+        if (!(0 <= timeGoalData && timeGoalData <= 1440)) {
+            throw new CustomException(INVALID_TIME_GOAL);
+        }
     }
 
     private Users getUserByLoginId(String loginId) {

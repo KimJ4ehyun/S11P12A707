@@ -33,11 +33,7 @@ values ('2023-12-25', 2550, 5, 1),
 
 insert into hour_focus_times (focus_time, time_unit, one_day_id)
 values (1800, 1, 23),
-       (2000, 2, 23),
-       (2000, 2, 24),
-       (1800, 4, 26),
-       (21231, 4, 26),
-       (52345, 6, 28)
+       (2000, 2, 23)
        ;
 
 insert into app_focus_times (app, start_time, focus_time, one_day_id)
