@@ -12,11 +12,15 @@ import com.ssafy.top.onedays.dto.request.TimeGoalRequest;
 import com.ssafy.top.onedays.dto.response.FocusTimeListCalendarResponse;
 import com.ssafy.top.onedays.dto.response.FocusTimeListDayResponse;
 import com.ssafy.top.onedays.dto.response.FocusTimeListResponse;
+import com.ssafy.top.onedays.dto.response.TimeGoalResponse;
 import com.ssafy.top.users.domain.Users;
 import com.ssafy.top.users.domain.UsersRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cglib.core.Local;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+
+import javax.swing.undo.CannotUndoException;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -36,9 +40,7 @@ public class OneDaysService {
     private final UsersRepository usersRepository;
 
     public CommonResponseDto<?> findTotalFocusTimeByLoginIdAndPeriod(String loginId, String period) {
-        Long userId = usersRepository.findByLoginId(loginId)
-                .orElseThrow(() -> new CustomException(USER_NOT_FOUND))
-                .getId();
+        Long userId = getUserByLoginId(loginId).getId();
         if (!(period.equals("day") || period.equals("week") || period.equals("month"))) {
             throw new CustomException(INVALID_QUERY_STRING);
         }
@@ -75,9 +77,7 @@ public class OneDaysService {
     }
 
     public CommonResponseDto<?> findFocusTimeList(String loginId, String period, Integer month) {
-        Long userId = usersRepository.findByLoginId(loginId)
-                .orElseThrow(() -> new CustomException(USER_NOT_FOUND))
-                .getId();
+        Long userId = getUserByLoginId(loginId).getId();
         LocalDate currentDay = LocalDate.now();
         LocalDate today = currentDay;
 
@@ -114,7 +114,6 @@ public class OneDaysService {
     }
 
     public int findTodayTotalFocusTimeByUserIdAndDateData(Long userId, LocalDate today){
-
         Long oneDayId = oneDaysRepository.findByUserIdAndDateData(userId, today)
                 .map(OneDays::getId)
                 .orElseThrow(() -> new CustomException(DATA_NOT_FOUND));
@@ -127,10 +126,7 @@ public class OneDaysService {
     }
 
     public CommonResponseDto<?> findFocusTimeListByLoginIdAndYearAndMonth(String loginId, int year, int month){
-        Long userId = usersRepository.findByLoginId(loginId)
-                .orElseThrow(() -> new CustomException(USER_NOT_FOUND))
-                .getId();
-
+        Long userId = getUserByLoginId(loginId).getId();
         if(!(1 <= month && month <= 12)){
             throw new CustomException(INVALID_QUERY_STRING);
         }
@@ -160,10 +156,17 @@ public class OneDaysService {
         return new CommonResponseDto<>(responseData, "캘린더 데이터 조회에 성공했습니다.", 200);
     }
 
-    public CommonResponseDto<?> saveTimeGoal(TimeGoalRequest timeGoal, String loginId){
-        Users user = usersRepository.findByLoginId(loginId)
-                .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+    public CommonResponseDto<?> findByLoginId(String loginId){
+        Long userId = getUserByLoginId(loginId).getId();
+        int targetTime = oneDaysRepository.findByUserIdAndDateData(userId, LocalDate.now())
+                .map(OneDays::getTargetTime)
+                .orElseThrow(() -> new CustomException(DATA_NOT_FOUND));
+        TimeGoalResponse timeGoalResponse = new TimeGoalResponse(targetTime);
+        return new CommonResponseDto<>(timeGoalResponse, "목표 시간을 조회했습니다.",200);
+    }
 
+    public CommonResponseDto<?> saveTimeGoal(String loginId, TimeGoalRequest timeGoal){
+        Users user = getUserByLoginId(loginId);
         int timeGoalData = timeGoal.getTimeGoal();
         if (!(0 <= timeGoalData && timeGoalData <= 1440)) {
             throw new CustomException(INVALID_TIME_GOAL);
@@ -178,4 +181,11 @@ public class OneDaysService {
 
         return new CommonResponseDto<>(oneDaysRepository.save(oneDay).getTargetTime() / 60, "정상적으로 목표가 설정되었습니다.", 201);
     }
+
+    private Users getUserByLoginId(String loginId) {
+        return usersRepository.findByLoginId(loginId)
+                .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+    }
+
 }
+
