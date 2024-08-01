@@ -23,6 +23,14 @@ public class OneDaysController {
         return ResponseEntity.ok().body(response);
     }
 
+    @GetMapping("/dash/stats/focus-time/total")
+    public ResponseEntity<?> findTotalFocusTime(HttpSession session) {
+        String loginId = (String) session.getAttribute("loginId");
+        loginId = "Timo1@gmail.com";
+        CommonResponseDto<?> response = oneDaysService.findTotalFocusTimeByLoginId(loginId);
+        return ResponseEntity.ok().body(response);
+    }
+
     @GetMapping("/dash/stats/focus-time/detail")
     public ResponseEntity<CommonResponseDto<?>> findFocusTimeListByPeriod(@RequestParam(name = "period") String period, HttpSession session) {
         String loginId = (String) session.getAttribute("loginId");
