@@ -22,6 +22,7 @@ public class AppFocusTimesController {
     @GetMapping("/dash/stats/app")
     public ResponseEntity<?> findAppFocusTimeList(HttpSession session){
         String loginId = (String) session.getAttribute("loginId");
+        loginId = "Timo1@gmail.com";
         List<AppFocusTimes> AppFocusTimesList = appFocusTimesService.findAppFocusTimesByLoginId(loginId);
         AppListResponse[] appListResponses = appFocusTimesService.findTopThreeByAppFocusTimeList(AppFocusTimesList);
         CommonResponseDto<Object> response = new CommonResponseDto<>(appListResponses, "프로그램 별 통계 조회에 성공했습니다.", 200);
@@ -31,6 +32,7 @@ public class AppFocusTimesController {
     @PutMapping("/focus-time/app")
     public ResponseEntity<?> save(@RequestBody AppNameRequest appNameRequest, HttpSession session){
         String loginId = (String) session.getAttribute("loginId");
+        loginId = "Timo1@gmail.com";
 
         CommonResponseDto<?> response = appFocusTimesService.save(loginId, appNameRequest);
 
