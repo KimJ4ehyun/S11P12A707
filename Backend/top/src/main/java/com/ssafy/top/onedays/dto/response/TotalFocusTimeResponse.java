@@ -11,4 +11,5 @@ import lombok.NoArgsConstructor;
 public class TotalFocusTimeResponse {
 
     private String totalFocusTime;
+    private String LastTotalFocusTime;
 }
