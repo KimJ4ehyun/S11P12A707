@@ -11,18 +11,13 @@ import com.ssafy.top.onedays.dto.response.*;
 import com.ssafy.top.users.domain.Users;
 import com.ssafy.top.users.domain.UsersRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cglib.core.Local;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-
-import javax.swing.undo.CannotUndoException;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import java.util.Optional;
-
 import static com.ssafy.top.global.exception.ErrorCode.*;
 
 @Service
@@ -42,21 +37,24 @@ public class OneDaysService {
         }
         LocalDate today = LocalDate.now();
         LocalDate yesterday = today.minusDays(1);
+        LocalDate lastStartDay = yesterday;
+        LocalDate lastEndDay = yesterday;
         int totalFocusTime = findTodayTotalFocusTimeByUserIdAndDateData(userId, today);
+
         if (period.equals("week")) {
             today = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
-        } else if (period.equals("month")) {
+            lastStartDay = today.minusWeeks(1);
+            lastEndDay = today.minusDays(1);
+        } else if(period.equals("month")) {
             today = today.withDayOfMonth(1);
+            lastStartDay = today.minusMonths(1);
+            lastEndDay = lastStartDay.with(TemporalAdjusters.lastDayOfMonth());
         }
-        List<OneDays> oneDaysList = oneDaysRepository.findByUserIdAndDateDataBetween(userId, today, yesterday);
-        for(OneDays oneDays : oneDaysList){
-            totalFocusTime += oneDays.getFocusTime();
-        }
-        int hours = totalFocusTime / 3600;
-        int minutes = (totalFocusTime % 3600) / 60;
-        int seconds = totalFocusTime % 60;
 
-        TotalFocusTimeResponse totalFocusTimeResponse = new TotalFocusTimeResponse(String.format("%02d:%02d:%02d", hours, minutes, seconds));
+        totalFocusTime += getTotalFocusTime(userId, today, yesterday);
+        int lastTotalFocusTime = getTotalFocusTime(userId, lastStartDay, lastEndDay);
+
+        TotalFocusTimeResponse totalFocusTimeResponse = new TotalFocusTimeResponse(formatTime(totalFocusTime), formatTime(lastTotalFocusTime));
         return new CommonResponseDto<>(totalFocusTimeResponse, "집중시간 통계 조회에 성공했습니다.", 200);
     }
 
@@ -209,6 +207,22 @@ public class OneDaysService {
     private Users getUserByLoginId(String loginId) {
         return usersRepository.findByLoginId(loginId)
                 .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+    }
+
+    private String formatTime(int totalSeconds) {
+        int hours = totalSeconds / 3600;
+        int minutes = (totalSeconds % 3600) / 60;
+        int seconds = totalSeconds % 60;
+        return String.format("%02d:%02d:%02d", hours, minutes, seconds);
+    }
+
+    private int getTotalFocusTime(Long userId, LocalDate startDate, LocalDate endDate) {
+        List<OneDays> oneDaysList = oneDaysRepository.findByUserIdAndDateDataBetween(userId, startDate, endDate);
+        int totalFocusTime = 0;
+        for (OneDays oneDays : oneDaysList) {
+            totalFocusTime += oneDays.getFocusTime();
+        }
+        return totalFocusTime;
     }
 
 }
