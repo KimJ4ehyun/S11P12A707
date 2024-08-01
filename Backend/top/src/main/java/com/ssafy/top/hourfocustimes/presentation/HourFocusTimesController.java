@@ -18,6 +18,7 @@ public class HourFocusTimesController {
     @PostMapping("/focus-time")
     public ResponseEntity<?> save(@RequestBody HourRequest hourRequest, HttpSession session){
         String loginId = (String) session.getAttribute("loginId");
+        loginId = "Timo1@gmail.com";
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)

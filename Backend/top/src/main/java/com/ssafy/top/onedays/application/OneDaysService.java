@@ -7,10 +7,7 @@ import com.ssafy.top.hourfocustimes.domain.HourFocusTimesRepository;
 import com.ssafy.top.onedays.domain.OneDays;
 import com.ssafy.top.onedays.domain.OneDaysRepository;
 import com.ssafy.top.onedays.dto.request.TimeGoalRequest;
-import com.ssafy.top.onedays.dto.response.FocusTimeListCalendarResponse;
-import com.ssafy.top.onedays.dto.response.FocusTimeListDayResponse;
-import com.ssafy.top.onedays.dto.response.FocusTimeListResponse;
-import com.ssafy.top.onedays.dto.response.TimeGoalResponse;
+import com.ssafy.top.onedays.dto.response.*;
 import com.ssafy.top.users.domain.Users;
 import com.ssafy.top.users.domain.UsersRepository;
 import lombok.RequiredArgsConstructor;
@@ -59,8 +56,10 @@ public class OneDaysService {
         int minutes = (totalFocusTime % 3600) / 60;
         int seconds = totalFocusTime % 60;
 
-        return new CommonResponseDto<>(String.format("%02d:%02d:%02d", hours, minutes, seconds), "집중시간 통계 조회에 성공했습니다.", 200);
+        TotalFocusTimeResponse totalFocusTimeResponse = new TotalFocusTimeResponse(String.format("%02d:%02d:%02d", hours, minutes, seconds));
+        return new CommonResponseDto<>(totalFocusTimeResponse, "집중시간 통계 조회에 성공했습니다.", 200);
     }
+
     public CommonResponseDto<?> findFocusTimeListByLoginIdAndPeriod(String loginId, String period) {
         if (!(period.equals("day") || period.equals("week") || period.equals("month"))) {
             throw new CustomException(INVALID_QUERY_STRING);
