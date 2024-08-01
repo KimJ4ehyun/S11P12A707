@@ -54,8 +54,19 @@ public class OneDaysService {
         totalFocusTime += getTotalFocusTime(userId, today, yesterday);
         int lastTotalFocusTime = getTotalFocusTime(userId, lastStartDay, lastEndDay);
 
-        TotalFocusTimeResponse totalFocusTimeResponse = new TotalFocusTimeResponse(formatTime(totalFocusTime), formatTime(lastTotalFocusTime));
+        PeriodTotalFocusTimeResponse totalFocusTimeResponse = new PeriodTotalFocusTimeResponse(formatTime(totalFocusTime), formatTime(lastTotalFocusTime));
         return new CommonResponseDto<>(totalFocusTimeResponse, "집중시간 통계 조회에 성공했습니다.", 200);
+    }
+
+    public CommonResponseDto<?> findTotalFocusTimeByLoginId(String loginId){
+        Long userId = getUserByLoginId(loginId).getId();
+        List<OneDays> oneDays = oneDaysRepository.findByUserId(userId);
+        int totalFocusTime = findTodayTotalFocusTimeByUserIdAndDateData(userId, LocalDate.now());
+        for(OneDays oneDay : oneDays){
+            totalFocusTime += oneDay.getFocusTime();
+        }
+        TotalFocusTimeResponse totalFocusTimeResponse = new TotalFocusTimeResponse(formatTime(totalFocusTime));
+        return new CommonResponseDto<>(totalFocusTimeResponse, "전체 집중시간의 합을 조회했습니다.", 200);
     }
 
     public CommonResponseDto<?> findFocusTimeListByLoginIdAndPeriod(String loginId, String period) {
@@ -107,18 +118,6 @@ public class OneDaysService {
         focusTimeListResponses[focusTimeListResponses.length-1] = new FocusTimeListResponse(formattedDateToday, findTodayTotalFocusTimeByUserIdAndDateData(userId, today));
 
         return new CommonResponseDto<>(focusTimeListResponses, "집중시간 통계 조회에 성공했습니다.", 200);
-    }
-
-    public int findTodayTotalFocusTimeByUserIdAndDateData(Long userId, LocalDate today){
-        Long oneDayId = oneDaysRepository.findByUserIdAndDateData(userId, today)
-                .map(OneDays::getId)
-                .orElseThrow(() -> new CustomException(DATA_NOT_FOUND));
-
-        List<HourFocusTimes> hourFocusTimesList = hourFocusTimesRepository.findByOneDaysId(oneDayId);
-
-        return hourFocusTimesList.stream()
-                .mapToInt(HourFocusTimes::getFocusTime)
-                .sum();
     }
 
     public CommonResponseDto<?> findFocusTimeListByLoginIdAndYearAndMonth(String loginId, int year, int month){
@@ -196,6 +195,18 @@ public class OneDaysService {
                 .build();
         TimeGoalResponse timeGoalResponse = new TimeGoalResponse(oneDaysRepository.save(oneDay).getTargetTime() / 60);
         return new CommonResponseDto<>(timeGoalResponse, "정상적으로 목표 시간이 수정되었습니다.", 200);
+    }
+
+    public int findTodayTotalFocusTimeByUserIdAndDateData(Long userId, LocalDate today){
+        Long oneDayId = oneDaysRepository.findByUserIdAndDateData(userId, today)
+                .map(OneDays::getId)
+                .orElseThrow(() -> new CustomException(DATA_NOT_FOUND));
+
+        List<HourFocusTimes> hourFocusTimesList = hourFocusTimesRepository.findByOneDaysId(oneDayId);
+
+        return hourFocusTimesList.stream()
+                .mapToInt(HourFocusTimes::getFocusTime)
+                .sum();
     }
 
     private void validateTimeGoal(int timeGoalData) {

@@ -10,4 +10,6 @@ public interface OneDaysRepository extends JpaRepository<OneDays, Long> {
     Optional<OneDays> findByUserIdAndDateData(Long userId, LocalDate today);
 
     List<OneDays> findByUserIdAndDateDataBetween(Long userId, LocalDate startDate, LocalDate endDate);
+
+    List<OneDays> findByUserId(Long userId);
 }

@@ -8,7 +8,8 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class TotalFocusTimeResponse {
+public class PeriodTotalFocusTimeResponse {
 
     private String totalFocusTime;
+    private String LastTotalFocusTime;
 }
