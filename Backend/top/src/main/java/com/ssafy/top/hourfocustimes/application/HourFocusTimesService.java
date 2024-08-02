@@ -28,7 +28,7 @@ public class HourFocusTimesService {
     private final UsersRepository usersRepository;
 
     public CommonResponseDto<?> updateFocusTime(String loginId, FocusTimeRequest focusTimeRequest){
-        Long userId = usersRepository.findByLoginId(loginId)
+        Long userId = usersRepository.findByEmail(loginId)
                 .orElseThrow(() -> new CustomException(USER_NOT_FOUND))
                 .getId();
 
@@ -52,7 +52,7 @@ public class HourFocusTimesService {
     }
 
     public CommonResponseDto<?> save(String loginId, HourRequest hourRequest){
-        Long userId = usersRepository.findByLoginId(loginId)
+        Long userId = usersRepository.findByEmail(loginId)
                 .map(Users::getId)
                 .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
 

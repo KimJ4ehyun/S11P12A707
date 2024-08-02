@@ -1,4 +1,4 @@
-insert into users (nickname, login_id, is_share, is_active)
+insert into users (nickname, email, is_share, is_active)
 values ('Timo1', 'Timo1@gmail.com', true, true),
        ('Timo2', 'Timo2@gmail.com', false, true),
        ('Timo3', 'Timo3@gmail.com', true, true),
