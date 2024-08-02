@@ -35,7 +35,7 @@ public class OauthAttributes {
     public Users toEntity() {
         return Users.builder()
                 .nickname(loginId)
-                .loginId(loginId)
+                .email(loginId)
                 .isShare(false)
                 .isActive(true)
                 .build();

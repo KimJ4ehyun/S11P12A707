@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface UsersRepository extends JpaRepository<Users, Long> {
-    Optional<Users> findByLoginId(String loginId);
+    Optional<Users> findByEmail(String email);
 
     @Query("select a.id, a.nickname, b.relation " +
             "from Users a " +

@@ -4,7 +4,6 @@ import com.ssafy.top.appfocustimes.domain.AppFocusTimes;
 import com.ssafy.top.appfocustimes.domain.AppFocusTimesRepository;
 import com.ssafy.top.appfocustimes.dto.request.AppNameRequest;
 import com.ssafy.top.appfocustimes.dto.response.AppListResponse;
-import com.ssafy.top.appfocustimes.dto.response.AppTimeResponse;
 import com.ssafy.top.global.domain.CommonResponseDto;
 import com.ssafy.top.global.exception.CustomException;
 import com.ssafy.top.onedays.domain.OneDays;
@@ -33,7 +32,7 @@ public class AppFocusTimesService {
     private final UsersRepository usersRepository;
 
     public List<AppFocusTimes> findAppFocusTimesByLoginId(String loginId) {
-        Long userId = usersRepository.findByLoginId(loginId)
+        Long userId = usersRepository.findByEmail(loginId)
                 .map(Users::getId)
                 .orElseThrow(() -> new NoSuchElementException("해당 로그인 아이디가 존재하지 않습니다: " + loginId));
 
@@ -62,7 +61,7 @@ public class AppFocusTimesService {
     }
 
     public CommonResponseDto<?> save(String loginId, AppNameRequest appNameRequest){
-        Long userId = usersRepository.findByLoginId(loginId)
+        Long userId = usersRepository.findByEmail(loginId)
                 .map(Users::getId)
                 .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
 

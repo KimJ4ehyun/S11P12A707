@@ -16,7 +16,7 @@ public class UserResponse {
     public static UserResponse toDto(Users user) {
         return UserResponse.builder()
                 .nickname(user.getNickname())
-                .loginId(user.getLoginId())
+                .loginId(user.getEmail())
                 .screenShare(user.getIsShare())
                 .build();
     }

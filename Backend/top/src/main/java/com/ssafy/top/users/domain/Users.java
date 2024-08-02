@@ -19,7 +19,7 @@ public class Users {
 
     private String nickname;
 
-    private String loginId;
+    private String email;
 
     private Boolean isShare;
 

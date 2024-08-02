@@ -13,7 +13,7 @@ public class SessionUser implements Serializable {
     private String loginId;
 
     public SessionUser(Users user) {
-        this.loginId = user.getLoginId();
+        this.loginId = user.getEmail();
 
     }
 }

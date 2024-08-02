@@ -216,7 +216,7 @@ public class OneDaysService {
     }
 
     private Users getUserByLoginId(String loginId) {
-        return usersRepository.findByLoginId(loginId)
+        return usersRepository.findByEmail(loginId)
                 .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
     }
 

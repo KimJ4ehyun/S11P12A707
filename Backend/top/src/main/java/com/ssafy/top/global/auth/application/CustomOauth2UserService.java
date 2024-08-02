@@ -56,9 +56,9 @@ public class CustomOauth2UserService implements OAuth2UserService<OAuth2UserRequ
     }
 
     private Users saveOrUpdate(OauthAttributes attributes) {
-        Users user = usersRepository.findByLoginId(attributes.getLoginId())
+        Users user = usersRepository.findByEmail(attributes.getLoginId())
                 .orElse(usersRepository.save(attributes.toEntity()));
-        log.info("로그인 한 유저: {}",user.getLoginId());
+        log.info("로그인 한 유저: {}",user.getEmail());
 
         return user;
 
