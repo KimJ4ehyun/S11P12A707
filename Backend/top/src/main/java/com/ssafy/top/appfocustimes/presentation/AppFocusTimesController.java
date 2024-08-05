@@ -27,7 +27,7 @@ public class AppFocusTimesController {
     }
 
     @PostMapping("/focus-time/app/custom")
-    public ResponseEntity<?> saveCustomApp(@RequestBody AppNameAndTimeRequest appNameAndTimeRequest, HttpSession session){
+    public ResponseEntity<?> saveCustomApp(@RequestBody AppNameAndTimeRequest appNameAndTimeRequest, HttpSession session) {
         String loginId = (String) session.getAttribute("loginId");
         loginId = "Timo1@gmail.com";
 
@@ -38,6 +38,7 @@ public class AppFocusTimesController {
         } else {
             return ResponseEntity.ok().body(response);
         }
+    }
 
     @GetMapping("/dash/stats/app/today")
     public ResponseEntity<?> findTodayAppFocusTimeList(HttpSession session){
