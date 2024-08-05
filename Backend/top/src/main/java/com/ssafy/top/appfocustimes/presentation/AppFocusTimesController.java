@@ -1,6 +1,7 @@
 package com.ssafy.top.appfocustimes.presentation;
 
 import com.ssafy.top.appfocustimes.application.AppFocusTimesService;
+import com.ssafy.top.appfocustimes.dto.request.AppNameAndTimeRequest;
 import com.ssafy.top.appfocustimes.dto.request.AppNameRequest;
 import com.ssafy.top.appfocustimes.dto.response.AppListResponse;
 import com.ssafy.top.global.domain.CommonResponseDto;
@@ -24,6 +25,19 @@ public class AppFocusTimesController {
         CommonResponseDto<Object> response = new CommonResponseDto<>(appListResponses, "프로그램 별 통계 조회에 성공했습니다.", 200);
         return ResponseEntity.ok().body(response);
     }
+
+    @PostMapping("/focus-time/app/custom")
+    public ResponseEntity<?> saveCustomApp(@RequestBody AppNameAndTimeRequest appNameAndTimeRequest, HttpSession session){
+        String loginId = (String) session.getAttribute("loginId");
+        loginId = "Timo1@gmail.com";
+
+        CommonResponseDto<?> response = appFocusTimesService.saveCustomApp(loginId, appNameAndTimeRequest);
+
+        if (response.getStatusCode() == 201) {
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } else {
+            return ResponseEntity.ok().body(response);
+        }
 
     @GetMapping("/dash/stats/app/today")
     public ResponseEntity<?> findTodayAppFocusTimeList(HttpSession session){
