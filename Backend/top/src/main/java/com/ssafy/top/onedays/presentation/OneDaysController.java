@@ -55,6 +55,14 @@ public class OneDaysController {
         return ResponseEntity.ok().body(response);
     }
 
+    @GetMapping("/dash/stats/focus-time/percent")
+    public ResponseEntity<?> findFocusTimePercent(HttpSession session){
+        String loginId = (String) session.getAttribute("loginId");
+        loginId = "Timo1@gmail.com";
+        CommonResponseDto<?> response = oneDaysService.findFocusTimePercentByLoginId(loginId);
+        return ResponseEntity.ok().body(response);
+    }
+
     @GetMapping("/focus-time/goal")
     public ResponseEntity<?> findByTimeGoal(HttpSession session) {
         String loginId = (String) session.getAttribute("loginId");

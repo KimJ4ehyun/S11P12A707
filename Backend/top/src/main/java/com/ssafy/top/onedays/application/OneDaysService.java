@@ -4,6 +4,7 @@ import com.ssafy.top.global.domain.CommonResponseDto;
 import com.ssafy.top.global.exception.CustomException;
 import com.ssafy.top.hourfocustimes.domain.HourFocusTimes;
 import com.ssafy.top.hourfocustimes.domain.HourFocusTimesRepository;
+import com.ssafy.top.hourfocustimes.dto.response.HourFocusTimeSumResponse;
 import com.ssafy.top.onedays.domain.OneDays;
 import com.ssafy.top.onedays.domain.OneDaysRepository;
 import com.ssafy.top.onedays.dto.request.TimeGoalRequest;
@@ -16,8 +17,8 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+
 import static com.ssafy.top.global.exception.ErrorCode.*;
 
 @Service
@@ -195,6 +196,80 @@ public class OneDaysService {
                 .build();
         TimeGoalResponse timeGoalResponse = new TimeGoalResponse(oneDaysRepository.save(oneDay).getTargetTime() / 60);
         return new CommonResponseDto<>(timeGoalResponse, "정상적으로 목표 시간이 수정되었습니다.", 200);
+    }
+
+    public CommonResponseDto<?> findFocusTimePercentByLoginId(String loginId) {
+        Long userId = getUserByLoginId(loginId).getId();
+        List<HourFocusTimeSumResponse> todayFocusTimeList = hourFocusTimesRepository.findAllUsersFocusTimeSum();
+        Map<Long, Long> todayFocusTimeMap = new HashMap<>();
+        int dayPercent = calculatePercent(todayFocusTimeList, todayFocusTimeMap, userId);
+
+        LocalDate today = LocalDate.now();
+        LocalDate yesterday = today.minusDays(1);
+        LocalDate weekFirstDate = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+        LocalDate monthFirstDate = today.withDayOfMonth(1);
+
+        List<FocusTimeSumResponse> focusTimeSumWeek = oneDaysRepository.findAllUsersFocusTimeSumByDateDataBetween(weekFirstDate, yesterday);
+        int weekPercent = calculatePeriodPercent(focusTimeSumWeek, todayFocusTimeMap, userId);
+
+        List<FocusTimeSumResponse> focusTimeSumMonth = oneDaysRepository.findAllUsersFocusTimeSumByDateDataBetween(monthFirstDate, yesterday);
+        int monthPercent = calculatePeriodPercent(focusTimeSumMonth, todayFocusTimeMap, userId);
+
+        FocusTimePercentResponse focusTimePercentResponse = new FocusTimePercentResponse(dayPercent, weekPercent, monthPercent);
+        return new CommonResponseDto<>(focusTimePercentResponse, "일간, 주간, 월간 백분율 조회에 성공했습니다.", 200);
+    }
+
+    private int calculatePercent(List<HourFocusTimeSumResponse> focusTimeList, Map<Long, Long> focusTimeMap, Long userId) {
+        long before = -1;
+        int idx = 0;
+        for (int i = 0; i < focusTimeList.size(); i++) {
+            HourFocusTimeSumResponse focusTime = focusTimeList.get(i);
+            focusTimeMap.put(focusTime.getUserId(), focusTime.getFocusTimeSum());
+            if (focusTime.getFocusTimeSum() != before) {
+                idx = i;
+            }
+            if (userId.equals(focusTime.getUserId())) {
+                return (idx + 1) * 100 / focusTimeList.size();
+            }
+            before = focusTime.getFocusTimeSum();
+        }
+
+        return 100;
+    }
+
+    private int calculatePeriodPercent(List<FocusTimeSumResponse> periodFocusTimeList, Map<Long, Long> todayFocusTimeMap, Long userId) {
+        boolean[] visited = new boolean[periodFocusTimeList.size()];
+        for (int i = 0; i < periodFocusTimeList.size(); i++) {
+            FocusTimeSumResponse userFocusTime = periodFocusTimeList.get(i);
+            Long focusTimeSumUserId = userFocusTime.getUserId();
+
+            if (todayFocusTimeMap.containsKey(focusTimeSumUserId)) {
+                visited[i] = true;
+                userFocusTime.updateFocusTimeSum(userFocusTime.getFocusTimeSum() + todayFocusTimeMap.get(focusTimeSumUserId));
+            }
+        }
+        int idx = 0;
+        for (Map.Entry<Long, Long> entry : todayFocusTimeMap.entrySet()) {
+            if (!visited[idx]) {
+                periodFocusTimeList.add(new FocusTimeSumResponse(entry.getKey(), entry.getValue()));
+            }
+            idx++;
+        }
+        Collections.sort(periodFocusTimeList);
+        long before = -1;
+        for (int i = 0; i < periodFocusTimeList.size(); i++) {
+            FocusTimeSumResponse userFocusTime = periodFocusTimeList.get(i);
+
+            if (userFocusTime.getFocusTimeSum() != before) {
+                idx = i;
+            }
+
+            if (userId.equals(userFocusTime.getUserId())) {
+                return (idx + 1) * 100 / periodFocusTimeList.size();
+            }
+            before = userFocusTime.getFocusTimeSum();
+        }
+        return 100;
     }
 
     public int findTodayTotalFocusTimeByUserIdAndDateData(Long userId, LocalDate today){
