@@ -56,10 +56,10 @@ public class OneDaysController {
     }
 
     @GetMapping("/focus-time/goal")
-    public ResponseEntity<?> findByTimeGoal(HttpSession session) {
+    public ResponseEntity<?> findByTimeGoal(@RequestParam(name="period") String period, HttpSession session) {
         String loginId = (String) session.getAttribute("loginId");
         loginId = "Timo1@gmail.com";
-        CommonResponseDto<?> response = oneDaysService.findByLoginId(loginId);
+        CommonResponseDto<?> response = oneDaysService.findTimeGoalByLoginIdAndPeriod(loginId, period);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 

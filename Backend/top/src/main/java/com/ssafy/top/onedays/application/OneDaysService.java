@@ -151,13 +151,25 @@ public class OneDaysService {
         return new CommonResponseDto<>(responseData, "캘린더 데이터 조회에 성공했습니다.", 200);
     }
 
-    public CommonResponseDto<?> findByLoginId(String loginId){
+    public CommonResponseDto<?> findTimeGoalByLoginIdAndPeriod(String loginId, String period) {
         Long userId = getUserByLoginId(loginId).getId();
-        int targetTime = oneDaysRepository.findByUserIdAndDateData(userId, LocalDate.now())
-                .map(OneDays::getTargetTime)
-                .orElseThrow(() -> new CustomException(DATA_NOT_FOUND));
-        TimeGoalResponse timeGoalResponse = new TimeGoalResponse(targetTime);
-        return new CommonResponseDto<>(timeGoalResponse, "목표 시간을 조회했습니다.",200);
+        if (!List.of("day", "week", "month").contains(period)) {
+            throw new CustomException(INVALID_QUERY_STRING);
+        }
+
+        LocalDate today = LocalDate.now();
+        LocalDate startDay = switch (period) {
+            case "week" -> today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+            case "month" -> today.withDayOfMonth(1);
+            default -> today;
+        };
+
+        List<OneDays> oneDaysList = oneDaysRepository.findByUserIdAndDateDataBetween(userId, startDay, today);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM-dd");
+        TimeGoalAndDayResponse[] timeGoalAndDayResponses = oneDaysList.stream()
+                .map(oneDay -> new TimeGoalAndDayResponse(oneDay.getDateData().format(formatter), oneDay.getTargetTime()))
+                .toArray(TimeGoalAndDayResponse[]::new);
+        return new CommonResponseDto<>(timeGoalAndDayResponses, "목표 시간을 조회했습니다.", 200);
     }
 
     public CommonResponseDto<?> saveTimeGoal(String loginId, TimeGoalRequest timeGoal){
