@@ -4,9 +4,9 @@ spring:
       on-profile: dev
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://${mysql-server}/top_db?useSSL=true&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
-    username: ${mysql-username}
-    password: ${mysql-password}
+    url: jdbc:mysql://${MYSQL_SERVER}/top_db?useSSL=true&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    username: ${MYSQL_USERNAME}
+    password: ${MYSQL_PASSWORD}
   jpa:
     hibernate:
       ddl-auto: update
