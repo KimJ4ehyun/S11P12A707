@@ -1,7 +1,6 @@
 package com.ssafy.top.appfocustimes.presentation;
 
 import com.ssafy.top.appfocustimes.application.AppFocusTimesService;
-import com.ssafy.top.appfocustimes.domain.AppFocusTimes;
 import com.ssafy.top.appfocustimes.dto.request.AppNameRequest;
 import com.ssafy.top.appfocustimes.dto.response.AppListResponse;
 import com.ssafy.top.global.domain.CommonResponseDto;
@@ -9,9 +8,10 @@ import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
@@ -23,8 +23,7 @@ public class AppFocusTimesController {
     public ResponseEntity<?> findAppFocusTimeList(HttpSession session){
         String loginId = (String) session.getAttribute("loginId");
         loginId = "Timo1@gmail.com";
-        List<AppFocusTimes> AppFocusTimesList = appFocusTimesService.findAppFocusTimesByLoginId(loginId);
-        AppListResponse[] appListResponses = appFocusTimesService.findTopThreeByAppFocusTimeList(AppFocusTimesList);
+        AppListResponse[] appListResponses = appFocusTimesService.findTopThreeByAppFocusTimeList(loginId);
         CommonResponseDto<Object> response = new CommonResponseDto<>(appListResponses, "프로그램 별 통계 조회에 성공했습니다.", 200);
         return ResponseEntity.ok().body(response);
     }
