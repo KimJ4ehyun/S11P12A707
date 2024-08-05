@@ -7,6 +7,6 @@ spring:
   application:
     name: top
   profiles:
-    active: local
+    active: dev
     include: oauth
 
