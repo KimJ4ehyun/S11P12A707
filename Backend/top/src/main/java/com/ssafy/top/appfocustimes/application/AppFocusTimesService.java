@@ -3,6 +3,7 @@ package com.ssafy.top.appfocustimes.application;
 import com.ssafy.top.appfocustimes.domain.AppFocusTimes;
 import com.ssafy.top.appfocustimes.domain.AppFocusTimesRepository;
 import com.ssafy.top.appfocustimes.dto.request.AppNameRequest;
+import com.ssafy.top.appfocustimes.dto.response.AppAndTimeResponse;
 import com.ssafy.top.appfocustimes.dto.response.AppListResponse;
 import com.ssafy.top.global.domain.CommonResponseDto;
 import com.ssafy.top.global.exception.CustomException;
@@ -50,15 +51,25 @@ public class AppFocusTimesService {
                 .toArray(AppListResponse[]::new);
     }
 
+    public CommonResponseDto<?> findTodayAppFocusTimeListByLoginId(String loginId) {
+        List<AppFocusTimes> appFocusTimesList = findAppFocusTimesByLoginId(loginId);
+        AppAndTimeResponse[] appAndTimeResponses = appFocusTimesList.stream()
+                .sorted(Comparator.comparingInt(AppFocusTimes::getFocusTime).reversed())
+                .map(appFocusTimes -> new AppAndTimeResponse(appFocusTimes.getApp(), appFocusTimes.getFocusTime()))
+                .toArray(AppAndTimeResponse[]::new);
+
+        return new CommonResponseDto<>(appAndTimeResponses, "프로그램 별 집중시간 조회에 성공했습니다.", 200);
+    }
+
     private List<AppFocusTimes> findAppFocusTimesByLoginId(String loginId) {
         Long userId = usersRepository.findByEmail(loginId)
                 .map(Users::getId)
-                .orElseThrow(() -> new NoSuchElementException("해당 로그인 아이디가 존재하지 않습니다: " + loginId));
+                .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
 
         LocalDate today = LocalDate.now();
         Long oneDayId = oneDaysRepository.findByUserIdAndDateData(userId, today)
                 .map(OneDays::getId)
-                .orElseThrow(() -> new NoSuchElementException("해당 날짜에 해당하는 데이터가 없습니다: " + today));
+                .orElseThrow(() -> new CustomException(DATA_NOT_FOUND));
 
         return appFocusTimesRepository.findByOneDaysId(oneDayId);
     }
