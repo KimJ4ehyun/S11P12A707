@@ -2,6 +2,7 @@ package com.ssafy.top.appfocustimes.application;
 
 import com.ssafy.top.appfocustimes.domain.AppFocusTimes;
 import com.ssafy.top.appfocustimes.domain.AppFocusTimesRepository;
+import com.ssafy.top.appfocustimes.dto.request.AppNameAndTimeRequest;
 import com.ssafy.top.appfocustimes.dto.request.AppNameRequest;
 import com.ssafy.top.appfocustimes.dto.response.AppAndTimeResponse;
 import com.ssafy.top.appfocustimes.dto.response.AppListResponse;
@@ -88,7 +89,7 @@ public class AppFocusTimesService {
         return saveFocusTime(beforeAppName, oneDay, LocalTime.now().toSecondOfDay(), nowAppName);
     }
 
-    private CommonResponseDto<Object> saveFocusTime(String beforeAppName, OneDays oneDay, int timeInSeconds, String nowAppName) {
+    private CommonResponseDto<?> saveFocusTime(String beforeAppName, OneDays oneDay, int timeInSeconds, String nowAppName) {
         saveFocusTimeBeforeApp(beforeAppName, oneDay, timeInSeconds);
         boolean isCreated = isNowAppFocusTimeCreated(oneDay, timeInSeconds, nowAppName);
 
@@ -130,5 +131,29 @@ public class AppFocusTimesService {
             }
         }
         return false;
+    }
+
+    public CommonResponseDto<?> saveCustomApp(String loginId, AppNameAndTimeRequest appNameAndTimeRequest){
+        Long userId = usersRepository.findByEmail(loginId)
+                .map(Users::getId)
+                .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+
+        OneDays oneDay = oneDaysRepository.findByUserIdAndDateData(userId, LocalDate.now())
+                .orElseThrow(() -> new CustomException(DATA_NOT_FOUND));
+
+        Optional<AppFocusTimes> appFocusTimes = appFocusTimesRepository.findByOneDaysIdAndApp(oneDay.getId(), appNameAndTimeRequest.getAppName());
+        if(appFocusTimes.isPresent()){
+            AppFocusTimes app = appFocusTimes.get();
+            app.updateFocusTime(app.getFocusTime() + appNameAndTimeRequest.getFocusTime());
+            return new CommonResponseDto<>(appFocusTimesRepository.save(app).getFocusTime(), "집중시간 데이터가 갱신되었습니다.", 200);
+        } else {
+            AppFocusTimes newAppFocusTimes = AppFocusTimes.builder()
+                    .app(appNameAndTimeRequest.getAppName())
+                    .startTime(0)
+                    .focusTime(appNameAndTimeRequest.getFocusTime())
+                    .oneDays(oneDay)
+                    .build();
+            return new CommonResponseDto<>(appFocusTimesRepository.save(newAppFocusTimes).getFocusTime(), "집중시간 데이터가 추가되었습니다.", 201);
+        }
     }
 }

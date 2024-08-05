@@ -9,4 +9,5 @@ public interface AppFocusTimesRepository extends JpaRepository<AppFocusTimes, Lo
     List<AppFocusTimes> findByOneDaysId(Long oneDayId);
 
     Optional<AppFocusTimes> findByOneDaysIdAndApp(Long oneDayId, String app);
+
 }
