@@ -8,10 +8,7 @@ import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -25,6 +22,14 @@ public class AppFocusTimesController {
         loginId = "Timo1@gmail.com";
         AppListResponse[] appListResponses = appFocusTimesService.findTopThreeByAppFocusTimeList(loginId);
         CommonResponseDto<Object> response = new CommonResponseDto<>(appListResponses, "프로그램 별 통계 조회에 성공했습니다.", 200);
+        return ResponseEntity.ok().body(response);
+    }
+
+    @GetMapping("/dash/stats/app/today")
+    public ResponseEntity<?> findTodayAppFocusTimeList(HttpSession session){
+        String loginId = (String) session.getAttribute("loginId");
+        loginId = "Timo1@gmail.com";
+        CommonResponseDto<?> response = appFocusTimesService.findTodayAppFocusTimeListByLoginId(loginId);
         return ResponseEntity.ok().body(response);
     }
 
