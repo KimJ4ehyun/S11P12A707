@@ -32,4 +32,13 @@ public class BansController {
 
         return ResponseEntity.ok(response);
     }
+
+    @PutMapping("/ban")
+    public ResponseEntity<?> updateIsBan(@RequestBody BanAddRequest banDeleteRequest){
+        Long userId = 1L;
+
+        CommonResponseDto<?> response = bansService.updateIsBan(userId, banDeleteRequest);
+
+        return ResponseEntity.ok(response);
+    }
 }

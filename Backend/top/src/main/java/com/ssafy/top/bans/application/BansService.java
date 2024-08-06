@@ -6,18 +6,14 @@ import com.ssafy.top.bans.dto.request.BanAddRequest;
 import com.ssafy.top.bans.dto.response.AppNameAndTimeResponse;
 import com.ssafy.top.global.domain.CommonResponseDto;
 import com.ssafy.top.global.exception.CustomException;
-import com.ssafy.top.onedays.dto.response.FocusTimeListDayResponse;
 import com.ssafy.top.users.domain.Users;
 import com.ssafy.top.users.domain.UsersRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
 import static com.ssafy.top.global.exception.ErrorCode.*;
 
 @Service
@@ -80,5 +76,19 @@ public class BansService {
                 .map(result -> new AppNameAndTimeResponse((String) result[0], ((long) result[1])))
                 .toArray(AppNameAndTimeResponse[]::new);
         return new CommonResponseDto<>(appNameAndTimeResponses, "금지 목록 프로그램 조회에 성공했습니다.", 200);
+    }
+
+    public CommonResponseDto<?> updateIsBan(Long userId, BanAddRequest banDeleteRequest){
+        String name = banDeleteRequest.getName();
+        if (name == null) {
+            throw new CustomException(INVALID_APP_NAME);
+        }
+        Optional<Bans> optionalBan = bansRepository.findByUserIdAndName(userId, name);
+        if(optionalBan.isPresent()){
+            Bans ban = optionalBan.get();
+            ban.updateIsBan(false);
+            return new CommonResponseDto<>(bansRepository.save(ban).getName(), "금지 목록 프로그램 삭제에 성공했습니다.", 200);
+        }
+        throw new CustomException(DATA_NOT_FOUND);
     }
 }

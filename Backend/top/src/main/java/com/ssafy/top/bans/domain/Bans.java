@@ -23,4 +23,8 @@ public class Bans {
     @ManyToOne
     @JoinColumn(name = "user_id")
     private Users user;
+
+    public void updateIsBan(boolean isBan) {
+        this.isBan = isBan;
+    }
 }

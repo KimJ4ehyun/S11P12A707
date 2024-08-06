@@ -63,7 +63,11 @@ values ('Youtube', 3800, 3600, 23),
        ('YoutubeMusic', 3600, 5000, 21),
        ('YoutubeMusic', 3600, 5000, 22),
        ('Mattermost', 3600, 5000, 21),
-       ('Mattermost', 3600, 5000, 22);
+       ('Mattermost', 3600, 5000, 22),
+       ('leagueoflegends', 3640, 1234, 23),
+       ('maplestory', 3640, 2351, 23),
+       ('battleground', 3640, 752, 23),
+       ('edu.ssafy.com', 3640, 235, 23);
 
 insert into friends (user_id, friend_id, relation)
 values (1, 2, 'ACCEPTED'),
