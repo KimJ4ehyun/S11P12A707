@@ -18,6 +18,8 @@ public class Bans {
 
     private String name;
 
+    private boolean isBan;
+
     @ManyToOne
     @JoinColumn(name = "user_id")
     private Users user;

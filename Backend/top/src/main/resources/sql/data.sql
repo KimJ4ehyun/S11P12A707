@@ -59,7 +59,11 @@ values ('Youtube', 3800, 3600, 23),
        ('Mattermost', 3580, 3800, 23),
        ('YoutubeMusic', 3600, 5000, 23),
        ('SSAFY', 3620, 2400, 23),
-       ('IntelliJ', 3640, 2000, 23);
+       ('IntelliJ', 3640, 2000, 23),
+       ('YoutubeMusic', 3600, 5000, 21),
+       ('YoutubeMusic', 3600, 5000, 22),
+       ('Mattermost', 3600, 5000, 21),
+       ('Mattermost', 3600, 5000, 22);
 
 insert into friends (user_id, friend_id, relation)
 values (1, 2, 'ACCEPTED'),
@@ -70,7 +74,10 @@ values (1, 2, 'ACCEPTED'),
        (2, 4, 'WAITING'),
        (4, 1, 'WAITING');
 
-insert into bans (name, user_id)
-values ('youtube.com', 1),
-       ('leagueoflegends', 1),
-       ('maplestory', 2);
+insert into bans (name, is_ban, user_id)
+values ('youtube.com', true, 1),
+       ('leagueoflegends', true, 1),
+       ('SSAFY', false, 1),
+       ('YoutubeMusic', true, 1),
+       ('Mattermost', true, 1),
+       ('maplestory', true, 2);
