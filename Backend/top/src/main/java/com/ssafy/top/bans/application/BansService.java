@@ -3,8 +3,10 @@ package com.ssafy.top.bans.application;
 import com.ssafy.top.bans.domain.Bans;
 import com.ssafy.top.bans.domain.BansRepository;
 import com.ssafy.top.bans.dto.request.BanAddRequest;
+import com.ssafy.top.bans.dto.response.AppNameAndTimeResponse;
 import com.ssafy.top.global.domain.CommonResponseDto;
 import com.ssafy.top.global.exception.CustomException;
+import com.ssafy.top.onedays.dto.response.FocusTimeListDayResponse;
 import com.ssafy.top.users.domain.Users;
 import com.ssafy.top.users.domain.UsersRepository;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static com.ssafy.top.global.exception.ErrorCode.*;
 
@@ -69,5 +72,13 @@ public class BansService {
 
         // 정규 표현식으로 도메인 체크
         return DOMAIN_PATTERN.matcher(domain).matches();
+    }
+
+    public CommonResponseDto<?> findBanListByUserId(Long userId){
+        List<Object[]> banList = bansRepository.findBanListByUserId(userId);
+        AppNameAndTimeResponse[] appNameAndTimeResponses = banList.stream()
+                .map(result -> new AppNameAndTimeResponse((String) result[0], ((long) result[1])))
+                .toArray(AppNameAndTimeResponse[]::new);
+        return new CommonResponseDto<>(appNameAndTimeResponses, "금지 목록 프로그램 조회에 성공했습니다.", 200);
     }
 }
