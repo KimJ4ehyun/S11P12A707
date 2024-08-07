@@ -2,7 +2,7 @@ package com.ssafy.top.bans.application;
 
 import com.ssafy.top.bans.domain.Bans;
 import com.ssafy.top.bans.domain.BansRepository;
-import com.ssafy.top.bans.dto.request.BanAddRequest;
+import com.ssafy.top.bans.dto.request.BanRequest;
 import com.ssafy.top.bans.dto.response.AppNameAndTimeResponse;
 import com.ssafy.top.global.domain.CommonResponseDto;
 import com.ssafy.top.global.exception.CustomException;
@@ -23,12 +23,12 @@ public class BansService {
     private final UsersRepository usersRepository;
     private final BansRepository bansRepository;
 
-    public CommonResponseDto<List<String>> addBan(Long userId, BanAddRequest banAddRequest) {
+    public CommonResponseDto<List<String>> addBan(Long userId, BanRequest banRequest) {
         Users user = usersRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
 
         // 소문자로 변환 + 공백 삭제
-        String name = banAddRequest.getName().toLowerCase().replace(" ", "");
+        String name = banRequest.getName().toLowerCase().replace(" ", "");
 
         // URL or App
         if(name.contains(".")) { // URL
@@ -44,11 +44,9 @@ public class BansService {
         }
 
         // 등록
-        bansRepository.save(banAddRequest.toEntity(user));
+        bansRepository.save(banRequest.toEntity(user));
 
-        List<String> result = bansRepository.findByUser(userId);
-
-        return new CommonResponseDto<>(result, "금지 목록에 추가되었습니다.", 201);
+        return new CommonResponseDto<>("금지 목록에 추가되었습니다.", 201);
     }
 
     public CommonResponseDto<?> findBanListByUserId(Long userId){
@@ -59,7 +57,7 @@ public class BansService {
         return new CommonResponseDto<>(appNameAndTimeResponses, "금지 목록 프로그램 조회에 성공했습니다.", 200);
     }
 
-    public CommonResponseDto<?> updateIsBan(Long userId, BanAddRequest banDeleteRequest){
+    public CommonResponseDto<?> updateIsBan(Long userId, BanRequest banDeleteRequest){
         String name = banDeleteRequest.getName();
 
         Optional<Bans> optionalBan = bansRepository.findByUserIdAndName(userId, name);
@@ -72,7 +70,7 @@ public class BansService {
         return new CommonResponseDto<>(bansRepository.save(ban).getName(), "금지 목록 프로그램 삭제에 성공했습니다.", 200);
     }
 
-    public CommonResponseDto<?> deleteBan(Long userId, BanAddRequest banDeleteRequest) {
+    public CommonResponseDto<?> deleteBan(Long userId, BanRequest banDeleteRequest) {
         String name = banDeleteRequest.getName();
 
         Optional<Bans> ban = bansRepository.findByUserIdAndName(userId, name);
