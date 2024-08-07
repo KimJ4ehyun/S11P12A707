@@ -14,14 +14,15 @@ import com.ssafy.top.users.domain.UsersRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
-import static com.ssafy.top.global.exception.ErrorCode.DATA_NOT_FOUND;
-import static com.ssafy.top.global.exception.ErrorCode.USER_NOT_FOUND;
+import static com.ssafy.top.global.exception.ErrorCode.*;
 
 @RequiredArgsConstructor
 @Service
@@ -75,8 +76,8 @@ public class AppFocusTimesService {
         OneDays oneDay = oneDaysRepository.findByUserIdAndDateData(userId, LocalDate.now())
                 .orElseThrow(() -> new CustomException(DATA_NOT_FOUND));
 
-        String prevAppName = appNameRequest.getPrevAppName();
-        String nowAppName = appNameRequest.getNowAppName();
+        String prevAppName = getProcessedAppName(appNameRequest.getPrevAppName());
+        String nowAppName = getProcessedAppName(appNameRequest.getNowAppName());
 
         return saveFocusTime(prevAppName, oneDay, LocalTime.now().toSecondOfDay(), nowAppName);
     }
@@ -102,13 +103,13 @@ public class AppFocusTimesService {
             } else {
                 AppFocusTimes appFocusTime = appFocusTimesRepository.findLatestStartTimeByOneDaysIdOrderByFocusTime(oneDay.getId())
                         .orElseThrow(() -> new CustomException(DATA_NOT_FOUND));
-                AppFocusTimes appFocusTimes = AppFocusTimes.builder()
+                AppFocusTimes newAppFocusTime = AppFocusTimes.builder()
                         .app(prevAppName)
-                        .startTime(0)
-                        .focusTime(LocalTime.now().toSecondOfDay() - appFocusTime.getStartTime())
+                        .startTime(timeInSeconds)
+                        .focusTime(timeInSeconds - appFocusTime.getStartTime())
                         .oneDays(oneDay)
                         .build();
-                appFocusTimesRepository.save(appFocusTimes);
+                appFocusTimesRepository.save(newAppFocusTime);
             }
         }
     }
@@ -158,5 +159,39 @@ public class AppFocusTimesService {
                     .build();
             return new CommonResponseDto<>(appFocusTimesRepository.save(newAppFocusTimes).getFocusTime(), "집중시간 데이터가 추가되었습니다.", 201);
         }
+    }
+
+    private static String getProcessedAppName(String appName) {
+        if (!"None".equals(appName)) {
+            return getDomainName(appName);
+        }
+        return appName;
+    }
+
+    private static String getDomainName(String url) {
+        try {
+            URI uri = new URI(url);
+            String domain = uri.getHost();
+            if (domain == null) {
+                return url;
+            }
+            return removePrefix(domain);
+        } catch (URISyntaxException e) {
+            throw new CustomException(INVALID_URL_FORMAT);
+        }
+    }
+
+    private static String removePrefix(String domain) {
+        if (domain.startsWith("www.")) {
+            domain = domain.substring(4);
+        }
+        int lastDotIndex = domain.lastIndexOf(".");
+        if (lastDotIndex > 0) {
+            int secondLastDotIndex = domain.lastIndexOf(".", lastDotIndex - 1);
+            if (secondLastDotIndex > 0) {
+                domain = domain.substring(secondLastDotIndex + 1);
+            }
+        }
+        return domain;
     }
 }
