@@ -93,7 +93,7 @@ public class AppFocusTimesService {
     }
 
     private void saveFocusTimePreviousApp(String prevAppName, OneDays oneDay, int timeInSeconds) {
-        if (!"None".equals(prevAppName)) {
+        if (prevAppName != null && !"None".equals(prevAppName)) {
             Optional<AppFocusTimes> optionalPrevAppFocusTime = appFocusTimesRepository.findByOneDaysIdAndApp(oneDay.getId(), prevAppName);
             if(optionalPrevAppFocusTime.isPresent()){
                 AppFocusTimes prevAppFocusTime = optionalPrevAppFocusTime.get();
@@ -115,7 +115,7 @@ public class AppFocusTimesService {
     }
 
     private boolean isNowAppFocusTimeCreated(OneDays oneDay, int timeInSeconds, String nowAppName) {
-        if (!"None".equals(nowAppName)) {
+        if (nowAppName != null && !"None".equals(nowAppName)) {
             Optional<AppFocusTimes> appFocusTimesOptional = appFocusTimesRepository.findByOneDaysIdAndApp(oneDay.getId(), nowAppName);
 
             if (appFocusTimesOptional.isPresent()) {
