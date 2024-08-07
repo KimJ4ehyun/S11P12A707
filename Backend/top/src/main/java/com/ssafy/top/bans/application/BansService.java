@@ -51,7 +51,42 @@ public class BansService {
         return new CommonResponseDto<>(result, "금지 목록에 추가되었습니다.", 201);
     }
 
-    public static boolean isValidDomain(String domain) {
+    public CommonResponseDto<?> findBanListByUserId(Long userId){
+        List<Object[]> banList = bansRepository.findBanListByUserId(userId);
+        AppNameAndTimeResponse[] appNameAndTimeResponses = banList.stream()
+                .map(result -> new AppNameAndTimeResponse((String) result[0], ((Long) result[1])))
+                .toArray(AppNameAndTimeResponse[]::new);
+        return new CommonResponseDto<>(appNameAndTimeResponses, "금지 목록 프로그램 조회에 성공했습니다.", 200);
+    }
+
+    public CommonResponseDto<?> updateIsBan(Long userId, BanAddRequest banDeleteRequest){
+        String name = banDeleteRequest.getName();
+
+        Optional<Bans> optionalBan = bansRepository.findByUserIdAndName(userId, name);
+        if(optionalBan.isEmpty()) {
+            throw new CustomException(DATA_NOT_FOUND);
+        }
+
+        Bans ban = optionalBan.get();
+        ban.updateIsBan(false);
+        return new CommonResponseDto<>(bansRepository.save(ban).getName(), "금지 목록 프로그램 삭제에 성공했습니다.", 200);
+    }
+
+    public CommonResponseDto<?> deleteBan(Long userId, BanAddRequest banDeleteRequest) {
+        String name = banDeleteRequest.getName();
+
+        Optional<Bans> ban = bansRepository.findByUserIdAndName(userId, name);
+        if(ban.isEmpty()) {
+            throw new CustomException(DATA_NOT_FOUND);
+        }
+
+        Bans existingBan = ban.get();
+        bansRepository.delete(existingBan);
+
+        return new CommonResponseDto<>("금지 목록 프로그램 삭제에 성공했습니다.", 204);
+    }
+
+    private boolean isValidDomain(String domain) {
         // 도메인 이름의 정규 표현식
         String DOMAIN_REGEX = "^(?!-)[A-Za-z0-9]([A-Za-z0-9-]{0,61}[A-Za-z0-9])?(\\.[A-Za-z]{2,})+$";
 
@@ -68,27 +103,5 @@ public class BansService {
 
         // 정규 표현식으로 도메인 체크
         return DOMAIN_PATTERN.matcher(domain).matches();
-    }
-
-    public CommonResponseDto<?> findBanListByUserId(Long userId){
-        List<Object[]> banList = bansRepository.findBanListByUserId(userId);
-        AppNameAndTimeResponse[] appNameAndTimeResponses = banList.stream()
-                .map(result -> new AppNameAndTimeResponse((String) result[0], ((long) result[1])))
-                .toArray(AppNameAndTimeResponse[]::new);
-        return new CommonResponseDto<>(appNameAndTimeResponses, "금지 목록 프로그램 조회에 성공했습니다.", 200);
-    }
-
-    public CommonResponseDto<?> updateIsBan(Long userId, BanAddRequest banDeleteRequest){
-        String name = banDeleteRequest.getName();
-        if (name == null) {
-            throw new CustomException(INVALID_APP_NAME);
-        }
-        Optional<Bans> optionalBan = bansRepository.findByUserIdAndName(userId, name);
-        if(optionalBan.isPresent()){
-            Bans ban = optionalBan.get();
-            ban.updateIsBan(false);
-            return new CommonResponseDto<>(bansRepository.save(ban).getName(), "금지 목록 프로그램 삭제에 성공했습니다.", 200);
-        }
-        throw new CustomException(DATA_NOT_FOUND);
     }
 }
