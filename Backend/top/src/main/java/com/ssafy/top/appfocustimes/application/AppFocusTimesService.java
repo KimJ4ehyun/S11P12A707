@@ -35,31 +35,25 @@ public class AppFocusTimesService {
 
     private final UsersRepository usersRepository;
 
-    public AppListResponse[] findTopThreeByAppFocusTimeList(String loginId) {
+    public CommonResponseDto<?> findAppFocusTimeListByLoginId(String loginId) {
         List<AppFocusTimes> appFocusTimesList = findAppFocusTimesByLoginId(loginId);
         int totalFocusTime = appFocusTimesList.stream()
                 .mapToInt(AppFocusTimes::getFocusTime)
                 .sum();
 
-        return appFocusTimesList.stream()
+        AppListResponse[] appListResponses = appFocusTimesList.stream()
                 .sorted(Comparator.comparingInt(AppFocusTimes::getFocusTime).reversed())
-                .limit(3)
-                .map(appFocusTimes -> new AppListResponse(
-                        appFocusTimes.getApp(),
-                        appFocusTimes.getFocusTime(),
-                        appFocusTimes.getFocusTime() * 100 / totalFocusTime
-                ))
+                .map(appFocusTimes -> {
+                    int focusTime = appFocusTimes.getFocusTime();
+                    int percentage = (int) Math.round((double) focusTime * 100 / totalFocusTime);
+                    return new AppListResponse(
+                            appFocusTimes.getApp(),
+                            focusTime,
+                            percentage
+                    );
+                })
                 .toArray(AppListResponse[]::new);
-    }
-
-    public CommonResponseDto<?> findTodayAppFocusTimeListByLoginId(String loginId) {
-        List<AppFocusTimes> appFocusTimesList = findAppFocusTimesByLoginId(loginId);
-        AppAndTimeResponse[] appAndTimeResponses = appFocusTimesList.stream()
-                .sorted(Comparator.comparingInt(AppFocusTimes::getFocusTime).reversed())
-                .map(appFocusTimes -> new AppAndTimeResponse(appFocusTimes.getApp(), appFocusTimes.getFocusTime()))
-                .toArray(AppAndTimeResponse[]::new);
-
-        return new CommonResponseDto<>(appAndTimeResponses, "프로그램 별 집중시간 조회에 성공했습니다.", 200);
+        return new CommonResponseDto<>(appListResponses, "프로그램별 통계 조회에 성공했습니다.", 200);
     }
 
     private List<AppFocusTimes> findAppFocusTimesByLoginId(String loginId) {
