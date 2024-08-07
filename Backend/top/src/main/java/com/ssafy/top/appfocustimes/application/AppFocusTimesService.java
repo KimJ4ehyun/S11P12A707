@@ -177,7 +177,7 @@ public class AppFocusTimesService {
             }
             return removePrefix(domain);
         } catch (URISyntaxException e) {
-            throw new CustomException(INVALID_URL_FORMAT);
+           return url;
         }
     }
 
