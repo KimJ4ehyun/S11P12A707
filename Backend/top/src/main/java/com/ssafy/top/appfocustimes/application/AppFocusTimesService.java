@@ -4,7 +4,6 @@ import com.ssafy.top.appfocustimes.domain.AppFocusTimes;
 import com.ssafy.top.appfocustimes.domain.AppFocusTimesRepository;
 import com.ssafy.top.appfocustimes.dto.request.AppNameAndTimeRequest;
 import com.ssafy.top.appfocustimes.dto.request.AppNameRequest;
-import com.ssafy.top.appfocustimes.dto.response.AppAndTimeResponse;
 import com.ssafy.top.appfocustimes.dto.response.AppListResponse;
 import com.ssafy.top.global.domain.CommonResponseDto;
 import com.ssafy.top.global.exception.CustomException;
@@ -19,7 +18,6 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Comparator;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import static com.ssafy.top.global.exception.ErrorCode.DATA_NOT_FOUND;
@@ -77,14 +75,14 @@ public class AppFocusTimesService {
         OneDays oneDay = oneDaysRepository.findByUserIdAndDateData(userId, LocalDate.now())
                 .orElseThrow(() -> new CustomException(DATA_NOT_FOUND));
 
-        String beforeAppName = appNameRequest.getBeforeAppName();
+        String prevAppName = appNameRequest.getPrevAppName();
         String nowAppName = appNameRequest.getNowAppName();
 
-        return saveFocusTime(beforeAppName, oneDay, LocalTime.now().toSecondOfDay(), nowAppName);
+        return saveFocusTime(prevAppName, oneDay, LocalTime.now().toSecondOfDay(), nowAppName);
     }
 
-    private CommonResponseDto<?> saveFocusTime(String beforeAppName, OneDays oneDay, int timeInSeconds, String nowAppName) {
-        saveFocusTimeBeforeApp(beforeAppName, oneDay, timeInSeconds);
+    private CommonResponseDto<?> saveFocusTime(String prevAppName, OneDays oneDay, int timeInSeconds, String nowAppName) {
+        saveFocusTimePreviousApp(prevAppName, oneDay, timeInSeconds);
         boolean isCreated = isNowAppFocusTimeCreated(oneDay, timeInSeconds, nowAppName);
 
         String message = isCreated ? "집중시간 데이터가 생성되었습니다." : "집중시간 데이터가 갱신되었습니다.";
@@ -93,14 +91,25 @@ public class AppFocusTimesService {
         return new CommonResponseDto<>(message, statusCode);
     }
 
-    private void saveFocusTimeBeforeApp(String beforeAppName, OneDays oneDay, int timeInSeconds) {
-        if (!"None".equals(beforeAppName)) {
-            AppFocusTimes beforeAppFocusTime = appFocusTimesRepository.findByOneDaysIdAndApp(oneDay.getId(), beforeAppName)
-                    .orElseThrow(() -> new CustomException(DATA_NOT_FOUND));
-
-            int focusTime = timeInSeconds - beforeAppFocusTime.getStartTime() + beforeAppFocusTime.getFocusTime();
-            beforeAppFocusTime.updateFocusTime(focusTime);
-            appFocusTimesRepository.save(beforeAppFocusTime);
+    private void saveFocusTimePreviousApp(String prevAppName, OneDays oneDay, int timeInSeconds) {
+        if (!"None".equals(prevAppName)) {
+            Optional<AppFocusTimes> optionalPrevAppFocusTime = appFocusTimesRepository.findByOneDaysIdAndApp(oneDay.getId(), prevAppName);
+            if(optionalPrevAppFocusTime.isPresent()){
+                AppFocusTimes prevAppFocusTime = optionalPrevAppFocusTime.get();
+                int focusTime = timeInSeconds - prevAppFocusTime.getStartTime() + prevAppFocusTime.getFocusTime();
+                prevAppFocusTime.updateFocusTime(focusTime);
+                appFocusTimesRepository.save(prevAppFocusTime);
+            } else {
+                AppFocusTimes appFocusTime = appFocusTimesRepository.findLatestStartTimeByOneDaysIdOrderByFocusTime(oneDay.getId())
+                        .orElseThrow(() -> new CustomException(DATA_NOT_FOUND));
+                AppFocusTimes appFocusTimes = AppFocusTimes.builder()
+                        .app(prevAppName)
+                        .startTime(0)
+                        .focusTime(LocalTime.now().toSecondOfDay() - appFocusTime.getStartTime())
+                        .oneDays(oneDay)
+                        .build();
+                appFocusTimesRepository.save(appFocusTimes);
+            }
         }
     }
 
