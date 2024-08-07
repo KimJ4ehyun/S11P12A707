@@ -4,7 +4,7 @@ import com.ssafy.top.global.domain.CommonResponseDto;
 import com.ssafy.top.global.exception.CustomException;
 import com.ssafy.top.hourfocustimes.domain.HourFocusTimes;
 import com.ssafy.top.hourfocustimes.domain.HourFocusTimesRepository;
-import com.ssafy.top.hourfocustimes.dto.response.HourFocusTimeSumResponse;
+import com.ssafy.top.hourfocustimes.dao.HourFocusTimeSumDao;
 import com.ssafy.top.onedays.domain.OneDays;
 import com.ssafy.top.onedays.domain.OneDaysRepository;
 import com.ssafy.top.onedays.dto.request.TimeGoalRequest;
@@ -212,7 +212,7 @@ public class OneDaysService {
 
     public CommonResponseDto<?> findFocusTimePercentByLoginId(String loginId) {
         Long userId = getUserByLoginId(loginId).getId();
-        List<HourFocusTimeSumResponse> todayFocusTimeList = hourFocusTimesRepository.findAllUsersFocusTimeSum();
+        List<HourFocusTimeSumDao> todayFocusTimeList = hourFocusTimesRepository.findAllUsersFocusTimeSum();
         Map<Long, Long> todayFocusTimeMap = new HashMap<>();
         int dayPercent = calculatePercent(todayFocusTimeList, todayFocusTimeMap, userId);
 
@@ -231,11 +231,11 @@ public class OneDaysService {
         return new CommonResponseDto<>(focusTimePercentResponse, "일간, 주간, 월간 백분율 조회에 성공했습니다.", 200);
     }
 
-    private int calculatePercent(List<HourFocusTimeSumResponse> focusTimeList, Map<Long, Long> focusTimeMap, Long userId) {
+    private int calculatePercent(List<HourFocusTimeSumDao> focusTimeList, Map<Long, Long> focusTimeMap, Long userId) {
         long before = -1;
         int idx = 0;
         for (int i = 0; i < focusTimeList.size(); i++) {
-            HourFocusTimeSumResponse focusTime = focusTimeList.get(i);
+            HourFocusTimeSumDao focusTime = focusTimeList.get(i);
             focusTimeMap.put(focusTime.getUserId(), focusTime.getFocusTimeSum());
             if (focusTime.getFocusTimeSum() != before) {
                 idx = i;
