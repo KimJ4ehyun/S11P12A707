@@ -14,6 +14,7 @@ public class BanAddRequest {
         return Bans.builder()
                 .name(name)
                 .user(user)
+                .isBan(true)
                 .build();
     }
 }
