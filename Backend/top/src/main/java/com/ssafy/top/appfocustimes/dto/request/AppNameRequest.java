@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 public class AppNameRequest {
 
     @Schema(description = "이전에 사용한 APP 이름")
-    private String beforeAppName;
+    private String prevAppName;
 
     @Schema(description = "지금 사용하고 있는 APP 이름")
     private String nowAppName;
