@@ -73,7 +73,6 @@ public class AppFocusTimesController {
     public ResponseEntity<?> save(@RequestBody AppNameRequest appNameRequest, HttpSession session){
         String loginId = (String) session.getAttribute("loginId");
         loginId = "Timo1@gmail.com";
-
         CommonResponseDto<?> response = appFocusTimesService.save(loginId, appNameRequest);
 
         if (response.getStatusCode() == 201) {

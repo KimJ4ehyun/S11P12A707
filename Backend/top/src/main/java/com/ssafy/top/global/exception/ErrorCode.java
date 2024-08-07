@@ -25,7 +25,8 @@ public enum ErrorCode {
     ALREADY_EXISTS(HttpStatus.CONFLICT, "해당 데이터가 이미 존재합니다."),
     INVALID_DOMAIN(HttpStatus.BAD_REQUEST, "도메인 형식이 올바르지 않습니다."),
     BAN_ALREADY_ADDED(HttpStatus.CONFLICT, "이미 금지 목록에 포함되어 있습니다."),
-    INVALID_APP_NAME(HttpStatus.BAD_REQUEST, "앱 이름은 null일 수 없습니다.")
+    INVALID_APP_NAME(HttpStatus.BAD_REQUEST, "앱 이름은 null일 수 없습니다."),
+    INVALID_URL_FORMAT(HttpStatus.BAD_REQUEST, "유효하지 않은 url입니다.")
     ;
 
     private final HttpStatus httpStatus;
