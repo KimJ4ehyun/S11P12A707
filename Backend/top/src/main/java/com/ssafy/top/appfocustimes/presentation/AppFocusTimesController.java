@@ -3,7 +3,6 @@ package com.ssafy.top.appfocustimes.presentation;
 import com.ssafy.top.appfocustimes.application.AppFocusTimesService;
 import com.ssafy.top.appfocustimes.dto.request.AppNameAndTimeRequest;
 import com.ssafy.top.appfocustimes.dto.request.AppNameRequest;
-import com.ssafy.top.appfocustimes.dto.response.AppAndTimeResponse;
 import com.ssafy.top.appfocustimes.dto.response.AppListResponse;
 import com.ssafy.top.global.domain.CommonResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
@@ -36,8 +35,7 @@ public class AppFocusTimesController {
     public ResponseEntity<?> findAppFocusTimeList(HttpSession session){
         String loginId = (String) session.getAttribute("loginId");
         loginId = "Timo1@gmail.com";
-        AppListResponse[] appListResponses = appFocusTimesService.findTopThreeByAppFocusTimeList(loginId);
-        CommonResponseDto<Object> response = new CommonResponseDto<>(appListResponses, "프로그램 별 통계 조회에 성공했습니다.", 200);
+        CommonResponseDto<?> response = appFocusTimesService.findAppFocusTimeListByLoginId(loginId);
         return ResponseEntity.ok().body(response);
     }
 
@@ -61,20 +59,6 @@ public class AppFocusTimesController {
         } else {
             return ResponseEntity.ok().body(response);
         }
-    }
-
-    @Operation(summary = "모든 APP 집중 시간 조회", description = "APP 별 집중시간을 기준으로 내림차순 정렬하여 조회")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200",
-                    description = "집중 시간 조회 성공",
-                    content = @Content(schema = @Schema(implementation = AppAndTimeResponse.class)))
-    })
-    @GetMapping("/dash/stats/app/today")
-    public ResponseEntity<?> findTodayAppFocusTimeList(HttpSession session){
-        String loginId = (String) session.getAttribute("loginId");
-        loginId = "Timo1@gmail.com";
-        CommonResponseDto<?> response = appFocusTimesService.findTodayAppFocusTimeListByLoginId(loginId);
-        return ResponseEntity.ok().body(response);
     }
 
     @Operation(summary = "APP 집중 시간 저장", description = "APP에 집중을 하고 있다 창이 바뀌면 집중 시간을 저장 또는 업데이트")
