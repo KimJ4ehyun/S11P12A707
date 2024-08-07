@@ -24,8 +24,8 @@ public class AppFocusTimesController {
 
     private final AppFocusTimesService appFocusTimesService;
 
-    @Operation(summary = "TOP3 APP 집중시간 통계 조회",
-            description = "집중시간 TOP3 안에 드는 APP을 집중시간을 기준으로 내림차순 정렬하여 전달")
+    @Operation(summary = "일일 APP 집중시간 통계 조회",
+            description = "일일 사용한 APP을 집중시간을 기준으로 내림차순 정렬하여 전달")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     description = "프로그램 별 통계 조회 성공",
