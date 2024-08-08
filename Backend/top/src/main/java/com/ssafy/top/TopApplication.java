@@ -15,11 +15,6 @@ import java.util.TimeZone;
 @EnableScheduling
 public class TopApplication {
 
-//	@PostConstruct
-//	public void init(){
-//		TimeZone.setDefault(TimeZone.getTimeZone("Asia/Seoul"));
-//	}
-
 	public static void main(String[] args) {
 		SpringApplication.run(TopApplication.class, args);
 	}
