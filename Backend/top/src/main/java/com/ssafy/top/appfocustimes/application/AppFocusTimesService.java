@@ -79,10 +79,11 @@ public class AppFocusTimesService {
         String prevAppName = getProcessedAppName(appNameRequest.getPrevAppName());
         String nowAppName = getProcessedAppName(appNameRequest.getNowAppName());
 
-        return saveFocusTime(prevAppName, oneDay, LocalTime.now().toSecondOfDay(), nowAppName);
+        return saveFocusTime(prevAppName, oneDay, nowAppName);
     }
 
-    private CommonResponseDto<?> saveFocusTime(String prevAppName, OneDays oneDay, int timeInSeconds, String nowAppName) {
+    private CommonResponseDto<?> saveFocusTime(String prevAppName, OneDays oneDay, String nowAppName) {
+        int timeInSeconds = LocalTime.now().toSecondOfDay();
         saveFocusTimePreviousApp(prevAppName, oneDay, timeInSeconds);
         boolean isCreated = isNowAppFocusTimeCreated(oneDay, timeInSeconds, nowAppName);
 
