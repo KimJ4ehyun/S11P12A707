@@ -9,11 +9,9 @@ import java.io.Serializable;
 @Getter
 @AllArgsConstructor
 public class SessionUser implements Serializable {
-
-    private String loginId;
+    private String email;
 
     public SessionUser(Users user) {
-        this.loginId = user.getEmail();
-
+        this.email = user.getEmail();
     }
 }

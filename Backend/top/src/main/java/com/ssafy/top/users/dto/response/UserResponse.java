@@ -14,7 +14,7 @@ public class UserResponse {
     private String nickname;
 
     @Schema(description = "로그인 아이디")
-    private String loginId;
+    private String email;
 
     @Schema(description = "화면 공유 여부")
     private Boolean screenShare;
@@ -22,7 +22,7 @@ public class UserResponse {
     public static UserResponse toDto(Users user) {
         return UserResponse.builder()
                 .nickname(user.getNickname())
-                .loginId(user.getEmail())
+                .email(user.getEmail())
                 .screenShare(user.getIsShare())
                 .build();
     }
