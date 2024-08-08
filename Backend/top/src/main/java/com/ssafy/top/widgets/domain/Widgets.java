@@ -5,9 +5,11 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
+@NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class Widgets {
@@ -17,11 +19,11 @@ public class Widgets {
     private Long id;
 
     @Enumerated(EnumType.STRING)
-    private WidgetType widgetType;
+    private WidgetType name;
 
-    private int xPosition;
+    private int x;
 
-    private int yPosition;
+    private int y;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
