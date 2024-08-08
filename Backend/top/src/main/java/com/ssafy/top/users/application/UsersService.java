@@ -40,8 +40,8 @@ public class UsersService {
     }
 
     @Transactional(readOnly = true)
-    public CommonResponseDto<UserResponse> getUser(Long userId) {
-        Users user = usersRepository.findById(userId)
+    public CommonResponseDto<UserResponse> getUser(String email) {
+        Users user = usersRepository.findByEmail(email)
                 .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
 
         return new CommonResponseDto<>(UserResponse.toDto(user), "내 정보 조회에 성공했습니다.", 200);

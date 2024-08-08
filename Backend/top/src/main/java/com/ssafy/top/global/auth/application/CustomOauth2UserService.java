@@ -22,7 +22,6 @@ import java.util.Collections;
 @RequiredArgsConstructor
 @Service
 public class CustomOauth2UserService implements OAuth2UserService<OAuth2UserRequest, OAuth2User> {
-
     private final static String ROLE = "USER";
 
     private final UsersRepository usersRepository;
@@ -30,14 +29,8 @@ public class CustomOauth2UserService implements OAuth2UserService<OAuth2UserRequ
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
-
-
         OAuth2UserService<OAuth2UserRequest, OAuth2User> delegate = new DefaultOAuth2UserService();
         OAuth2User oAuth2User = delegate.loadUser(userRequest);
-
-        //카카오, 구글, 네이버 등 로그인 서비스를 구분
-        //구글만 필요하므로 생략
-        //String registrationId = userRequest.getClientRegistration().getRegistrationId();
 
         String userNameAttributeName = userRequest.getClientRegistration()
                 .getProviderDetails()
@@ -56,11 +49,7 @@ public class CustomOauth2UserService implements OAuth2UserService<OAuth2UserRequ
     }
 
     private Users saveOrUpdate(OauthAttributes attributes) {
-        Users user = usersRepository.findByEmail(attributes.getLoginId())
+        return usersRepository.findByEmail(attributes.getEmail())
                 .orElse(usersRepository.save(attributes.toEntity()));
-        log.info("로그인 한 유저: {}",user.getEmail());
-
-        return user;
-
     }
 }

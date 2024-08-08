@@ -1,5 +1,6 @@
 package com.ssafy.top.users.presentation;
 
+import com.ssafy.top.global.auth.domain.SessionUser;
 import com.ssafy.top.global.domain.CommonResponseDto;
 import com.ssafy.top.users.application.UsersService;
 import com.ssafy.top.users.dto.request.UserUpdateRequest;
@@ -14,6 +15,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -59,10 +61,10 @@ public class UsersController {
                     description = "내 정보 조회 실패(없는 유저)")
     })
     @GetMapping("/user")
-    public ResponseEntity<?> findUser() {
-        Long userId = 1L;
+    public ResponseEntity<?> findUser(HttpSession session) {
+        SessionUser sessionUser = (SessionUser) session.getAttribute("user");
 
-        CommonResponseDto<UserResponse> response = usersService.getUser(userId);
+        CommonResponseDto<UserResponse> response = usersService.getUser(sessionUser.getEmail());
 
         return ResponseEntity.ok(response);
     }
