@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class WidgetsDto {
     @Schema(description = "위젯 이름")
-    private WidgetType name;
+    private String name;
 
     @Schema(description = "위젯 너비")
     private Integer width;
@@ -32,7 +32,7 @@ public class WidgetsDto {
 
     public static WidgetsDto toDto(Widgets widget) {
         return WidgetsDto.builder()
-                .name(widget.getName())
+                .name(String.valueOf(widget.getName()))
                 .width(0)
                 .height(0)
                 .x(widget.getX())
@@ -42,7 +42,7 @@ public class WidgetsDto {
 
     public Widgets toEntity(Users user) {
         return Widgets.builder()
-                .name(name)
+                .name(WidgetType.valueOf(name))
                 .x(x)
                 .y(y)
                 .user(user)
