@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
 import java.util.*;
@@ -36,7 +37,7 @@ public class OneDaysService {
         if (!(period.equals("day") || period.equals("week") || period.equals("month"))) {
             throw new CustomException(INVALID_QUERY_STRING);
         }
-        LocalDate today = LocalDate.now();
+        LocalDate today = LocalDate.now(ZoneId.of("Asia/Seoul"));
         LocalDate yesterday = today.minusDays(1);
         LocalDate lastStartDay = yesterday;
         LocalDate lastEndDay = yesterday;
@@ -62,7 +63,7 @@ public class OneDaysService {
     public CommonResponseDto<?> findTotalFocusTimeByLoginId(String loginId){
         Long userId = getUserByLoginId(loginId).getId();
         List<OneDays> oneDays = oneDaysRepository.findByUserId(userId);
-        int totalFocusTime = findTodayTotalFocusTimeByUserIdAndDateData(userId, LocalDate.now());
+        int totalFocusTime = findTodayTotalFocusTimeByUserIdAndDateData(userId, LocalDate.now(ZoneId.of("Asia/Seoul")));
         for(OneDays oneDay : oneDays){
             totalFocusTime += oneDay.getFocusTime();
         }
@@ -86,7 +87,7 @@ public class OneDaysService {
 
     public CommonResponseDto<?> findFocusTimeList(String loginId, String period, Integer month) {
         Long userId = getUserByLoginId(loginId).getId();
-        LocalDate currentDay = LocalDate.now();
+        LocalDate currentDay = LocalDate.now(ZoneId.of("Asia/Seoul"));
         LocalDate today = currentDay;
 
         if(period != null){
@@ -129,7 +130,7 @@ public class OneDaysService {
 
         LocalDate startDate = LocalDate.of(year, month, 1);
         LocalDate endDate = startDate.with(TemporalAdjusters.lastDayOfMonth());
-        LocalDate today = LocalDate.now();
+        LocalDate today = LocalDate.now(ZoneId.of("Asia/Seoul"));
 
         List<OneDays> oneDaysList = oneDaysRepository.findByUserIdAndDateDataBetween(userId, startDate, endDate);
         if (!today.isBefore(startDate) && !today.isAfter(endDate)) {
@@ -158,7 +159,7 @@ public class OneDaysService {
             throw new CustomException(INVALID_QUERY_STRING);
         }
 
-        LocalDate today = LocalDate.now();
+        LocalDate today = LocalDate.now(ZoneId.of("Asia/Seoul"));
         LocalDate startDay = switch (period) {
             case "week" -> today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
             case "month" -> today.withDayOfMonth(1);
@@ -177,14 +178,14 @@ public class OneDaysService {
         Users user = getUserByLoginId(loginId);
         validateTimeGoal(timeGoal.getTimeGoal());
 
-        Optional<OneDays> oneDays = oneDaysRepository.findByUserIdAndDateData(user.getId(), LocalDate.now());
+        Optional<OneDays> oneDays = oneDaysRepository.findByUserIdAndDateData(user.getId(), LocalDate.now(ZoneId.of("Asia/Seoul")));
         if(oneDays.isPresent()){
             throw new CustomException(ALREADY_EXISTS);
         }
 
         OneDays oneDay = OneDays.builder()
                 .user(user)
-                .dateData(LocalDate.now())
+                .dateData(LocalDate.now(ZoneId.of("Asia/Seoul")))
                 .focusTime(0)
                 .targetTime(timeGoal.getTimeGoal()*60)
                 .build();
@@ -196,7 +197,7 @@ public class OneDaysService {
         Users user = getUserByLoginId(loginId);
         validateTimeGoal(timeGoal.getTimeGoal());
 
-        OneDays oneDays = oneDaysRepository.findByUserIdAndDateData(user.getId(), LocalDate.now())
+        OneDays oneDays = oneDaysRepository.findByUserIdAndDateData(user.getId(), LocalDate.now(ZoneId.of("Asia/Seoul")))
                 .orElseThrow(() -> new CustomException(DATA_NOT_FOUND));
 
         OneDays oneDay = OneDays.builder()
@@ -212,11 +213,11 @@ public class OneDaysService {
 
     public CommonResponseDto<?> findFocusTimePercentByLoginId(String loginId) {
         Long userId = getUserByLoginId(loginId).getId();
-        List<HourFocusTimeSumDao> todayFocusTimeList = hourFocusTimesRepository.findAllUsersFocusTimeSum();
+        LocalDate today = LocalDate.now(ZoneId.of("Asia/Seoul"));
+        List<HourFocusTimeSumDao> todayFocusTimeList = hourFocusTimesRepository.findAllUsersFocusTimeSum(today);
         Map<Long, Long> todayFocusTimeMap = new HashMap<>();
         int dayPercent = calculatePercent(todayFocusTimeList, todayFocusTimeMap, userId);
 
-        LocalDate today = LocalDate.now();
         LocalDate yesterday = today.minusDays(1);
         LocalDate weekFirstDate = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
         LocalDate monthFirstDate = today.withDayOfMonth(1);
