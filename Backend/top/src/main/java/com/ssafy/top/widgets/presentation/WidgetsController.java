@@ -20,10 +20,25 @@ import java.util.List;
 public class WidgetsController {
     private final WidgetsService widgetsService;
 
+    @Operation(summary = "위젯 조회",
+            description = "위젯을 조회한다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "위젯 조회 성공")
+    })
+    @GetMapping
+    public ResponseEntity<?> getWidgets() {
+        Long userId = 1L;
+
+        CommonResponseDto<?> response = widgetsService.getWidgets(userId);
+
+        return ResponseEntity.ok(response);
+    }
+
     @Operation(summary = "위젯 저장",
             description = "위젯을 저장한다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200",
+            @ApiResponse(responseCode = "201",
                     description = "위젯 저장 성공")
     })
     @PostMapping
