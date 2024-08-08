@@ -15,5 +15,6 @@ spring:
     init:
       mode: always
       data-locations: classpath:sql/data.sql
-
-timezone: Asia/Seoul
+      
+server:
+  timezone: Asia/Seoul
