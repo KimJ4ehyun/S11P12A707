@@ -1,9 +1,12 @@
 package com.ssafy.top.widgets.presentation;
 
 import com.ssafy.top.global.domain.CommonResponseDto;
+import com.ssafy.top.users.dto.response.UsersResponse;
 import com.ssafy.top.widgets.application.WidgetsService;
 import com.ssafy.top.widgets.dto.WidgetsDto;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -24,7 +27,8 @@ public class WidgetsController {
             description = "위젯을 조회한다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
-                    description = "위젯 조회 성공")
+                    description = "위젯 조회 성공",
+                    content = @Content(schema = @Schema(implementation = WidgetsDto.class))),
     })
     @GetMapping
     public ResponseEntity<?> getWidgets() {
