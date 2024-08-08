@@ -13,11 +13,11 @@ import com.ssafy.top.users.domain.Users;
 import com.ssafy.top.users.domain.UsersRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -83,7 +83,7 @@ public class AppFocusTimesService {
     }
 
     private CommonResponseDto<?> saveFocusTime(String prevAppName, OneDays oneDay, String nowAppName) {
-        int timeInSeconds = LocalTime.now().toSecondOfDay();
+        int timeInSeconds = LocalTime.now(ZoneId.of("Asia/Seoul")).toSecondOfDay();
         saveFocusTimePreviousApp(prevAppName, oneDay, timeInSeconds);
         boolean isCreated = isNowAppFocusTimeCreated(oneDay, timeInSeconds, nowAppName);
 
