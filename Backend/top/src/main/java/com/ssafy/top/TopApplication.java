@@ -14,7 +14,7 @@ import java.util.TimeZone;
 @SpringBootApplication(exclude = SecurityAutoConfiguration.class)
 @EnableScheduling
 public class TopApplication {
-
+	
 	public static void main(String[] args) {
 		SpringApplication.run(TopApplication.class, args);
 	}
