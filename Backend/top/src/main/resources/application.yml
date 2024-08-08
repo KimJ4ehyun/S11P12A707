@@ -1,5 +1,5 @@
 server:
-  url: ${SERVER_URL}
+  url: http://localhost
   port: 8083
   servlet:
     context-path: /api
@@ -8,6 +8,6 @@ spring:
   application:
     name: top
   profiles:
-    active: dev
+    active: local
     include: oauth
 
