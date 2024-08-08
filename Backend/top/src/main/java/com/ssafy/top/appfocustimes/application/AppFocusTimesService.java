@@ -63,7 +63,7 @@ public class AppFocusTimesService {
         LocalDate today = LocalDate.now();
         Long oneDayId = oneDaysRepository.findByUserIdAndDateData(userId, today)
                 .map(OneDays::getId)
-                .orElseThrow(() -> new CustomException(DATA_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ONE_DAY_NOT_FOUND));
 
         return appFocusTimesRepository.findByOneDaysId(oneDayId);
     }
@@ -74,7 +74,7 @@ public class AppFocusTimesService {
                 .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
 
         OneDays oneDay = oneDaysRepository.findByUserIdAndDateData(userId, LocalDate.now())
-                .orElseThrow(() -> new CustomException(DATA_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ONE_DAY_NOT_FOUND));
 
         String prevAppName = getProcessedAppName(appNameRequest.getPrevAppName());
         String nowAppName = getProcessedAppName(appNameRequest.getNowAppName());
