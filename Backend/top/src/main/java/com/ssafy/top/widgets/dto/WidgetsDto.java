@@ -30,6 +30,16 @@ public class WidgetsDto {
     @Schema(description = "위젯 좌상단 y 좌표")
     private Integer y;
 
+    public static WidgetsDto toDto(Widgets widget) {
+        return WidgetsDto.builder()
+                .name(widget.getName())
+                .width(0)
+                .height(0)
+                .x(widget.getX())
+                .y(widget.getY())
+                .build();
+    }
+
     public Widgets toEntity(Users user) {
         return Widgets.builder()
                 .name(name)

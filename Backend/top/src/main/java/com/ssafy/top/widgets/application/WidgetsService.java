@@ -23,6 +23,19 @@ public class WidgetsService {
     private final UsersRepository usersRepository;
     private final WidgetsRepository widgetsRepository;
 
+    @Transactional(readOnly = true)
+    public CommonResponseDto<?> getWidgets(Long userId) {
+        Users user = usersRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+
+        List<WidgetsDto> widgets = widgetsRepository.findAllByUserId(userId)
+                .stream()
+                .map(WidgetsDto::toDto)
+                .toList();
+
+        return new CommonResponseDto<>(widgets, "위젯 조회에 성공했습니다.", 200);
+    }
+
     public CommonResponseDto<?> saveWidgets(Long userId, List<WidgetsDto> widgets) {
         Users user = usersRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
