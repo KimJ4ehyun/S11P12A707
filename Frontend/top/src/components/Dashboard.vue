@@ -3,7 +3,7 @@
     <div class="content">
       <div class="header">
         <h1>Dashboard</h1>
-        <a class="edit-button" @click="toggleEditMode">저장</a>
+        <button class="save-button" @click="saveWidgetSetting">저장</button>
       </div>
       <div ref="gridstack" class="grid-stack"></div>
       <Sidebar
@@ -16,7 +16,7 @@
         :class="{ open: isSidebarOpen }"
         @click="toggleSidebar"
       >
-        ☰
+        위젯 목록
       </button>
     </div>
   </div>
@@ -26,6 +26,7 @@
 import { createApp, onMounted, ref, nextTick } from "vue";
 import { GridStack } from "gridstack";
 import "gridstack/dist/gridstack.min.css";
+import axios from 'axios';
 import Sidebar from "./Sidebar.vue";
 import TodayFocusSmall from "./TodayFocusSmall.vue";
 import WeekFocusSmall from "./WeekFocusSmall.vue";
@@ -64,7 +65,7 @@ export default {
   setup() {
     const gridstack = ref(null);
     const isSidebarOpen = ref(false);
-    const isEditMode = ref(false);
+    const isSaveMode = ref(false);
     let grid;
 
     const components = [
@@ -110,7 +111,7 @@ export default {
 
       const widgetElement = document.createElement("div");
       widgetElement.className = "grid-stack-item";
-      widgetElement.dataset.componentName = componentConfig.name;
+      widgetElement.dataset.componentName = componentConfig.name; // componentName 설정
       widgetElement.innerHTML = `
         <div class="grid-stack-item-content">
           <div class="widget-delete">✖</div>
@@ -150,12 +151,92 @@ export default {
       }
     };
 
-    const toggleEditMode = () => {
-      isEditMode.value = !isEditMode.value;
+    const saveWidgetSetting = async () => {
+      isSaveMode.value = !isSaveMode.value;
       const deleteButtons = document.querySelectorAll(".widget-delete");
       deleteButtons.forEach((button) => {
-        button.style.display = isEditMode.value ? "block" : "none";
+        button.style.display = isSaveMode.value ? "block" : "none";
       });
+
+      const gridData = grid.save(true); // GridStack의 현재 상태를 저장
+
+      console.log("Saving grid data:", gridData); // 보낼 데이터 구조를 확인하는 로그
+
+      // 서버가 예상하는 형식으로 변환
+      const formattedData = gridData.map(widget => {
+        if (widget.el && widget.el.dataset) {
+          let componentName = widget.el.dataset.componentName;
+
+          if (!componentName) {
+            // componentName이 없는 경우, 가능한 이름을 추론하여 추가
+            const contentElement = widget.el.querySelector(".grid-stack-item-content");
+            if (contentElement) {
+              const app = contentElement.__vue_app__;
+              if (app) {
+                const rootComponent = app._component;
+                if (rootComponent && rootComponent.name) {
+                  componentName = rootComponent.name;
+                }
+              }
+            }
+            if (!componentName) {
+              console.error('Component name is missing from widget element', widget);
+              componentName = "UnknownComponent"; // 임시 이름 할당
+            } else {
+              widget.el.dataset.componentName = componentName; // 추론한 componentName을 dataset에 추가
+            }
+          }
+
+          return {
+            name: componentName,
+            width: widget.w,
+            height: widget.h,
+            x: widget.x,
+            y: widget.y
+          };
+        } else {
+          console.error('Widget element or dataset is missing', widget);
+          return null; // 잘못된 위젯은 무시
+        }
+      }).filter(widget => widget !== null); // 유효한 위젯만 포함
+
+      console.log("Formatted data to be saved:", formattedData); // formattedData 출력
+
+      try {
+        const response = await axios.post("https://i11a707.p.ssafy.io/api/widgets", formattedData);
+        console.log("Widget settings saved successfully:", response);
+        alert("위젯 설정이 저장되었습니다"); // 팝업창 표시
+      } catch (error) {
+        console.error("Error saving widget settings:", error);
+      }
+    };
+
+    const loadWidgetSetting = async () => {
+      try {
+        const response = await axios.get("https://i11a707.p.ssafy.io/api/widgets");
+        const savedWidgets = response.data.data; // data 속성의 배열을 사용
+
+        console.log("Load Widgets:", savedWidgets); // 응답 데이터 확인용 로그
+
+        if (Array.isArray(savedWidgets)) {
+          savedWidgets.forEach((widget) => {
+            const componentConfig = availableComponents.value.find(
+              (c) => c.name === widget.name // 여기서 widget.componentName 대신 widget.name 사용
+            );
+            if (componentConfig) {
+              addWidget(componentConfig, widget.width, widget.height, {
+                x: widget.x,
+                y: widget.y,
+              });
+              componentConfig.isActive = true;
+            }
+          });
+        } else {
+          console.error("Error: Saved widgets data is not an array");
+        }
+      } catch (error) {
+        console.error("Error loading widget settings:", error);
+      }
     };
 
     const toggleSidebar = () => {
@@ -205,16 +286,19 @@ export default {
             componentConfig.isActive = true;
           }
         });
+
+        // 저장된 위젯 설정 불러오기
+        loadWidgetSetting();
       });
     });
 
     return {
       gridstack,
       isSidebarOpen,
-      isEditMode,
+      isSaveMode,
       availableComponents,
       toggleSidebar,
-      toggleEditMode,
+      saveWidgetSetting,
       addWidget,
       toggleComponent,
     };
@@ -246,9 +330,18 @@ export default {
   margin: 0;
 }
 
-.edit-button {
+.save-button {
   cursor: pointer;
-  color: #3498db;
+  color: white;
+  background-color: #8793F5;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 20px;
+  font-size: 16px;
+}
+
+.save-button:hover {
+  background-color: #7A84DC;
 }
 
 .sidebar {
@@ -275,7 +368,7 @@ export default {
   position: fixed;
   top: 20px;
   right: 20px;
-  width: 50px;
+  width: 120px;
   height: 50px;
   background-color: #3498db;
   color: white;

@@ -55,7 +55,7 @@ export default {
         const response = await axios.get('https://i11a707.p.ssafy.io/api/focus-time/ban');
         this.bannedList = response.data.data;
       } catch (error) {
-        console.log('Error to fetch data:', error);
+        console.log('밴 목록 에러:', error);
       }
     },
           
