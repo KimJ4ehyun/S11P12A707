@@ -29,8 +29,8 @@ public class HourFocusTimesService {
 
     private final UsersRepository usersRepository;
 
-    public CommonResponseDto<?> updateFocusTime(String loginId, FocusTimeRequest focusTimeRequest){
-        Users user = usersRepository.findByEmail(loginId)
+    public CommonResponseDto<?> updateFocusTime(String email, FocusTimeRequest focusTimeRequest){
+        Users user = usersRepository.findByEmail(email)
                 .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
 
         OneDays oneDay = oneDaysService.findOneDayByUserAndDateData(user, LocalDate.now(ZoneId.of("Asia/Seoul")));
@@ -47,8 +47,8 @@ public class HourFocusTimesService {
         return new CommonResponseDto<>("집중 시간이 업데이트 되었습니다.", 200);
     }
 
-    public CommonResponseDto<?> save(String loginId, HourRequest hourRequest){
-        Users user = usersRepository.findByEmail(loginId)
+    public CommonResponseDto<?> save(String email, HourRequest hourRequest){
+        Users user = usersRepository.findByEmail(email)
                 .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
 
         OneDays oneDay = oneDaysService.findOneDayByUserAndDateData(user, LocalDate.now(ZoneId.of("Asia/Seoul")));

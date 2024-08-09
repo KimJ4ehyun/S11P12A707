@@ -4,6 +4,7 @@ import com.ssafy.top.appfocustimes.application.AppFocusTimesService;
 import com.ssafy.top.appfocustimes.dto.request.AppNameAndTimeRequest;
 import com.ssafy.top.appfocustimes.dto.request.AppNameRequest;
 import com.ssafy.top.appfocustimes.dto.response.AppListResponse;
+import com.ssafy.top.global.auth.domain.SessionUser;
 import com.ssafy.top.global.domain.CommonResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -33,9 +34,8 @@ public class AppFocusTimesController {
     })
     @GetMapping("/dash/stats/app")
     public ResponseEntity<?> findAppFocusTimeList(HttpSession session){
-        String loginId = (String) session.getAttribute("loginId");
-        loginId = "Timo1@gmail.com";
-        CommonResponseDto<?> response = appFocusTimesService.findAppFocusTimeListByLoginId(loginId);
+        SessionUser sessionUser = (SessionUser) session.getAttribute("user");
+        CommonResponseDto<?> response = appFocusTimesService.findAppFocusTimeListByEmail(sessionUser.getEmail());
         return ResponseEntity.ok().body(response);
     }
 
@@ -49,10 +49,9 @@ public class AppFocusTimesController {
     })
     @PostMapping("/focus-time/app/custom")
     public ResponseEntity<?> saveCustomApp(@RequestBody AppNameAndTimeRequest appNameAndTimeRequest, HttpSession session) {
-        String loginId = (String) session.getAttribute("loginId");
-        loginId = "Timo1@gmail.com";
+        SessionUser sessionUser = (SessionUser) session.getAttribute("user");
 
-        CommonResponseDto<?> response = appFocusTimesService.saveCustomApp(loginId, appNameAndTimeRequest);
+        CommonResponseDto<?> response = appFocusTimesService.saveCustomApp(sessionUser.getEmail(), appNameAndTimeRequest);
 
         if (response.getStatusCode() == 201) {
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -71,9 +70,8 @@ public class AppFocusTimesController {
     })
     @PutMapping("/focus-time/app")
     public ResponseEntity<?> save(@RequestBody AppNameRequest appNameRequest, HttpSession session){
-        String loginId = (String) session.getAttribute("loginId");
-        loginId = "Timo1@gmail.com";
-        CommonResponseDto<?> response = appFocusTimesService.save(loginId, appNameRequest);
+        SessionUser sessionUser = (SessionUser) session.getAttribute("user");
+        CommonResponseDto<?> response = appFocusTimesService.save(sessionUser.getEmail(), appNameRequest);
 
         if (response.getStatusCode() == 201) {
             return ResponseEntity.status(HttpStatus.CREATED).body(response);

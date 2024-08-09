@@ -1,5 +1,6 @@
 package com.ssafy.top.hourfocustimes.presentation;
 
+import com.ssafy.top.global.auth.domain.SessionUser;
 import com.ssafy.top.global.domain.CommonResponseDto;
 import com.ssafy.top.hourfocustimes.application.HourFocusTimesService;
 import com.ssafy.top.hourfocustimes.dto.request.FocusTimeRequest;
@@ -38,12 +39,11 @@ public class HourFocusTimesController {
     })
     @PostMapping("/focus-time")
     public ResponseEntity<?> save(@RequestBody HourRequest hourRequest, HttpSession session){
-        String loginId = (String) session.getAttribute("loginId");
-        loginId = "Timo1@gmail.com";
+        SessionUser sessionUser = (SessionUser) session.getAttribute("user");
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(hourFocusTimesService.save(loginId, hourRequest));
+                .body(hourFocusTimesService.save(sessionUser.getEmail(), hourRequest));
     }
 
     @Operation(summary = "시간 단위 기준 집중 시간 업데이트",
@@ -57,8 +57,7 @@ public class HourFocusTimesController {
     })
     @PutMapping("/focus-time")
     public ResponseEntity<?> updateFocusTime(@RequestBody FocusTimeRequest focusTimeRequest, HttpSession session){
-        String loginId = (String) session.getAttribute("loginId");
-        loginId = "Timo1@gmail.com";
-        return ResponseEntity.ok().body(hourFocusTimesService.updateFocusTime(loginId, focusTimeRequest));
+        SessionUser sessionUser = (SessionUser) session.getAttribute("user");
+        return ResponseEntity.ok().body(hourFocusTimesService.updateFocusTime(sessionUser.getEmail(), focusTimeRequest));
     }
 }

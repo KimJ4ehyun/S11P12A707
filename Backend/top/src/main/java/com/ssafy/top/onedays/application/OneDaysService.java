@@ -32,8 +32,8 @@ public class OneDaysService {
 
     private final UsersRepository usersRepository;
 
-    public CommonResponseDto<?> findTotalFocusTimeByLoginIdAndPeriod(String loginId, String period) {
-        Long userId = getUserByLoginId(loginId).getId();
+    public CommonResponseDto<?> findTotalFocusTimeByEmailAndPeriod(String email, String period) {
+        Long userId = getUserByEmail(email).getId();
         if (!(period.equals("day") || period.equals("week") || period.equals("month"))) {
             throw new CustomException(INVALID_QUERY_STRING);
         }
@@ -60,8 +60,8 @@ public class OneDaysService {
         return new CommonResponseDto<>(totalFocusTimeResponse, "집중시간 통계 조회에 성공했습니다.", 200);
     }
 
-    public CommonResponseDto<?> findTotalFocusTimeByLoginId(String loginId){
-        Long userId = getUserByLoginId(loginId).getId();
+    public CommonResponseDto<?> findTotalFocusTimeByEmail(String email){
+        Long userId = getUserByEmail(email).getId();
         List<OneDays> oneDays = oneDaysRepository.findByUserId(userId);
         int totalFocusTime = findTodayTotalFocusTimeByUserIdAndDateData(userId, LocalDate.now(ZoneId.of("Asia/Seoul")));
         for(OneDays oneDay : oneDays){
@@ -71,22 +71,22 @@ public class OneDaysService {
         return new CommonResponseDto<>(totalFocusTimeResponse, "전체 집중시간의 합을 조회했습니다.", 200);
     }
 
-    public CommonResponseDto<?> findFocusTimeListByLoginIdAndPeriod(String loginId, String period) {
+    public CommonResponseDto<?> findFocusTimeListByEmailAndPeriod(String email, String period) {
         if (!(period.equals("day") || period.equals("week") || period.equals("month"))) {
             throw new CustomException(INVALID_QUERY_STRING);
         }
-        return findFocusTimeList(loginId, period, null);
+        return findFocusTimeList(email, period, null);
     }
 
-    public CommonResponseDto<?> findFocusTimeListByLoginIdAndMonth(String loginId, int month) {
+    public CommonResponseDto<?> findFocusTimeListByEmailAndMonth(String email, int month) {
         if(!(month == 1 || month == 6)){
             throw new CustomException(INVALID_QUERY_STRING);
         }
-        return findFocusTimeList(loginId, null, month);
+        return findFocusTimeList(email, null, month);
     }
 
-    public CommonResponseDto<?> findFocusTimeList(String loginId, String period, Integer month) {
-        Users user = getUserByLoginId(loginId);
+    public CommonResponseDto<?> findFocusTimeList(String email, String period, Integer month) {
+        Users user = getUserByEmail(email);
         LocalDate currentDay = LocalDate.now(ZoneId.of("Asia/Seoul"));
         LocalDate today = currentDay;
 
@@ -122,8 +122,8 @@ public class OneDaysService {
         return new CommonResponseDto<>(focusTimeListResponses, "집중시간 통계 조회에 성공했습니다.", 200);
     }
 
-    public CommonResponseDto<?> findFocusTimeListByLoginIdAndYearAndMonth(String loginId, int year, int month){
-        Long userId = getUserByLoginId(loginId).getId();
+    public CommonResponseDto<?> findFocusTimeListByEmailAndYearAndMonth(String email, int year, int month){
+        Long userId = getUserByEmail(email).getId();
         if(!(1 <= month && month <= 12)){
             throw new CustomException(INVALID_QUERY_STRING);
         }
@@ -153,8 +153,8 @@ public class OneDaysService {
         return new CommonResponseDto<>(responseData, "캘린더 데이터 조회에 성공했습니다.", 200);
     }
 
-    public CommonResponseDto<?> findTimeGoalByLoginIdAndPeriod(String loginId, String period) {
-        Long userId = getUserByLoginId(loginId).getId();
+    public CommonResponseDto<?> findTimeGoalByEmailAndPeriod(String email, String period) {
+        Long userId = getUserByEmail(email).getId();
         if (!List.of("day", "week", "month").contains(period)) {
             throw new CustomException(INVALID_QUERY_STRING);
         }
@@ -174,8 +174,8 @@ public class OneDaysService {
         return new CommonResponseDto<>(timeGoalAndDayResponses, "목표 시간을 조회했습니다.", 200);
     }
 
-    public CommonResponseDto<?> saveTimeGoal(String loginId, TimeGoalRequest timeGoal){
-        Users user = getUserByLoginId(loginId);
+    public CommonResponseDto<?> saveTimeGoal(String email, TimeGoalRequest timeGoal){
+        Users user = getUserByEmail(email);
         validateTimeGoal(timeGoal.getTimeGoal());
 
         Optional<OneDays> oneDays = oneDaysRepository.findByUserIdAndDateData(user.getId(), LocalDate.now(ZoneId.of("Asia/Seoul")));
@@ -193,8 +193,8 @@ public class OneDaysService {
         return new CommonResponseDto<>(timeGoalResponse, "정상적으로 목표가 설정되었습니다.", 201);
     }
 
-    public CommonResponseDto<?> updateTimeGoal(String loginId, TimeGoalRequest timeGoal){
-        Users user = getUserByLoginId(loginId);
+    public CommonResponseDto<?> updateTimeGoal(String email, TimeGoalRequest timeGoal){
+        Users user = getUserByEmail(email);
         validateTimeGoal(timeGoal.getTimeGoal());
 
         OneDays oneDays = findOneDayByUserAndDateData(user, LocalDate.now(ZoneId.of("Asia/Seoul")));
@@ -210,8 +210,8 @@ public class OneDaysService {
         return new CommonResponseDto<>(timeGoalResponse, "정상적으로 목표 시간이 수정되었습니다.", 200);
     }
 
-    public CommonResponseDto<?> findFocusTimePercentByLoginId(String loginId) {
-        Long userId = getUserByLoginId(loginId).getId();
+    public CommonResponseDto<?> findFocusTimePercentByEmail(String email) {
+        Long userId = getUserByEmail(email).getId();
         LocalDate today = LocalDate.now(ZoneId.of("Asia/Seoul"));
         List<HourFocusTimeSumDao> todayFocusTimeList = hourFocusTimesRepository.findAllUsersFocusTimeSum(today);
         Map<Long, Long> todayFocusTimeMap = new HashMap<>();
@@ -302,8 +302,8 @@ public class OneDaysService {
         }
     }
 
-    private Users getUserByLoginId(String loginId) {
-        return usersRepository.findByEmail(loginId)
+    private Users getUserByEmail(String email) {
+        return usersRepository.findByEmail(email)
                 .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
     }
 
