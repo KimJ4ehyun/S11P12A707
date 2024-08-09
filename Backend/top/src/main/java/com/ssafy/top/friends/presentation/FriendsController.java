@@ -2,8 +2,8 @@ package com.ssafy.top.friends.presentation;
 
 import com.ssafy.top.friends.application.FriendsService;
 import com.ssafy.top.friends.dto.response.FriendsResponse;
+import com.ssafy.top.global.auth.domain.SessionUser;
 import com.ssafy.top.global.domain.CommonResponseDto;
-import com.ssafy.top.users.dto.response.UsersResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -33,10 +34,10 @@ public class FriendsController {
                     content = @Content(schema = @Schema(implementation = FriendsResponse.class)))
     })
     @GetMapping
-    public ResponseEntity<?> findFriends() {
-        Long userId = 1L;
+    public ResponseEntity<?> findFriends(HttpSession session) {
+        SessionUser sessionUser = (SessionUser) session.getAttribute("user");
 
-        CommonResponseDto<List<FriendsResponse>> response = friendsService.getFriends(userId);
+        CommonResponseDto<List<FriendsResponse>> response = friendsService.getFriends(sessionUser.getEmail());
 
         return ResponseEntity.ok(response);
     }
@@ -59,11 +60,10 @@ public class FriendsController {
                     description = "친구 신청 실패(이미 친구)")
     })
     @PostMapping("/request/{friendId}")
-    public ResponseEntity<?> requestFriends(
-            @PathVariable Long friendId) {
-        Long userId = 1L;
+    public ResponseEntity<?> requestFriends(HttpSession session, @PathVariable Long friendId) {
+        SessionUser sessionUser = (SessionUser) session.getAttribute("user");
 
-        CommonResponseDto<?> response = friendsService.requestFriends(userId, friendId);
+        CommonResponseDto<?> response = friendsService.requestFriends(sessionUser.getEmail(), friendId);
 
         return ResponseEntity.ok(response);
     }
@@ -84,11 +84,10 @@ public class FriendsController {
                     description = "친구 신청 수락 실패(이미 친구)")
     })
     @PostMapping("/response/{friendId}")
-    public ResponseEntity<?> responseFriends(
-            @PathVariable Long friendId) {
-        Long userId = 1L;
+    public ResponseEntity<?> responseFriends(HttpSession session, @PathVariable Long friendId) {
+        SessionUser sessionUser = (SessionUser) session.getAttribute("user");
 
-        CommonResponseDto<?> response = friendsService.responseFriends(userId, friendId);
+        CommonResponseDto<?> response = friendsService.responseFriends(sessionUser.getEmail(), friendId);
 
         return ResponseEntity.ok(response);
     }
@@ -109,11 +108,10 @@ public class FriendsController {
                     description = "친구 신청 거절(이미 친구)")
     })
     @DeleteMapping("/response/{friendId}")
-    public ResponseEntity<?> declineFriends(
-            @PathVariable Long friendId) {
-        Long userId = 1L;
+    public ResponseEntity<?> declineFriends(HttpSession session, @PathVariable Long friendId) {
+        SessionUser sessionUser = (SessionUser) session.getAttribute("user");
 
-        CommonResponseDto<?> response = friendsService.declineFriends(userId, friendId);
+        CommonResponseDto<?> response = friendsService.declineFriends(sessionUser.getEmail(), friendId);
 
         return ResponseEntity.ok(response);
     }
@@ -134,11 +132,10 @@ public class FriendsController {
                     description = "친구 신청 취소(이미 친구)")
     })
     @DeleteMapping("/request/{friendId}")
-    public ResponseEntity<?> cancelFriends(
-            @PathVariable Long friendId) {
-        Long userId = 1L;
+    public ResponseEntity<?> cancelFriends(HttpSession session, @PathVariable Long friendId) {
+        SessionUser sessionUser = (SessionUser) session.getAttribute("user");
 
-        CommonResponseDto<?> response = friendsService.cancelFriends(userId, friendId);
+        CommonResponseDto<?> response = friendsService.cancelFriends(sessionUser.getEmail(), friendId);
 
         return ResponseEntity.ok(response);
     }
@@ -159,11 +156,10 @@ public class FriendsController {
                     description = "친구 삭제 실패(이미 친구)")
     })
     @DeleteMapping("/{friendId}")
-    public ResponseEntity<?> deleteFriends(
-            @PathVariable Long friendId) {
-        Long userId = 1L;
+    public ResponseEntity<?> deleteFriends(HttpSession session, @PathVariable Long friendId) {
+        SessionUser sessionUser = (SessionUser) session.getAttribute("user");
 
-        CommonResponseDto<?> response = friendsService.deleteFriends(userId, friendId);
+        CommonResponseDto<?> response = friendsService.deleteFriends(sessionUser.getEmail(), friendId);
 
         return ResponseEntity.ok(response);
     }
