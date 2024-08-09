@@ -9,6 +9,8 @@ import java.util.Optional;
 public interface BansRepository extends JpaRepository<Bans, Long> {
     Optional<Bans> findByUserIdAndName(Long userId, String name);
 
+    Optional<Bans> findByUserIdAndNameAndIsBanTrue(Long userId, String name);
+
     @Query("select a.name " +
             "from Bans a " +
             "where a.user.id = :userId " +

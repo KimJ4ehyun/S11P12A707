@@ -29,13 +29,13 @@ public class HourFocusTimesService {
 
     private final UsersRepository usersRepository;
 
-    public CommonResponseDto<?> updateFocusTime(String email, FocusTimeRequest focusTimeRequest){
+    public CommonResponseDto<?> updateFocusTimePeriodically(String email, FocusTimeRequest focusTimeRequest){
         Users user = usersRepository.findByEmail(email)
                 .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
 
         OneDays oneDay = oneDaysService.findOneDayByUserAndDateData(user, LocalDate.now(ZoneId.of("Asia/Seoul")));
 
-        HourFocusTimes hourFocusTimes = findHourFocusTimeByOneDays(oneDay);
+        HourFocusTimes hourFocusTimes = findHourFocusTimeByOneDays(oneDay, LocalTime.now(ZoneId.of("Asia/Seoul")).getHour());
 
         HourFocusTimes updateHourFocusTimes = HourFocusTimes.builder()
                 .id(hourFocusTimes.getId())
@@ -68,12 +68,31 @@ public class HourFocusTimesService {
         }
     }
 
-    public HourFocusTimes findHourFocusTimeByOneDays(OneDays oneDay){
-        return hourFocusTimesRepository.findByOneDaysIdAndTimeUnit(oneDay.getId(), LocalTime.now(ZoneId.of("Asia/Seoul")).getHour())
+    public void updateFocusTime(OneDays oneDay, int startTime, int endTime){
+        int startHour = startTime / 3600;
+        int endHour = endTime / 3600;
+        if (startHour == endHour) {
+            HourFocusTimes hourFocusTimes = findHourFocusTimeByOneDays(oneDay, startHour);
+            hourFocusTimes.updateFocusTime(endTime - startTime + hourFocusTimes.getFocusTime());
+            hourFocusTimesRepository.save(hourFocusTimes);
+        } else {
+            HourFocusTimes hourFocusTimeStart = findHourFocusTimeByOneDays(oneDay, startHour);
+            hourFocusTimeStart.updateFocusTime(endHour * 3600 - startTime + hourFocusTimeStart.getFocusTime());
+            hourFocusTimesRepository.save(hourFocusTimeStart);
+
+            HourFocusTimes hourFocusTimeEnd = findHourFocusTimeByOneDays(oneDay, endHour);
+            hourFocusTimeEnd.updateFocusTime(endTime - endHour * 3600 + hourFocusTimeEnd.getFocusTime());
+            hourFocusTimesRepository.save(hourFocusTimeEnd);
+        }
+
+    }
+
+    public HourFocusTimes findHourFocusTimeByOneDays(OneDays oneDay, int hour){
+        return hourFocusTimesRepository.findByOneDaysIdAndTimeUnit(oneDay.getId(), hour)
                 .orElseGet(() -> {
                     HourFocusTimes newHourFocusTimes = HourFocusTimes.builder()
                             .focusTime(0)
-                            .timeUnit(LocalTime.now(ZoneId.of("Asia/Seoul")).getHour())
+                            .timeUnit(hour)
                             .oneDays(oneDay)
                             .build();
                     hourFocusTimesRepository.save(newHourFocusTimes);

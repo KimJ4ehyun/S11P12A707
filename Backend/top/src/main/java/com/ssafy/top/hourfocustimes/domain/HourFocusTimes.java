@@ -27,4 +27,7 @@ public class HourFocusTimes {
     @JoinColumn(name="one_day_id")
     private OneDays oneDays;
 
+    public void updateFocusTime(int focusTime) {
+        this.focusTime = focusTime;
+    }
 }

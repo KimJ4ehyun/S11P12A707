@@ -58,6 +58,6 @@ public class HourFocusTimesController {
     @PutMapping("/focus-time")
     public ResponseEntity<?> updateFocusTime(@RequestBody FocusTimeRequest focusTimeRequest, HttpSession session){
         SessionUser sessionUser = (SessionUser) session.getAttribute("user");
-        return ResponseEntity.ok().body(hourFocusTimesService.updateFocusTime(sessionUser.getEmail(), focusTimeRequest));
+        return ResponseEntity.ok().body(hourFocusTimesService.updateFocusTimePeriodically(sessionUser.getEmail(), focusTimeRequest));
     }
 }

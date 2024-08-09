@@ -5,8 +5,13 @@ import com.ssafy.top.appfocustimes.domain.AppFocusTimesRepository;
 import com.ssafy.top.appfocustimes.dto.request.AppNameAndTimeRequest;
 import com.ssafy.top.appfocustimes.dto.request.AppNameRequest;
 import com.ssafy.top.appfocustimes.dto.response.AppListResponse;
+import com.ssafy.top.bans.application.BansService;
+import com.ssafy.top.bans.domain.Bans;
+import com.ssafy.top.bans.domain.BansRepository;
 import com.ssafy.top.global.domain.CommonResponseDto;
 import com.ssafy.top.global.exception.CustomException;
+import com.ssafy.top.hourfocustimes.application.HourFocusTimesService;
+import com.ssafy.top.hourfocustimes.domain.HourFocusTimes;
 import com.ssafy.top.onedays.application.OneDaysService;
 import com.ssafy.top.onedays.domain.OneDays;
 import com.ssafy.top.users.domain.Users;
@@ -28,6 +33,10 @@ import static com.ssafy.top.global.exception.ErrorCode.*;
 public class AppFocusTimesService {
 
     private final OneDaysService oneDaysService;
+
+    private final HourFocusTimesService hourFocusTimesService;
+
+    private final BansRepository bansRepository;
 
     private final AppFocusTimesRepository appFocusTimesRepository;
 
@@ -94,6 +103,11 @@ public class AppFocusTimesService {
                 int focusTime = timeInSeconds - prevAppFocusTime.getStartTime() + prevAppFocusTime.getFocusTime();
                 prevAppFocusTime.updateFocusTime(focusTime);
                 appFocusTimesRepository.save(prevAppFocusTime);
+                Optional<Bans> ban = bansRepository.findByUserIdAndNameAndIsBanTrue(oneDay.getUser().getId(), prevAppName);
+                if (ban.isEmpty()) {
+                    hourFocusTimesService.updateFocusTime(oneDay, prevAppFocusTime.getStartTime(), timeInSeconds);
+                }
+
             } else {
                 int appFocusTime = appFocusTimesRepository.findLatestStartTimeByOneDaysIdOrderByFocusTime(oneDay.getId())
                         .map(AppFocusTimes::getStartTime)
@@ -104,6 +118,10 @@ public class AppFocusTimesService {
                         .focusTime(timeInSeconds - appFocusTime)
                         .oneDays(oneDay)
                         .build();
+                Optional<Bans> ban = bansRepository.findByUserIdAndNameAndIsBanTrue(oneDay.getUser().getId(), prevAppName);
+                if (ban.isEmpty()) {
+                    hourFocusTimesService.updateFocusTime(oneDay, appFocusTime, timeInSeconds);
+                }
                 appFocusTimesRepository.save(newAppFocusTime);
             }
         }
