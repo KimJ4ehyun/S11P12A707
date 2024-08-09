@@ -92,7 +92,7 @@ public class OneDaysService {
 
         if(period != null){
             if (period.equals("day")) {
-                OneDays oneDay = findOneDayByUser(user);
+                OneDays oneDay = findOneDayByUserAndDateData(user, LocalDate.now(ZoneId.of("Asia/Seoul")));
 
                 List<HourFocusTimes> hourFocusTimesList = hourFocusTimesRepository.findByOneDaysId(oneDay.getId());
                 FocusTimeListDayResponse[] focusTimeListDayResponses = hourFocusTimesList.stream()
@@ -197,7 +197,7 @@ public class OneDaysService {
         Users user = getUserByLoginId(loginId);
         validateTimeGoal(timeGoal.getTimeGoal());
 
-        OneDays oneDays = findOneDayByUser(user);
+        OneDays oneDays = findOneDayByUserAndDateData(user, LocalDate.now(ZoneId.of("Asia/Seoul")));
 
         OneDays oneDay = OneDays.builder()
                 .id(oneDays.getId())
@@ -287,7 +287,7 @@ public class OneDaysService {
     public int findTodayTotalFocusTimeByUserIdAndDateData(Long userId, LocalDate today){
         Users user = usersRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
-        Long oneDayId = findOneDayByUser(user).getId();
+        Long oneDayId = findOneDayByUserAndDateData(user, today).getId();
 
         List<HourFocusTimes> hourFocusTimesList = hourFocusTimesRepository.findByOneDaysId(oneDayId);
 
@@ -323,12 +323,11 @@ public class OneDaysService {
         return totalFocusTime;
     }
 
-    public OneDays findOneDayByUser(Users user){
-        LocalDate today = LocalDate.now(ZoneId.of("Asia/Seoul"));
-        return oneDaysRepository.findByUserIdAndDateData(user.getId(), today)
+    public OneDays findOneDayByUserAndDateData(Users user, LocalDate date){
+        return oneDaysRepository.findByUserIdAndDateData(user.getId(), date)
                 .orElseGet(() -> {
                     OneDays newOneDay = OneDays.builder()
-                            .dateData(today)
+                            .dateData(date)
                             .focusTime(0)
                             .targetTime(0)
                             .user(user)
@@ -339,4 +338,3 @@ public class OneDaysService {
     }
 
 }
-
