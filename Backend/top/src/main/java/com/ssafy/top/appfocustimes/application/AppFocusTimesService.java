@@ -33,8 +33,8 @@ public class AppFocusTimesService {
 
     private final UsersRepository usersRepository;
 
-    public CommonResponseDto<?> findAppFocusTimeListByLoginId(String loginId) {
-        List<AppFocusTimes> appFocusTimesList = findAppFocusTimesByLoginId(loginId);
+    public CommonResponseDto<?> findAppFocusTimeListByEmail(String email) {
+        List<AppFocusTimes> appFocusTimesList = findAppFocusTimesByEmail(email);
         int totalFocusTime = appFocusTimesList.stream()
                 .mapToInt(AppFocusTimes::getFocusTime)
                 .sum();
@@ -54,8 +54,8 @@ public class AppFocusTimesService {
         return new CommonResponseDto<>(appListResponses, "프로그램별 통계 조회에 성공했습니다.", 200);
     }
 
-    private List<AppFocusTimes> findAppFocusTimesByLoginId(String loginId) {
-        Users user = usersRepository.findByEmail(loginId)
+    private List<AppFocusTimes> findAppFocusTimesByEmail(String email) {
+        Users user = usersRepository.findByEmail(email)
                 .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
 
         OneDays oneDay = oneDaysService.findOneDayByUserAndDateData(user, LocalDate.now(ZoneId.of("Asia/Seoul")));
@@ -63,8 +63,8 @@ public class AppFocusTimesService {
         return appFocusTimesRepository.findByOneDaysId(oneDay.getId());
     }
 
-    public CommonResponseDto<?> save(String loginId, AppNameRequest appNameRequest) {
-        Users user = usersRepository.findByEmail(loginId)
+    public CommonResponseDto<?> save(String email, AppNameRequest appNameRequest) {
+        Users user = usersRepository.findByEmail(email)
                 .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
 
         OneDays oneDay = oneDaysService.findOneDayByUserAndDateData(user, LocalDate.now(ZoneId.of("Asia/Seoul")));
@@ -132,8 +132,8 @@ public class AppFocusTimesService {
         return false;
     }
 
-    public CommonResponseDto<?> saveCustomApp(String loginId, AppNameAndTimeRequest appNameAndTimeRequest){
-        Users user = usersRepository.findByEmail(loginId)
+    public CommonResponseDto<?> saveCustomApp(String email, AppNameAndTimeRequest appNameAndTimeRequest){
+        Users user = usersRepository.findByEmail(email)
                 .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
 
         OneDays oneDay = oneDaysService.findOneDayByUserAndDateData(user, LocalDate.now(ZoneId.of("Asia/Seoul")));
