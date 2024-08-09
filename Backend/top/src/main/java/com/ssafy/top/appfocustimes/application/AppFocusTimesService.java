@@ -95,12 +95,13 @@ public class AppFocusTimesService {
                 prevAppFocusTime.updateFocusTime(focusTime);
                 appFocusTimesRepository.save(prevAppFocusTime);
             } else {
-                AppFocusTimes appFocusTime = appFocusTimesRepository.findLatestStartTimeByOneDaysIdOrderByFocusTime(oneDay.getId())
-                        .orElseThrow(() -> new CustomException(DATA_NOT_FOUND));
+                int appFocusTime = appFocusTimesRepository.findLatestStartTimeByOneDaysIdOrderByFocusTime(oneDay.getId())
+                        .map(AppFocusTimes::getStartTime)
+                        .orElse(timeInSeconds);
                 AppFocusTimes newAppFocusTime = AppFocusTimes.builder()
                         .app(prevAppName)
                         .startTime(timeInSeconds)
-                        .focusTime(timeInSeconds - appFocusTime.getStartTime())
+                        .focusTime(timeInSeconds - appFocusTime)
                         .oneDays(oneDay)
                         .build();
                 appFocusTimesRepository.save(newAppFocusTime);
