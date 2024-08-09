@@ -9,7 +9,6 @@ import com.ssafy.top.global.domain.CommonResponseDto;
 import com.ssafy.top.global.exception.CustomException;
 import com.ssafy.top.onedays.application.OneDaysService;
 import com.ssafy.top.onedays.domain.OneDays;
-import com.ssafy.top.onedays.domain.OneDaysRepository;
 import com.ssafy.top.users.domain.Users;
 import com.ssafy.top.users.domain.UsersRepository;
 import lombok.RequiredArgsConstructor;
@@ -31,8 +30,6 @@ public class AppFocusTimesService {
     private final OneDaysService oneDaysService;
 
     private final AppFocusTimesRepository appFocusTimesRepository;
-
-    private final OneDaysRepository oneDaysRepository;
 
     private final UsersRepository usersRepository;
 
@@ -61,7 +58,7 @@ public class AppFocusTimesService {
         Users user = usersRepository.findByEmail(loginId)
                 .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
 
-        OneDays oneDay = oneDaysService.findOneDayByUser(user);
+        OneDays oneDay = oneDaysService.findOneDayByUserAndDateData(user, LocalDate.now(ZoneId.of("Asia/Seoul")));
 
         return appFocusTimesRepository.findByOneDaysId(oneDay.getId());
     }
@@ -70,7 +67,7 @@ public class AppFocusTimesService {
         Users user = usersRepository.findByEmail(loginId)
                 .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
 
-        OneDays oneDay = oneDaysService.findOneDayByUser(user);
+        OneDays oneDay = oneDaysService.findOneDayByUserAndDateData(user, LocalDate.now(ZoneId.of("Asia/Seoul")));
 
         String prevAppName = getProcessedAppName(appNameRequest.getPrevAppName());
         String nowAppName = getProcessedAppName(appNameRequest.getNowAppName());
@@ -138,7 +135,7 @@ public class AppFocusTimesService {
         Users user = usersRepository.findByEmail(loginId)
                 .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
 
-        OneDays oneDay = oneDaysService.findOneDayByUser(user);
+        OneDays oneDay = oneDaysService.findOneDayByUserAndDateData(user, LocalDate.now(ZoneId.of("Asia/Seoul")));
 
         Optional<AppFocusTimes> appFocusTimes = appFocusTimesRepository.findByOneDaysIdAndApp(oneDay.getId(), appNameAndTimeRequest.getAppName());
         if(appFocusTimes.isPresent()){

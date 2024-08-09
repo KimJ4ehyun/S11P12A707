@@ -6,10 +6,8 @@ import com.ssafy.top.hourfocustimes.domain.HourFocusTimes;
 import com.ssafy.top.hourfocustimes.domain.HourFocusTimesRepository;
 import com.ssafy.top.hourfocustimes.dto.request.FocusTimeRequest;
 import com.ssafy.top.onedays.application.OneDaysService;
-import com.ssafy.top.onedays.domain.OneDaysRepository;
 import com.ssafy.top.users.domain.UsersRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cglib.core.Local;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -35,7 +33,7 @@ public class HourFocusTimesService {
         Users user = usersRepository.findByEmail(loginId)
                 .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
 
-        OneDays oneDay = oneDaysService.findOneDayByUser(user);
+        OneDays oneDay = oneDaysService.findOneDayByUserAndDateData(user, LocalDate.now(ZoneId.of("Asia/Seoul")));
 
         HourFocusTimes hourFocusTimes = findHourFocusTimeByOneDays(oneDay);
 
@@ -53,7 +51,7 @@ public class HourFocusTimesService {
         Users user = usersRepository.findByEmail(loginId)
                 .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
 
-        OneDays oneDay = oneDaysService.findOneDayByUser(user);
+        OneDays oneDay = oneDaysService.findOneDayByUserAndDateData(user, LocalDate.now(ZoneId.of("Asia/Seoul")));
 
         int hour = hourRequest.getHour();
 
