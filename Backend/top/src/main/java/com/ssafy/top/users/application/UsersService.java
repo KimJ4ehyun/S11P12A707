@@ -24,14 +24,17 @@ public class UsersService {
     private final UsersRepository usersRepository;
 
     @Transactional(readOnly = true)
-    public CommonResponseDto<List<UsersResponse>> getUsersByLoginId(Long userId, String nickname) {
+    public CommonResponseDto<List<UsersResponse>> getUsersByLoginId(String email, String nickname) {
+        Users user = usersRepository.findByEmail(email)
+                .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+
         String trimmedNickname = nickname.replace(" ", "");
 
         if(trimmedNickname.isEmpty()) {
             throw new CustomException(WHITESPACE_NOT_ALLOWED);
         }
 
-        List<UsersResponse> result = usersRepository.findUsersByNickname(userId, trimmedNickname)
+        List<UsersResponse> result = usersRepository.findUsersByNickname(user.getId(), trimmedNickname)
                 .stream()
                 .map(UsersResponse::new)
                 .toList();
@@ -47,8 +50,8 @@ public class UsersService {
         return new CommonResponseDto<>(UserResponse.toDto(user), "내 정보 조회에 성공했습니다.", 200);
     }
 
-    public CommonResponseDto<UserUpdateResponse> updateUser(Long userId, UserUpdateRequest userUpdateRequest) {
-        Users user = usersRepository.findById(userId)
+    public CommonResponseDto<UserUpdateResponse> updateUser(String email, UserUpdateRequest userUpdateRequest) {
+        Users user = usersRepository.findByEmail(email)
                 .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
 
         updateNickname(user, userUpdateRequest.getNickname());
@@ -60,8 +63,8 @@ public class UsersService {
         return new CommonResponseDto<>(UserUpdateResponse.toDto(user), "내 정보 수정에 성공했습니다.", 200);
     }
 
-    public CommonResponseDto<Boolean> screenShare(Long userId, Boolean isShare) {
-        Users user = usersRepository.findById(userId)
+    public CommonResponseDto<Boolean> screenShare(String email, Boolean isShare) {
+        Users user = usersRepository.findByEmail(email)
                 .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
 
         updateIsShare(user, isShare);
@@ -71,8 +74,8 @@ public class UsersService {
         return new CommonResponseDto<>(isShare, "활성화 여부 수정에 성공했습니다.", 200);
     }
 
-    public CommonResponseDto<Boolean> extension(Long userId, Boolean isActive) {
-        Users user = usersRepository.findById(userId)
+    public CommonResponseDto<Boolean> extension(String email, Boolean isActive) {
+        Users user = usersRepository.findByEmail(email)
                 .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
 
         updateIsActive(user, isActive);
