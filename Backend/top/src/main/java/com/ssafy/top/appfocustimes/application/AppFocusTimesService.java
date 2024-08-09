@@ -32,9 +32,9 @@ import static com.ssafy.top.global.exception.ErrorCode.*;
 @Service
 public class AppFocusTimesService {
 
-    private final OneDaysService oneDaysService;
-
     private final HourFocusTimesService hourFocusTimesService;
+
+    private final OneDaysService oneDaysService;
 
     private final BansRepository bansRepository;
 
@@ -155,8 +155,9 @@ public class AppFocusTimesService {
                 .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
 
         OneDays oneDay = oneDaysService.findOneDayByUserAndDateData(user, LocalDate.now(ZoneId.of("Asia/Seoul")));
-
+        int nowTime = LocalTime.now(ZoneId.of("Asia/Seoul")).toSecondOfDay();
         Optional<AppFocusTimes> appFocusTimes = appFocusTimesRepository.findByOneDaysIdAndApp(oneDay.getId(), appNameAndTimeRequest.getAppName());
+        hourFocusTimesService.updateFocusTime(oneDay, nowTime - appNameAndTimeRequest.getFocusTime() ,nowTime);
         if(appFocusTimes.isPresent()){
             AppFocusTimes app = appFocusTimes.get();
             app.updateFocusTime(app.getFocusTime() + appNameAndTimeRequest.getFocusTime());
@@ -186,23 +187,10 @@ public class AppFocusTimesService {
             if (domain == null) {
                 return url;
             }
-            return removePrefix(domain);
+            return domain;
         } catch (URISyntaxException e) {
            return url;
         }
     }
 
-    private static String removePrefix(String domain) {
-        if (domain.startsWith("www.")) {
-            domain = domain.substring(4);
-        }
-        int lastDotIndex = domain.lastIndexOf(".");
-        if (lastDotIndex > 0) {
-            int secondLastDotIndex = domain.lastIndexOf(".", lastDotIndex - 1);
-            if (secondLastDotIndex > 0) {
-                domain = domain.substring(secondLastDotIndex + 1);
-            }
-        }
-        return domain;
-    }
 }
