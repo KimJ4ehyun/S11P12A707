@@ -7,6 +7,7 @@ import com.ssafy.top.appfocustimes.dto.request.AppNameRequest;
 import com.ssafy.top.appfocustimes.dto.response.AppListResponse;
 import com.ssafy.top.global.domain.CommonResponseDto;
 import com.ssafy.top.global.exception.CustomException;
+import com.ssafy.top.onedays.application.OneDaysService;
 import com.ssafy.top.onedays.domain.OneDays;
 import com.ssafy.top.onedays.domain.OneDaysRepository;
 import com.ssafy.top.users.domain.Users;
@@ -26,6 +27,8 @@ import static com.ssafy.top.global.exception.ErrorCode.*;
 @RequiredArgsConstructor
 @Service
 public class AppFocusTimesService {
+
+    private final OneDaysService oneDaysService;
 
     private final AppFocusTimesRepository appFocusTimesRepository;
 
@@ -55,25 +58,19 @@ public class AppFocusTimesService {
     }
 
     private List<AppFocusTimes> findAppFocusTimesByLoginId(String loginId) {
-        Long userId = usersRepository.findByEmail(loginId)
-                .map(Users::getId)
+        Users user = usersRepository.findByEmail(loginId)
                 .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
 
-        LocalDate today = LocalDate.now(ZoneId.of("Asia/Seoul"));
-        Long oneDayId = oneDaysRepository.findByUserIdAndDateData(userId, today)
-                .map(OneDays::getId)
-                .orElseThrow(() -> new CustomException(ONE_DAY_NOT_FOUND));
+        OneDays oneDay = oneDaysService.findOneDayByUser(user);
 
-        return appFocusTimesRepository.findByOneDaysId(oneDayId);
+        return appFocusTimesRepository.findByOneDaysId(oneDay.getId());
     }
 
     public CommonResponseDto<?> save(String loginId, AppNameRequest appNameRequest) {
-        Long userId = usersRepository.findByEmail(loginId)
-                .map(Users::getId)
+        Users user = usersRepository.findByEmail(loginId)
                 .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
 
-        OneDays oneDay = oneDaysRepository.findByUserIdAndDateData(userId, LocalDate.now(ZoneId.of("Asia/Seoul")))
-                .orElseThrow(() -> new CustomException(ONE_DAY_NOT_FOUND));
+        OneDays oneDay = oneDaysService.findOneDayByUser(user);
 
         String prevAppName = getProcessedAppName(appNameRequest.getPrevAppName());
         String nowAppName = getProcessedAppName(appNameRequest.getNowAppName());
@@ -138,12 +135,10 @@ public class AppFocusTimesService {
     }
 
     public CommonResponseDto<?> saveCustomApp(String loginId, AppNameAndTimeRequest appNameAndTimeRequest){
-        Long userId = usersRepository.findByEmail(loginId)
-                .map(Users::getId)
+        Users user = usersRepository.findByEmail(loginId)
                 .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
 
-        OneDays oneDay = oneDaysRepository.findByUserIdAndDateData(userId, LocalDate.now(ZoneId.of("Asia/Seoul")))
-                .orElseThrow(() -> new CustomException(DATA_NOT_FOUND));
+        OneDays oneDay = oneDaysService.findOneDayByUser(user);
 
         Optional<AppFocusTimes> appFocusTimes = appFocusTimesRepository.findByOneDaysIdAndApp(oneDay.getId(), appNameAndTimeRequest.getAppName());
         if(appFocusTimes.isPresent()){

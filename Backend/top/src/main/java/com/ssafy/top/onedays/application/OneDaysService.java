@@ -86,16 +86,15 @@ public class OneDaysService {
     }
 
     public CommonResponseDto<?> findFocusTimeList(String loginId, String period, Integer month) {
-        Long userId = getUserByLoginId(loginId).getId();
+        Users user = getUserByLoginId(loginId);
         LocalDate currentDay = LocalDate.now(ZoneId.of("Asia/Seoul"));
         LocalDate today = currentDay;
 
         if(period != null){
             if (period.equals("day")) {
-                Long oneDayId = oneDaysRepository.findByUserIdAndDateData(userId, today)
-                        .map(OneDays::getId)
-                        .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
-                List<HourFocusTimes> hourFocusTimesList = hourFocusTimesRepository.findByOneDaysId(oneDayId);
+                OneDays oneDay = findOneDayByUser(user);
+
+                List<HourFocusTimes> hourFocusTimesList = hourFocusTimesRepository.findByOneDaysId(oneDay.getId());
                 FocusTimeListDayResponse[] focusTimeListDayResponses = hourFocusTimesList.stream()
                         .map(hourFocusTime -> new FocusTimeListDayResponse(hourFocusTime.getTimeUnit(), hourFocusTime.getFocusTime()))
                         .toArray(FocusTimeListDayResponse[]::new);
@@ -109,6 +108,7 @@ public class OneDaysService {
             currentDay = currentDay.minusMonths(month).plusDays(1);
         }
 
+        Long userId = user.getId();
         LocalDate yesterday = today.minusDays(1);
         List<OneDays> oneDaysList = oneDaysRepository.findByUserIdAndDateDataBetween(userId, currentDay, yesterday);
         FocusTimeListResponse[] focusTimeListResponses = new FocusTimeListResponse[oneDaysList.size()+1];
@@ -197,8 +197,7 @@ public class OneDaysService {
         Users user = getUserByLoginId(loginId);
         validateTimeGoal(timeGoal.getTimeGoal());
 
-        OneDays oneDays = oneDaysRepository.findByUserIdAndDateData(user.getId(), LocalDate.now(ZoneId.of("Asia/Seoul")))
-                .orElseThrow(() -> new CustomException(DATA_NOT_FOUND));
+        OneDays oneDays = findOneDayByUser(user);
 
         OneDays oneDay = OneDays.builder()
                 .id(oneDays.getId())
@@ -286,9 +285,9 @@ public class OneDaysService {
     }
 
     public int findTodayTotalFocusTimeByUserIdAndDateData(Long userId, LocalDate today){
-        Long oneDayId = oneDaysRepository.findByUserIdAndDateData(userId, today)
-                .map(OneDays::getId)
-                .orElseThrow(() -> new CustomException(DATA_NOT_FOUND));
+        Users user = usersRepository.findByUserId(userId)
+                .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+        Long oneDayId = findOneDayByUser(user).getId();
 
         List<HourFocusTimes> hourFocusTimesList = hourFocusTimesRepository.findByOneDaysId(oneDayId);
 
@@ -322,6 +321,21 @@ public class OneDaysService {
             totalFocusTime += oneDays.getFocusTime();
         }
         return totalFocusTime;
+    }
+
+    public OneDays findOneDayByUser(Users user){
+        LocalDate today = LocalDate.now(ZoneId.of("Asia/Seoul"));
+        return oneDaysRepository.findByUserIdAndDateData(user.getId(), today)
+                .orElseGet(() -> {
+                    OneDays newOneDay = OneDays.builder()
+                            .dateData(today)
+                            .focusTime(0)
+                            .targetTime(0)
+                            .user(user)
+                            .build();
+                    oneDaysRepository.save(newOneDay);
+                    return newOneDay;
+                });
     }
 
 }

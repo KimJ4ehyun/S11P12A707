@@ -10,6 +10,8 @@ import java.util.Optional;
 public interface UsersRepository extends JpaRepository<Users, Long> {
     Optional<Users> findByEmail(String email);
 
+    Optional<Users> findByUserId(Long userId);
+
     @Query("select a.id, a.nickname, b.relation " +
             "from Users a " +
             "left join Friends b on b.friendsPK.userId = :userId and a.id = b.friendsPK.friendId " +
