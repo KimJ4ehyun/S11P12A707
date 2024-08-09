@@ -43,10 +43,10 @@ public class UsersController {
                     description = "유저 검색 실패(검색어가 비었습니다)")
     })
     @GetMapping("/users")
-    public ResponseEntity<?> findUsersByNickname(@RequestParam String nickname) {
-        Long userId = 1L;
+    public ResponseEntity<?> findUsersByNickname(HttpSession session, @RequestParam String nickname) {
+        SessionUser sessionUser = (SessionUser) session.getAttribute("user");
 
-        CommonResponseDto<List<UsersResponse>> response = usersService.getUsersByLoginId(userId, nickname);
+        CommonResponseDto<List<UsersResponse>> response = usersService.getUsersByLoginId(sessionUser.getEmail(), nickname);
 
         return ResponseEntity.ok(response);
     }
@@ -83,10 +83,10 @@ public class UsersController {
                     description = "공백인 닉네임")
     })
     @PutMapping("/user")
-    public ResponseEntity<?> updateUser(@RequestBody @Valid UserUpdateRequest userUpdateRequest) {
-        Long userId = 1L;
+    public ResponseEntity<?> updateUser(HttpSession session, @RequestBody @Valid UserUpdateRequest userUpdateRequest) {
+        SessionUser sessionUser = (SessionUser) session.getAttribute("user");
 
-        CommonResponseDto<UserUpdateResponse> response = usersService.updateUser(userId, userUpdateRequest);
+        CommonResponseDto<UserUpdateResponse> response = usersService.updateUser(sessionUser.getEmail(), userUpdateRequest);
 
         return ResponseEntity.ok(response);
     }
@@ -104,10 +104,10 @@ public class UsersController {
                     description = "존재하지 않는 유저")
     })
     @PutMapping("/screenShare/{isShare}")
-    public ResponseEntity<?> screenShare(@PathVariable Boolean isShare) {
-        Long userId = 1L;
+    public ResponseEntity<?> screenShare(HttpSession session, @PathVariable Boolean isShare) {
+        SessionUser sessionUser = (SessionUser) session.getAttribute("user");
 
-        CommonResponseDto<Boolean> response = usersService.screenShare(userId, isShare);
+        CommonResponseDto<Boolean> response = usersService.screenShare(sessionUser.getEmail(), isShare);
 
         return ResponseEntity.ok(response);
     }
@@ -125,10 +125,10 @@ public class UsersController {
                     description = "존재하지 않는 유저")
     })
     @PutMapping("/extension/{isActive}")
-    public ResponseEntity<?> extension(@PathVariable Boolean isActive) {
-        Long userId = 1L;
+    public ResponseEntity<?> extension(HttpSession session, @PathVariable Boolean isActive) {
+        SessionUser sessionUser = (SessionUser) session.getAttribute("user");
 
-        CommonResponseDto<Boolean> response = usersService.extension(userId, isActive);
+        CommonResponseDto<Boolean> response = usersService.extension(sessionUser.getEmail(), isActive);
 
         return ResponseEntity.ok(response);
     }
