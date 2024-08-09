@@ -22,6 +22,7 @@
   </div>
 </template>
 
+
 <script>
 import { createApp, onMounted, ref, nextTick } from "vue";
 import { GridStack } from "gridstack";
@@ -305,6 +306,7 @@ export default {
   },
 };
 </script>
+
 
 <style scoped>
 .layout {
