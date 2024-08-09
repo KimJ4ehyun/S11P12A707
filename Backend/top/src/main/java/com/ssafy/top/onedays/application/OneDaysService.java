@@ -285,7 +285,7 @@ public class OneDaysService {
     }
 
     public int findTodayTotalFocusTimeByUserIdAndDateData(Long userId, LocalDate today){
-        Users user = usersRepository.findByUserId(userId)
+        Users user = usersRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
         Long oneDayId = findOneDayByUser(user).getId();
 
