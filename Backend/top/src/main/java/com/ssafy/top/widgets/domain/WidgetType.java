@@ -27,7 +27,7 @@ public enum WidgetType {
     MonthStreakRow,
     CalendarCheck,
     FocusTimeEachPrograms,
-    FocusTimeEachProgramsPrecentage,
+    FocusTimeEachProgramsPercentage,
     TimeLine,
     TodayTargetTime,
     WeekTargetTime,
