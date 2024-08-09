@@ -130,7 +130,7 @@ public class CustomOauth2UserService implements OAuth2UserService<OAuth2UserRequ
         widgets.add(w6);
 
         Widgets w7 = Widgets.builder()
-                .name(WidgetType.FocusTimeEachProgramsPrecentage)
+                .name(WidgetType.FocusTimeEachProgramsPercentage)
                 .x(0)
                 .y(5)
                 .user(user)
