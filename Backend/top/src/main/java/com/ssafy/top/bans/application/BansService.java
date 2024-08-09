@@ -23,8 +23,8 @@ public class BansService {
     private final UsersRepository usersRepository;
     private final BansRepository bansRepository;
 
-    public CommonResponseDto<List<String>> addBan(Long userId, BanRequest banRequest) {
-        Users user = usersRepository.findById(userId)
+    public CommonResponseDto<List<String>> addBan(String email, BanRequest banRequest) {
+        Users user = usersRepository.findByEmail(email)
                 .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
 
         // 소문자로 변환 + 공백 삭제
@@ -38,7 +38,7 @@ public class BansService {
         }
 
         // 이미 사용자가 등록한 경우
-        Optional<Bans> ban = bansRepository.findByUserIdAndName(userId, name);
+        Optional<Bans> ban = bansRepository.findByUserIdAndName(user.getId(), name);
         if(ban.isPresent()) {
             throw new CustomException(BAN_ALREADY_ADDED);
         }
@@ -49,18 +49,26 @@ public class BansService {
         return new CommonResponseDto<>("금지 목록에 추가되었습니다.", 201);
     }
 
-    public CommonResponseDto<?> findBanListByUserId(Long userId){
-        List<Object[]> banList = bansRepository.findBanListByUserId(userId);
+    public CommonResponseDto<?> findBanListByUserId(String email){
+        Users user = usersRepository.findByEmail(email)
+                .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+
+        List<Object[]> banList = bansRepository.findBanListByUserId(user.getId());
+
         AppNameAndTimeResponse[] appNameAndTimeResponses = banList.stream()
                 .map(result -> new AppNameAndTimeResponse((String) result[0], ((Long) result[1])))
                 .toArray(AppNameAndTimeResponse[]::new);
+
         return new CommonResponseDto<>(appNameAndTimeResponses, "금지 목록 프로그램 조회에 성공했습니다.", 200);
     }
 
-    public CommonResponseDto<?> updateIsBan(Long userId, BanRequest banDeleteRequest){
+    public CommonResponseDto<?> updateIsBan(String email, BanRequest banDeleteRequest){
+        Users user = usersRepository.findByEmail(email)
+                .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+
         String name = banDeleteRequest.getName();
 
-        Optional<Bans> optionalBan = bansRepository.findByUserIdAndName(userId, name);
+        Optional<Bans> optionalBan = bansRepository.findByUserIdAndName(user.getId(), name);
         if(optionalBan.isEmpty()) {
             throw new CustomException(DATA_NOT_FOUND);
         }
@@ -70,10 +78,13 @@ public class BansService {
         return new CommonResponseDto<>(bansRepository.save(ban).getName(), "금지 목록 프로그램 삭제에 성공했습니다.", 200);
     }
 
-    public CommonResponseDto<?> deleteBan(Long userId, BanRequest banDeleteRequest) {
+    public CommonResponseDto<?> deleteBan(String email, BanRequest banDeleteRequest) {
+        Users user = usersRepository.findByEmail(email)
+                .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+
         String name = banDeleteRequest.getName();
 
-        Optional<Bans> ban = bansRepository.findByUserIdAndName(userId, name);
+        Optional<Bans> ban = bansRepository.findByUserIdAndName(user.getId(), name);
         if(ban.isEmpty()) {
             throw new CustomException(DATA_NOT_FOUND);
         }
