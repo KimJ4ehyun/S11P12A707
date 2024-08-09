@@ -11,6 +11,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.ZoneId;
+
 import com.ssafy.top.hourfocustimes.dto.request.HourRequest;
 import com.ssafy.top.onedays.domain.OneDays;
 import com.ssafy.top.users.domain.Users;
@@ -32,11 +34,11 @@ public class HourFocusTimesService {
                 .orElseThrow(() -> new CustomException(USER_NOT_FOUND))
                 .getId();
 
-        Long oneDayId = oneDaysRepository.findByUserIdAndDateData(userId, LocalDate.now())
+        Long oneDayId = oneDaysRepository.findByUserIdAndDateData(userId, LocalDate.now(ZoneId.of("Asia/Seoul")))
                 .orElseThrow(() -> new CustomException(ONE_DAY_NOT_FOUND))
                 .getId();
 
-        HourFocusTimes hourFocusTimes = hourFocusTimesRepository.findByOneDaysIdAndTimeUnit(oneDayId, LocalTime.now().getHour())
+        HourFocusTimes hourFocusTimes = hourFocusTimesRepository.findByOneDaysIdAndTimeUnit(oneDayId, LocalTime.now(ZoneId.of("Asia/Seoul")).getHour())
                 .orElseThrow(() -> new CustomException(HOUR_FOCUS_TIME_NOT_FOUND));
 
         int focusTime = focusTimeRequest.getFocusTime();
@@ -56,7 +58,7 @@ public class HourFocusTimesService {
                 .map(Users::getId)
                 .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
 
-        OneDays oneDays = oneDaysRepository.findByUserIdAndDateData(userId, LocalDate.now())
+        OneDays oneDays = oneDaysRepository.findByUserIdAndDateData(userId, LocalDate.now(ZoneId.of("Asia/Seoul")))
                 .orElseThrow(() -> new CustomException(ONE_DAY_NOT_FOUND));
 
         int hour = hourRequest.getHour();

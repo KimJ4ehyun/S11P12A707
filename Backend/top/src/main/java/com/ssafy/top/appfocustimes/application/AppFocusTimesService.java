@@ -17,6 +17,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -58,7 +59,7 @@ public class AppFocusTimesService {
                 .map(Users::getId)
                 .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
 
-        LocalDate today = LocalDate.now();
+        LocalDate today = LocalDate.now(ZoneId.of("Asia/Seoul"));
         Long oneDayId = oneDaysRepository.findByUserIdAndDateData(userId, today)
                 .map(OneDays::getId)
                 .orElseThrow(() -> new CustomException(ONE_DAY_NOT_FOUND));
@@ -71,7 +72,7 @@ public class AppFocusTimesService {
                 .map(Users::getId)
                 .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
 
-        OneDays oneDay = oneDaysRepository.findByUserIdAndDateData(userId, LocalDate.now())
+        OneDays oneDay = oneDaysRepository.findByUserIdAndDateData(userId, LocalDate.now(ZoneId.of("Asia/Seoul")))
                 .orElseThrow(() -> new CustomException(ONE_DAY_NOT_FOUND));
 
         String prevAppName = getProcessedAppName(appNameRequest.getPrevAppName());
@@ -81,7 +82,7 @@ public class AppFocusTimesService {
     }
 
     private CommonResponseDto<?> saveFocusTime(String prevAppName, OneDays oneDay, String nowAppName) {
-        int timeInSeconds = LocalTime.now().toSecondOfDay();
+        int timeInSeconds = LocalTime.now(ZoneId.of("Asia/Seoul")).toSecondOfDay();
         saveFocusTimePreviousApp(prevAppName, oneDay, timeInSeconds);
         boolean isCreated = isNowAppFocusTimeCreated(oneDay, timeInSeconds, nowAppName);
 
@@ -141,7 +142,7 @@ public class AppFocusTimesService {
                 .map(Users::getId)
                 .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
 
-        OneDays oneDay = oneDaysRepository.findByUserIdAndDateData(userId, LocalDate.now())
+        OneDays oneDay = oneDaysRepository.findByUserIdAndDateData(userId, LocalDate.now(ZoneId.of("Asia/Seoul")))
                 .orElseThrow(() -> new CustomException(DATA_NOT_FOUND));
 
         Optional<AppFocusTimes> appFocusTimes = appFocusTimesRepository.findByOneDaysIdAndApp(oneDay.getId(), appNameAndTimeRequest.getAppName());
