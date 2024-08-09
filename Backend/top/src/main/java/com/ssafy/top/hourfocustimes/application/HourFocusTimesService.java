@@ -77,7 +77,7 @@ public class HourFocusTimesService {
             hourFocusTimesRepository.save(hourFocusTimes);
         } else {
             HourFocusTimes hourFocusTimeStart = findHourFocusTimeByOneDays(oneDay, startHour);
-            hourFocusTimeStart.updateFocusTime(endHour * 3600 - startTime + hourFocusTimeStart.getFocusTime());
+            hourFocusTimeStart.updateFocusTime((startTime + 1) * 3600 - startTime + hourFocusTimeStart.getFocusTime());
             hourFocusTimesRepository.save(hourFocusTimeStart);
 
             HourFocusTimes hourFocusTimeEnd = findHourFocusTimeByOneDays(oneDay, endHour);
