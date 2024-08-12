@@ -13,16 +13,17 @@ import com.ssafy.top.users.domain.Users;
 import com.ssafy.top.users.domain.UsersRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
 import java.util.*;
-
 import static com.ssafy.top.global.exception.ErrorCode.*;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class OneDaysService {
 
@@ -32,6 +33,7 @@ public class OneDaysService {
 
     private final UsersRepository usersRepository;
 
+    @Transactional(readOnly = true)
     public CommonResponseDto<?> findTotalFocusTimeByEmailAndPeriod(String email, String period) {
         Long userId = getUserByEmail(email).getId();
         if (!(period.equals("day") || period.equals("week") || period.equals("month"))) {
@@ -60,6 +62,7 @@ public class OneDaysService {
         return new CommonResponseDto<>(totalFocusTimeResponse, "집중시간 통계 조회에 성공했습니다.", 200);
     }
 
+    @Transactional(readOnly = true)
     public CommonResponseDto<?> findTotalFocusTimeByEmail(String email){
         Long userId = getUserByEmail(email).getId();
         List<OneDays> oneDays = oneDaysRepository.findByUserId(userId);
@@ -71,6 +74,7 @@ public class OneDaysService {
         return new CommonResponseDto<>(totalFocusTimeResponse, "전체 집중시간의 합을 조회했습니다.", 200);
     }
 
+    @Transactional(readOnly = true)
     public CommonResponseDto<?> findFocusTimeListByEmailAndPeriod(String email, String period) {
         if (!(period.equals("day") || period.equals("week") || period.equals("month"))) {
             throw new CustomException(INVALID_QUERY_STRING);
@@ -78,6 +82,7 @@ public class OneDaysService {
         return findFocusTimeList(email, period, null);
     }
 
+    @Transactional(readOnly = true)
     public CommonResponseDto<?> findFocusTimeListByEmailAndMonth(String email, int month) {
         if(!(month == 1 || month == 6)){
             throw new CustomException(INVALID_QUERY_STRING);
@@ -85,6 +90,7 @@ public class OneDaysService {
         return findFocusTimeList(email, null, month);
     }
 
+    @Transactional(readOnly = true)
     public CommonResponseDto<?> findFocusTimeList(String email, String period, Integer month) {
         Users user = getUserByEmail(email);
         LocalDate currentDay = LocalDate.now(ZoneId.of("Asia/Seoul"));
@@ -122,6 +128,7 @@ public class OneDaysService {
         return new CommonResponseDto<>(focusTimeListResponses, "집중시간 통계 조회에 성공했습니다.", 200);
     }
 
+    @Transactional(readOnly = true)
     public CommonResponseDto<?> findFocusTimeListByEmailAndYearAndMonth(String email, int year, int month){
         Long userId = getUserByEmail(email).getId();
         if(!(1 <= month && month <= 12)){
@@ -153,6 +160,7 @@ public class OneDaysService {
         return new CommonResponseDto<>(responseData, "캘린더 데이터 조회에 성공했습니다.", 200);
     }
 
+    @Transactional(readOnly = true)
     public CommonResponseDto<?> findTimeGoalByEmailAndPeriod(String email, String period) {
         Long userId = getUserByEmail(email).getId();
         if (!List.of("day", "week", "month").contains(period)) {
@@ -210,6 +218,7 @@ public class OneDaysService {
         return new CommonResponseDto<>(timeGoalResponse, "정상적으로 목표 시간이 수정되었습니다.", 200);
     }
 
+    @Transactional(readOnly = true)
     public CommonResponseDto<?> findFocusTimePercentByEmail(String email) {
         Long userId = getUserByEmail(email).getId();
         LocalDate today = LocalDate.now(ZoneId.of("Asia/Seoul"));
@@ -284,6 +293,7 @@ public class OneDaysService {
         return 100;
     }
 
+    @Transactional(readOnly = true)
     public int findTodayTotalFocusTimeByUserIdAndDateData(Long userId, LocalDate today){
         Users user = usersRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
@@ -302,6 +312,7 @@ public class OneDaysService {
         }
     }
 
+    @Transactional(readOnly = true)
     private Users getUserByEmail(String email) {
         return usersRepository.findByEmail(email)
                 .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
@@ -314,6 +325,7 @@ public class OneDaysService {
         return String.format("%02d:%02d:%02d", hours, minutes, seconds);
     }
 
+    @Transactional(readOnly = true)
     private int getTotalFocusTime(Long userId, LocalDate startDate, LocalDate endDate) {
         List<OneDays> oneDaysList = oneDaysRepository.findByUserIdAndDateDataBetween(userId, startDate, endDate);
         int totalFocusTime = 0;
@@ -323,6 +335,7 @@ public class OneDaysService {
         return totalFocusTime;
     }
 
+    @Transactional(readOnly = true)
     public OneDays findOneDayByUserAndDateData(Users user, LocalDate date){
         return oneDaysRepository.findByUserIdAndDateData(user.getId(), date)
                 .orElseGet(() -> {

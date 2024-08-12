@@ -12,14 +12,14 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
-
 import com.ssafy.top.hourfocustimes.dto.request.HourRequest;
 import com.ssafy.top.onedays.domain.OneDays;
 import com.ssafy.top.users.domain.Users;
-
+import org.springframework.transaction.annotation.Transactional;
 import static com.ssafy.top.global.exception.ErrorCode.*;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class HourFocusTimesService {
 
@@ -84,15 +84,12 @@ public class HourFocusTimesService {
         if (startHour == endHour) {
             HourFocusTimes hourFocusTimes = findHourFocusTimeByOneDays(oneDay, startHour);
             hourFocusTimes.updateFocusTime(endTime - startTime + hourFocusTimes.getFocusTime());
-            hourFocusTimesRepository.save(hourFocusTimes);
         } else {
             HourFocusTimes hourFocusTimeStart = findHourFocusTimeByOneDays(oneDay, startHour);
             hourFocusTimeStart.updateFocusTime((startHour + 1) * 3600 - startTime + hourFocusTimeStart.getFocusTime());
-            hourFocusTimesRepository.save(hourFocusTimeStart);
 
             HourFocusTimes hourFocusTimeEnd = findHourFocusTimeByOneDays(oneDay, endHour);
             hourFocusTimeEnd.updateFocusTime(endTime - endHour * 3600 + hourFocusTimeEnd.getFocusTime());
-            hourFocusTimesRepository.save(hourFocusTimeEnd);
         }
     }
 

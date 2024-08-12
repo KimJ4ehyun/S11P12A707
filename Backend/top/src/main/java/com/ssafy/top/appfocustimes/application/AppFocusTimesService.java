@@ -5,19 +5,18 @@ import com.ssafy.top.appfocustimes.domain.AppFocusTimesRepository;
 import com.ssafy.top.appfocustimes.dto.request.AppNameAndTimeRequest;
 import com.ssafy.top.appfocustimes.dto.request.AppNameRequest;
 import com.ssafy.top.appfocustimes.dto.response.AppListResponse;
-import com.ssafy.top.bans.application.BansService;
 import com.ssafy.top.bans.domain.Bans;
 import com.ssafy.top.bans.domain.BansRepository;
 import com.ssafy.top.global.domain.CommonResponseDto;
 import com.ssafy.top.global.exception.CustomException;
 import com.ssafy.top.hourfocustimes.application.HourFocusTimesService;
-import com.ssafy.top.hourfocustimes.domain.HourFocusTimes;
 import com.ssafy.top.onedays.application.OneDaysService;
 import com.ssafy.top.onedays.domain.OneDays;
 import com.ssafy.top.users.domain.Users;
 import com.ssafy.top.users.domain.UsersRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.LocalDate;
@@ -28,8 +27,9 @@ import java.util.List;
 import java.util.Optional;
 import static com.ssafy.top.global.exception.ErrorCode.*;
 
-@RequiredArgsConstructor
 @Service
+@Transactional
+@RequiredArgsConstructor
 public class AppFocusTimesService {
 
     private final HourFocusTimesService hourFocusTimesService;
@@ -42,6 +42,7 @@ public class AppFocusTimesService {
 
     private final UsersRepository usersRepository;
 
+    @Transactional(readOnly = true)
     public CommonResponseDto<?> findAppFocusTimeListByEmail(String email) {
         List<AppFocusTimes> appFocusTimesList = findAppFocusTimesByEmail(email);
         int totalFocusTime = appFocusTimesList.stream()
@@ -63,6 +64,7 @@ public class AppFocusTimesService {
         return new CommonResponseDto<>(appListResponses, "프로그램별 통계 조회에 성공했습니다.", 200);
     }
 
+    @Transactional(readOnly = true)
     private List<AppFocusTimes> findAppFocusTimesByEmail(String email) {
         Users user = usersRepository.findByEmail(email)
                 .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
@@ -102,15 +104,13 @@ public class AppFocusTimesService {
                 AppFocusTimes prevAppFocusTime = optionalPrevAppFocusTime.get();
                 int focusTime = timeInSeconds - prevAppFocusTime.getStartTime() + prevAppFocusTime.getFocusTime();
                 prevAppFocusTime.updateFocusTime(focusTime);
-                appFocusTimesRepository.save(prevAppFocusTime);
                 Optional<Bans> ban = bansRepository.findByUserIdAndNameAndIsBanTrue(oneDay.getUser().getId(), prevAppName);
                 if (ban.isEmpty()) {
                     hourFocusTimesService.updateFocusTime(oneDay, prevAppFocusTime.getStartTime(), timeInSeconds);
                 }
 
             } else {
-                int appFocusTime = appFocusTimesRepository.findLatestStartTimeByOneDaysIdOrderByFocusTime(oneDay.getId())
-                        .map(AppFocusTimes::getStartTime)
+                int appFocusTime = appFocusTimesRepository.findLatestStartTimeByOneDaysId(oneDay.getId())
                         .orElse(timeInSeconds);
                 AppFocusTimes newAppFocusTime = AppFocusTimes.builder()
                         .app(prevAppName)
@@ -134,7 +134,6 @@ public class AppFocusTimesService {
             if (appFocusTimesOptional.isPresent()) {
                 AppFocusTimes nowAppFocusTimes = appFocusTimesOptional.get();
                 nowAppFocusTimes.updateStartTime(timeInSeconds);
-                appFocusTimesRepository.save(nowAppFocusTimes);
             } else {
                 AppFocusTimes newAppFocusTimes = AppFocusTimes.builder()
                         .app(nowAppName)
