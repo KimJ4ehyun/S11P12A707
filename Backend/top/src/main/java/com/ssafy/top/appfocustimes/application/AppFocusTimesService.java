@@ -104,6 +104,7 @@ public class AppFocusTimesService {
                 AppFocusTimes prevAppFocusTime = optionalPrevAppFocusTime.get();
                 int focusTime = timeInSeconds - prevAppFocusTime.getStartTime() + prevAppFocusTime.getFocusTime();
                 prevAppFocusTime.updateFocusTime(focusTime);
+                prevAppFocusTime.updateStartTime(timeInSeconds);
                 Optional<Bans> ban = bansRepository.findByUserIdAndNameAndIsBanTrue(oneDay.getUser().getId(), prevAppName);
                 if (ban.isEmpty()) {
                     hourFocusTimesService.updateFocusTime(oneDay, prevAppFocusTime.getStartTime(), timeInSeconds);
