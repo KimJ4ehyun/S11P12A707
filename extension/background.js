@@ -105,7 +105,7 @@ function sendLog(prevUrl, currentUrl) {
 
 async function initialize() {
   try {
-    await authenticateUser();
+    // await authenticateUser();
     connect();
   } catch (error) {
     console.error("Initialization failed:", error);
