@@ -23,9 +23,5 @@
       ],
       "matches": ["<all_urls>"]
     }
-  ],
-  "oauth2": {
-    "client_id": "248934322493-gplf6c0t0r9mpah7aocrgugsejfs3t3a.apps.googleusercontent.com",
-    "scopes": ["https://www.googleapis.com/auth/userinfo.email"]
-  }
+  ]
 }
