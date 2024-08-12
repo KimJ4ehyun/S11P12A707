@@ -30,7 +30,8 @@ public class SecurityConfig{
                 .csrf(AbstractHttpConfigurer::disable)
                 .headers((headerConfig) -> headerConfig.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))
 
-                .authorizeHttpRequests((authorizeRequest) -> authorizeRequest.anyRequest().authenticated())
+                .authorizeHttpRequests((authorizeRequest) -> authorizeRequest.requestMatchers("/user/check").permitAll()
+                        .anyRequest().authenticated())
 
                 .oauth2Login(Customizer.withDefaults());
 
