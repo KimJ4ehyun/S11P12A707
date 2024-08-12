@@ -96,15 +96,16 @@ function sendLog(prevUrl, currentUrl) {
   })
     .then((response) => response.json())
     .then((data) => {
-      console.log("Data sent successfully:", data);
+      console.log("데이터 전송 성공:", data);
     })
     .catch((error) => {
-      console.error("Error sending data:", error);
+      console.error("데이터 전송 실패:", error);
     });
 }
 
 async function initialize() {
   try {
+    // authenticateUser();
     connect();
   } catch (error) {
     console.error("Initialization failed:", error);

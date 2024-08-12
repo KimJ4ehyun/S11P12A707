@@ -3,5 +3,5 @@
   "description": "최상단 앱과 URL 추적으로 집중 시간 측정 및 대시보드 제공",
   "path": "native-messaging.bat",
   "type": "stdio",
-  "allowed_origins": ["chrome-extension://jckihcjdfohdkbnfaapkddekkgjheakg/"]
+  "allowed_origins": ["chrome-extension://abbdbmliljafelgflkiklpoohgmpejfp/"]
 }
