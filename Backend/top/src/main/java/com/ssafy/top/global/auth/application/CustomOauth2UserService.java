@@ -149,8 +149,8 @@ public class CustomOauth2UserService implements OAuth2UserService<OAuth2UserRequ
     }
 
     private void initBan(Users user) {
-        String[] names = {"youtube.com", "comic.naver.com", "chatgpt.com", "coupang.com",
-                "netflix.com", "tving.com", "kakaotalk.exe", "mattermost.exe"};
+        String[] names = {"www.youtube.com", "comic.naver.com", "chatgpt.com", "www.coupang.com",
+                "www.netflix.com", "www.tving.com", "kakaotalk.exe", "mattermost.exe"};
 
         List<Bans> bans = new ArrayList<>();
 
