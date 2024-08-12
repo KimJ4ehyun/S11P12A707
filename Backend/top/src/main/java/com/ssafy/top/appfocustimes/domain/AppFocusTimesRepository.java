@@ -13,7 +13,8 @@ public interface AppFocusTimesRepository extends JpaRepository<AppFocusTimes, Lo
 
     Optional<AppFocusTimes> findByOneDaysIdAndApp(Long oneDayId, String app);
 
-    @Query(value = "SELECT * FROM app_focus_times WHERE one_day_id = :oneDaysId ORDER BY start_time DESC LIMIT 1", nativeQuery = true)
-    Optional<AppFocusTimes> findLatestStartTimeByOneDaysIdOrderByFocusTime(@Param("oneDaysId") Long oneDaysId);
+    @Query("SELECT MAX(a.startTime) FROM AppFocusTimes a WHERE a.oneDays.id = :oneDaysId")
+    Optional<Integer> findLatestStartTimeByOneDaysId(@Param("oneDaysId") Long oneDaysId);
+
 
 }
