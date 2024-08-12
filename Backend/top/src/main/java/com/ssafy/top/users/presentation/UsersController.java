@@ -20,7 +20,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.view.RedirectView;
 
 import java.util.List;
 
@@ -134,10 +133,13 @@ public class UsersController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/user/login")
-    public RedirectView login(HttpSession session){
-        RedirectView redirectView = new RedirectView();
-        redirectView.setUrl("https://i11a707.p.ssafy.io");
-        return redirectView;
+    @GetMapping("/user/check")
+    public ResponseEntity<?> login(HttpSession session){
+        Object attribute = session.getAttribute("user");
+        CommonResponseDto<Boolean> response = new CommonResponseDto<>(true, "로그인된 상태", 200);
+        if(attribute==null) {
+            response = new CommonResponseDto<>(false, "로그인 필요", 200);
+        }
+        return ResponseEntity.ok(response);
     }
 }
