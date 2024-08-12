@@ -80,8 +80,8 @@ public class AppFocusTimesService {
 
         OneDays oneDay = oneDaysService.findOneDayByUserAndDateData(user, LocalDate.now(ZoneId.of("Asia/Seoul")));
 
-        String prevAppName = getProcessedAppName(appNameRequest.getPrevAppName());
-        String nowAppName = getProcessedAppName(appNameRequest.getNowAppName());
+        String prevAppName = getProcessedAppName(appNameRequest.getPrevAppName()).toLowerCase();
+        String nowAppName = getProcessedAppName(appNameRequest.getNowAppName()).toLowerCase();
 
         return saveFocusTime(prevAppName, oneDay, nowAppName);
     }
