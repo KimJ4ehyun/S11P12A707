@@ -4,7 +4,7 @@ spring:
       client:
         registration:
           google:
-            redirect-uri: "https://i11a707.p.ssafy.io/api/login/oauth2/code/google"
+            redirect-uri: "https://i11a707.p.ssafy.io"
 #            redirect-uri: "http://localhost:8083/api/login/oauth2/code/google"
 #            redirect-uri: "https://i11a707.p.ssafy.io/api/oauth2/callback/google"
             client-id: ${CLIENT_ID}

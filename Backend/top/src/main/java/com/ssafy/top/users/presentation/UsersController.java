@@ -142,4 +142,10 @@ public class UsersController {
         }
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/user/login")
+    public ResponseEntity<?> login(){
+        CommonResponseDto<Boolean> response = new CommonResponseDto<>(true, "로그인 성공", 200);
+        return ResponseEntity.ok(response);
+    }
 }
