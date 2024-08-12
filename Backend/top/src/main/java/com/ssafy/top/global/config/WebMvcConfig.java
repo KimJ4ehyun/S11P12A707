@@ -13,8 +13,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
                 .allowedOrigins("*")
                 // GET, POST, PATCH, DELETE, OPTIONS 메서드 허용
                 .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
-                .allowedHeaders("*")
-                .allowCredentials(true)
+                .allowedHeaders("Content-Type", "x-requested-with","Authorization","Access-Control-Allow-Origin")
                 .maxAge(3600);
     }
 }
