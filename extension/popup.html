@@ -1,52 +1,79 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="utf-8">
+    <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <!-- Font Awesome -->
-     <link rel="stylesheet" href="node_modules/@fortawesome/fontawesome-free/css/all.min.css">
-     
-     <!-- bootstrap css, js -->
-     <link rel="stylesheet" href="node_modules/bootstrap/dist/css/bootstrap.min.css">
-     <script src="node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-     
-     
-     <!-- livekit-client -->
-     <script src="node_modules/livekit-client/dist/livekit-client.umd.js"></script>
-     
-     <link rel="stylesheet" href="popup.css">
-     <script type="module" src="popup.js"></script>
-    </head>
-    
-    <body>
-        <!-- <div id="response"></div> -->
-        <main>
-            <a type="button" class="btn btn-outline-primary" id="dashboard-link" href="https://i11a707.p.ssafy.io/">Dashboard</a>
-            <div id="join">
-                <div id="join-dialog">
-                    <h3 id="top-share">Top Share</h3>
-                    <form onsubmit="joinRoom(); return false">
-                        <div>
-                            <label for="participant-name">닉네임</label>
-                            <input id="participant-name" class="form-control" type="text" required />
-                        </div>
-                        <div>
-                            <label for="room-name">room key</label>
-                        <input id="room-name" class="form-control" type="text" required />
-                    </div>
-                    <button id="join-button" class="btn btn-lg btn-primary" type="submit">참가하기</button>
-                </form>
-            </div>
-        </div>
+    <link
+      rel="stylesheet"
+      href="node_modules/@fortawesome/fontawesome-free/css/all.min.css"
+    />
 
-        <div id="room" hidden>
-            <div id="room-header">
-                <h2 id="room-title"></h2>
-                <button class="btn btn-danger" id="leave-room-button" onclick="leaveRoom()">떠나기</button>
+    <!-- bootstrap css, js -->
+    <link
+      rel="stylesheet"
+      href="node_modules/bootstrap/dist/css/bootstrap.min.css"
+    />
+    <script src="node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- livekit-client -->
+    <script src="node_modules/livekit-client/dist/livekit-client.umd.js"></script>
+
+    <link rel="stylesheet" href="popup.css" />
+    <script type="module" src="popup.js"></script>
+  </head>
+
+  <body>
+    <!-- <div id="response"></div> -->
+    <main>
+      <a
+        type="button"
+        class="btn btn-outline-primary"
+        id="dashboard-link"
+        href="https://i11a707.p.ssafy.io/api/user/login"
+        >Dashboard</a
+      >
+      <div id="join">
+        <div id="join-dialog">
+          <h3 id="top-share">Top Share</h3>
+          <form onsubmit="joinRoom(); return false">
+            <div>
+              <label for="participant-name">닉네임</label>
+              <input
+                id="participant-name"
+                class="form-control"
+                type="text"
+                required
+              />
             </div>
-            <div id="layout-container"></div>
+            <div>
+              <label for="room-name">room key</label>
+              <input id="room-name" class="form-control" type="text" required />
+            </div>
+            <button
+              id="join-button"
+              class="btn btn-lg btn-primary"
+              type="submit"
+            >
+              참가하기
+            </button>
+          </form>
         </div>
+      </div>
+
+      <div id="room" hidden>
+        <div id="room-header">
+          <h2 id="room-title"></h2>
+          <button
+            class="btn btn-danger"
+            id="leave-room-button"
+            onclick="leaveRoom()"
+          >
+            떠나기
+          </button>
+        </div>
+        <div id="layout-container"></div>
+      </div>
     </main>
-
-</body>
+  </body>
 </html>
