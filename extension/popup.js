@@ -73,33 +73,7 @@ async function joinRoom() {
         console.log("There was an error connecting to the room:", error.message);
         await leaveRoom();
     }
-  try {
-    // Get the room name and participant name from the form
-    const roomName = document.getElementById("room-name").value;
-    const userName = document.getElementById("participant-name").value;
-
-    // Get a token from your application server with the room name and participant name
-    const token = await getToken(roomName, userName);
-
-    // Connect to the room with the LiveKit URL and the token
-    await room.connect(LIVEKIT_URL, token);
-
-    // Hide the 'Join room' page and show the 'Room' page
-    document.getElementById("room-title").innerText = roomName;
-    document.getElementById("join").hidden = true;
-    document.getElementById("room").hidden = false;
-
-    // Publish your camera and microphone
-    await room.localParticipant.enableCameraAndMicrophone();
-    const localVideoTrack = room.localParticipant.videoTrackPublications
-      .values()
-      .next().value.track;
-    addTrack(localVideoTrack, userName, true);
-  } catch (error) {
-    console.log("There was an error connecting to the room:", error.message);
-    await leaveRoom();
   }
-}
 
 function addTrack(track, participantIdentity, local = false) {
   const element = track.attach();
@@ -141,11 +115,18 @@ window.onbeforeunload = () => {
 
 window.onload = generateFormValues;
 
-function generateFormValues() {
-    const participantName = getUserInfo();
-    console.log(participantName);
-    document.getElementById("room-name").value = "Test Room";
-    document.getElementById("participant-name").value = participantName.value;
+async function generateFormValues() {
+    try {
+        const data = await getUserInfo(); // getUserInfo가 반환하는 Promise를 기다림
+        const participantName = data.data.nickname; // data에서 participantName 추출
+
+        // 폼 필드에 값을 설정
+        document.getElementById("room-name").value = "Test Room";
+        document.getElementById("participant-name").value = participantName;
+
+    } catch (error) {
+        console.log('generateFormValues 안됨: ', error); // 오류 처리
+    }
 }
 
 function createVideoContainer(participantIdentity, local = false) {
@@ -220,12 +201,8 @@ async function getUserInfo() {
         if (!response.ok) {
             throw new Error('Network response was not ok');
         }
-        // .then(
         const data = await response.json(); // 응답 본문을 JSON으로 파싱
-        const participantName = data.data.nickname;
-        console.log(participantName);
-        return participantName; // 파싱된 데이터를 반환
-        // )
+        return data; // 파싱된 데이터를 반환
     } catch (error) {
         console.log('getUserInfo 안됨: ', error); // 오류를 콘솔에 출력
         throw error; // 필요하다면 오류를 다시 던져서 호출자에게 알림

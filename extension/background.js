@@ -1,40 +1,14 @@
 let port = null;
 let previousUrl = null;
 
-async function authenticateUser() {
-  return new Promise((resolve, reject) => {
-    chrome.identity.getAuthToken({ interactive: true }, function (token) {
-      if (chrome.runtime.lastError || !token) {
-        console.error(chrome.runtime.lastError);
-        return reject(chrome.runtime.lastError);
-      }
-
-      fetch("https://www.googleapis.com/oauth2/v1/userinfo?alt=json", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-        .then((response) => response.json())
-        .then((userInfo) => {
-          console.log(`User Email: ${userInfo.email}`);
-          chrome.storage.local.set({ userInfo });
-          resolve();
-        })
-        .catch((error) => {
-          console.error("Failed to get user info:", error);
-          reject(error);
-        });
-    });
-  });
-}
-
 function connect() {
   const hostName = "com.google.chrome.top";
-  console.log("Connecting to native messaging host " + hostName);
+  console.log("Connecting to native messaging host" + hostName);
   port = chrome.runtime.connectNative(hostName);
   port.onMessage.addListener(onNativeMessage);
   port.onDisconnect.addListener(onDisconnected);
 
+  // 현재 활성 탭의 URL을 previousUrl에 저장
   chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
     if (tabs.length > 0) {
       previousUrl = tabs[0].url;
@@ -43,14 +17,12 @@ function connect() {
 }
 
 function onNativeMessage(message) {
-  let { prevAppName, nowAppName } = message;
-
+  let prevAppName = message["prevAppName"];
+  let nowAppName = message["nowAppName"];
   if (nowAppName === "chrome.exe") {
     chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
       if (tabs.length > 0) {
         nowAppName = tabs[0].url;
-        sendLog(previousUrl, nowAppName);
-        previousUrl = nowAppName;
       }
     });
   } else if (prevAppName === "chrome.exe") {
