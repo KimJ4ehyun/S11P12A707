@@ -132,4 +132,11 @@ public class UsersController {
 
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/user/login")
+    public ResponseEntity<?> login(HttpSession session){
+        SessionUser sessionUser = (SessionUser) session.getAttribute("user");
+        CommonResponseDto<String> response = new CommonResponseDto<>("로그인 성공: "+sessionUser.getEmail(), 200);
+        return ResponseEntity.ok(response);
+    }
 }
