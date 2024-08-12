@@ -1,25 +1,24 @@
 var APPLICATION_SERVER_URL = "https://i11a707.p.ssafy.io/ov-server/";
 var LIVEKIT_URL = "wss://i11a707.p.ssafy.io:4443";
-configureUrls();
 
-document.addEventListener("DOMContentLoaded", () => {
-  // document.getElementById("join-button").addEventListener("click", joinRoom);
-  const leave_button = document.getElementById("leave-room-button");
-  const form = document.getElementById("form");
-  form.onsubmit = function (event) {
-    event.preventDefault();
-    joinRoom();
-    return false;
-  };
-  leave_button.onclick = function () {
-    leaveRoom();
-  };
-
-  generateFormValues();
-});
 
 const LivekitClient = window.LivekitClient;
 var room;
+
+// 각종 이벤트 리스너
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById("dashboard-link").addEventListener("click", godashboard);
+    document.getElementById("join-button").addEventListener("click", joinRoom);
+    document.getElementById("leave-room-button").addEventListener("click", leaveRoom);
+    
+    generateFormValues();
+});
+
+function godashboard(event) {
+    event.preventDefault(); // 기본 링크 동작을 방지합니다.
+    const href = this.getAttribute('href'); // 'href' 속성을 가져옵니다.
+    chrome.tabs.create({ url: href }); // 새 탭에서 링크를 엽니다.
+}
 
 function configureUrls() {}
 
@@ -53,6 +52,27 @@ async function joinRoom() {
     }
   );
 
+    try {
+        // Get the room name and participant name from the form
+        const roomName = document.getElementById("room-name").value;
+        const userName = document.getElementById("participant-name").value;
+        // Get a token from your application server with the room name and participant name
+        const token = await getToken(roomName, userName);
+        // Connect to the room with the LiveKit URL and the token
+        await room.connect(LIVEKIT_URL, token);
+        // Hide the 'Join room' page and show the 'Room' page
+        document.getElementById("room-title").innerText = roomName;
+        document.getElementById("join").hidden = true;
+        document.getElementById("room").hidden = false;
+        // Publish your camera and microphone
+        await room.localParticipant.enableCameraAndMicrophone();
+        const localVideoTrack = room.localParticipant.videoTrackPublications.values().next().value.track;
+
+        addTrack(localVideoTrack, userName, true);
+    } catch (error) {
+        console.log("There was an error connecting to the room:", error.message);
+        await leaveRoom();
+    }
   try {
     // Get the room name and participant name from the form
     const roomName = document.getElementById("room-name").value;
@@ -122,9 +142,10 @@ window.onbeforeunload = () => {
 window.onload = generateFormValues;
 
 function generateFormValues() {
-  document.getElementById("room-name").value = "Test Room";
-  document.getElementById("participant-name").value =
-    "Participant" + Math.floor(Math.random() * 100);
+    const participantName = getUserInfo();
+    console.log(participantName);
+    document.getElementById("room-name").value = "Test Room";
+    document.getElementById("participant-name").value = participantName.value;
 }
 
 function createVideoContainer(participantIdentity, local = false) {
@@ -182,4 +203,31 @@ async function getToken(roomName, participantName) {
 
   const token = await response.json();
   return token.token;
+}
+
+// 내 정보 불러오기
+var DEFAULT_URL = "https://i11a707.p.ssafy.io/api";
+
+async function getUserInfo() {
+    try {
+        const response = await fetch(DEFAULT_URL + "/user", {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json"
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        // .then(
+        const data = await response.json(); // 응답 본문을 JSON으로 파싱
+        const participantName = data.data.nickname;
+        console.log(participantName);
+        return participantName; // 파싱된 데이터를 반환
+        // )
+    } catch (error) {
+        console.log('getUserInfo 안됨: ', error); // 오류를 콘솔에 출력
+        throw error; // 필요하다면 오류를 다시 던져서 호출자에게 알림
+    }
 }
