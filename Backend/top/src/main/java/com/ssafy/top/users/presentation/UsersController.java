@@ -20,6 +20,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.view.RedirectView;
 
 import java.util.List;
 
@@ -134,9 +135,9 @@ public class UsersController {
     }
 
     @GetMapping("/user/login")
-    public ResponseEntity<?> login(HttpSession session){
-        SessionUser sessionUser = (SessionUser) session.getAttribute("user");
-        CommonResponseDto<String> response = new CommonResponseDto<>("로그인 성공: "+sessionUser.getEmail(), 200);
-        return ResponseEntity.ok(response);
+    public RedirectView login(HttpSession session){
+        RedirectView redirectView = new RedirectView();
+        redirectView.setUrl("https://i11a707.p.ssafy.io");
+        return redirectView;
     }
 }
