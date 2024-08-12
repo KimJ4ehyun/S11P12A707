@@ -24,11 +24,11 @@ public class WidgetsService {
     private final WidgetsRepository widgetsRepository;
 
     @Transactional(readOnly = true)
-    public CommonResponseDto<?> getWidgets(Long userId) {
-        Users user = usersRepository.findById(userId)
+    public CommonResponseDto<?> getWidgets(String email) {
+        Users user = usersRepository.findByEmail(email)
                 .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
 
-        List<WidgetsDto> widgets = widgetsRepository.findAllByUserId(userId)
+        List<WidgetsDto> widgets = widgetsRepository.findAllByUserId(user.getId())
                 .stream()
                 .map(WidgetsDto::toDto)
                 .toList();
@@ -36,11 +36,11 @@ public class WidgetsService {
         return new CommonResponseDto<>(widgets, "위젯 조회에 성공했습니다.", 200);
     }
 
-    public CommonResponseDto<?> saveWidgets(Long userId, List<WidgetsDto> widgets) {
-        Users user = usersRepository.findById(userId)
+    public CommonResponseDto<?> saveWidgets(String email, List<WidgetsDto> widgets) {
+        Users user = usersRepository.findByEmail(email)
                 .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
 
-        widgetsRepository.deleteAllByUserId(userId);
+        widgetsRepository.deleteAllByUserId(user.getId());
 
         List<Widgets> saveWidgets = widgets
                 .stream()

@@ -1,5 +1,6 @@
 package com.ssafy.top.widgets.presentation;
 
+import com.ssafy.top.global.auth.domain.SessionUser;
 import com.ssafy.top.global.domain.CommonResponseDto;
 import com.ssafy.top.users.dto.response.UsersResponse;
 import com.ssafy.top.widgets.application.WidgetsService;
@@ -10,6 +11,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -31,10 +33,10 @@ public class WidgetsController {
                     content = @Content(schema = @Schema(implementation = WidgetsDto.class))),
     })
     @GetMapping
-    public ResponseEntity<?> getWidgets() {
-        Long userId = 1L;
+    public ResponseEntity<?> getWidgets(HttpSession session) {
+        SessionUser sessionUser = (SessionUser) session.getAttribute("user");
 
-        CommonResponseDto<?> response = widgetsService.getWidgets(userId);
+        CommonResponseDto<?> response = widgetsService.getWidgets(sessionUser.getEmail());
 
         return ResponseEntity.ok(response);
     }
@@ -46,10 +48,10 @@ public class WidgetsController {
                     description = "위젯 저장 성공")
     })
     @PostMapping
-    public ResponseEntity<?> saveWidgets(@RequestBody List<WidgetsDto> widgets) {
-        Long userId = 1L;
+    public ResponseEntity<?> saveWidgets(HttpSession session, @RequestBody List<WidgetsDto> widgets) {
+        SessionUser sessionUser = (SessionUser) session.getAttribute("user");
 
-        CommonResponseDto<?> response = widgetsService.saveWidgets(userId, widgets);
+        CommonResponseDto<?> response = widgetsService.saveWidgets(sessionUser.getEmail(), widgets);
 
         return ResponseEntity.ok(response);
     }
