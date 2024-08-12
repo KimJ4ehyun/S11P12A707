@@ -7,44 +7,9 @@ body {
     height: 600px;
     margin: 0;
     padding: 0;
-    padding-top: 50px;
     display: flex;
     flex-direction: column;
     height: 100%;
-}
-
-header {
-    height: 50px;
-    width: 100%;
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: 1;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 30px;
-    background-color: #4d4d4d;
-}
-
-header h1 {
-    margin: 0;
-    font-size: 1.5em;
-    font-weight: bold;
-}
-
-header a {
-    color: #ccc;
-    text-decoration: none;
-}
-
-header a:hover {
-    color: #a9a9a9;
-}
-
-header i {
-    padding: 5px 5px;
-    font-size: 2em;
 }
 
 main {
@@ -87,6 +52,12 @@ main {
     font-size: 20px;
 }
 
+#top-share{
+    font-weight: bold;
+    font-size: 30px;
+    color: #0088aa;
+}
+
 .form-control {
     width: 100%;
     padding: 8px;
@@ -120,6 +91,11 @@ main {
 .btn-success:hover {
     background-color: #1abd61;
     border-color: #1abd61;
+}
+
+#dashboard-link {
+    font-weight: bold;
+    font-size: 20px;
 }
 
 #room {

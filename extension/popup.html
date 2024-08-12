@@ -21,20 +21,20 @@
     <body>
         <!-- <div id="response"></div> -->
         <main>
-            <a id="dashboard-link" href="https://i11a707.p.ssafy.io/" crossorigin="anonymous">Dashboard</a>
+            <a type="button" class="btn btn-outline-primary" id="dashboard-link" href="https://i11a707.p.ssafy.io/">Dashboard</a>
             <div id="join">
                 <div id="join-dialog">
-                    <h3>Temo</h3>
+                    <h3 id="top-share">Top Share</h3>
                     <form onsubmit="joinRoom(); return false">
                         <div>
-                            <label for="participant-name">유저</label>
+                            <label for="participant-name">닉네임</label>
                             <input id="participant-name" class="form-control" type="text" required />
                         </div>
                         <div>
-                            <label for="room-name">방 제목</label>
+                            <label for="room-name">room key</label>
                         <input id="room-name" class="form-control" type="text" required />
                     </div>
-                    <button id="join-button" class="btn btn-lg btn-success" type="submit">참가하기</button>
+                    <button id="join-button" class="btn btn-lg btn-primary" type="submit">참가하기</button>
                 </form>
             </div>
         </div>
