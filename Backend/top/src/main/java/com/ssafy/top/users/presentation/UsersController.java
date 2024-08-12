@@ -18,6 +18,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,6 +26,7 @@ import java.util.List;
 
 @Tag(name = "사용자 관련 API", description = "사용자에 관련된 API")
 @RestController
+@Slf4j
 @RequiredArgsConstructor
 public class UsersController {
 
@@ -136,6 +138,7 @@ public class UsersController {
     @GetMapping("/user/check")
     public ResponseEntity<?> login(HttpSession session){
         Object attribute = session.getAttribute("user");
+        log.info("{}", attribute);
         CommonResponseDto<Boolean> response = new CommonResponseDto<>(true, "로그인된 상태", 200);
         if(attribute==null) {
             response = new CommonResponseDto<>(false, "로그인 필요", 200);
