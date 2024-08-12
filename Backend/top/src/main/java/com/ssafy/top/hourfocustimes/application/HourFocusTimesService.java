@@ -70,8 +70,17 @@ public class HourFocusTimesService {
 
     public void updateFocusTime(OneDays oneDay, int startTime, int endTime){
         if(startTime < 0) startTime += 3600 * 24;
+        if(endTime < 0) endTime += 3600 * 24;
+
+        if (startTime > endTime) {
+            updateFocusTime(oneDay, startTime, 3600 * 24);
+            updateFocusTime(oneDay, 0, endTime);
+            return;
+        }
+
         int startHour = startTime / 3600;
         int endHour = endTime / 3600;
+
         if (startHour == endHour) {
             HourFocusTimes hourFocusTimes = findHourFocusTimeByOneDays(oneDay, startHour);
             hourFocusTimes.updateFocusTime(endTime - startTime + hourFocusTimes.getFocusTime());
@@ -85,7 +94,6 @@ public class HourFocusTimesService {
             hourFocusTimeEnd.updateFocusTime(endTime - endHour * 3600 + hourFocusTimeEnd.getFocusTime());
             hourFocusTimesRepository.save(hourFocusTimeEnd);
         }
-
     }
 
     public HourFocusTimes findHourFocusTimeByOneDays(OneDays oneDay, int hour){
