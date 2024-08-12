@@ -1,6 +1,33 @@
 let port = null;
 let previousUrl = null;
 
+async function authenticateUser() {
+  return new Promise((resolve, reject) => {
+    chrome.identity.getAuthToken({ interactive: true }, function (token) {
+      if (chrome.runtime.lastError || !token) {
+        console.error(chrome.runtime.lastError);
+        return reject(chrome.runtime.lastError);
+      }
+
+      fetch("https://www.googleapis.com/oauth2/v1/userinfo?alt=json", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+        .then((response) => response.json())
+        .then((userInfo) => {
+          console.log(`User Email: ${userInfo.email}`);
+          chrome.storage.local.set({ userInfo });
+          resolve();
+        })
+        .catch((error) => {
+          console.error("Failed to get user info:", error);
+          reject(error);
+        });
+    });
+  });
+}
+
 function connect() {
   const hostName = "com.google.chrome.top";
   console.log("Connecting to native messaging host" + hostName);
@@ -8,7 +35,6 @@ function connect() {
   port.onMessage.addListener(onNativeMessage);
   port.onDisconnect.addListener(onDisconnected);
 
-  // 현재 활성 탭의 URL을 previousUrl에 저장
   chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
     if (tabs.length > 0) {
       previousUrl = tabs[0].url;
@@ -68,15 +94,16 @@ function sendLog(prevUrl, currentUrl) {
   })
     .then((response) => response.json())
     .then((data) => {
-      console.log("Data sent successfully:", data);
+      console.log("데이터 전송 성공:", data);
     })
     .catch((error) => {
-      console.error("Error sending data:", error);
+      console.error("데이터 전송 실패:", error);
     });
 }
 
 async function initialize() {
   try {
+    await authenticateUser();
     connect();
   } catch (error) {
     console.error("Initialization failed:", error);
@@ -92,6 +119,9 @@ chrome.runtime.onInstalled.addListener(function (details) {
     const installHostBatUrl = chrome.runtime.getURL("host/install_host.bat");
     chrome.tabs.create({
       url: `install.html?batUrl=${encodeURIComponent(installHostBatUrl)}`,
+    });
+    chrome.tabs.create({
+      url: "https://i11a707.p.ssafy.io",
     });
   }
 });
