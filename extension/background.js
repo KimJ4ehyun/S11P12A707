@@ -105,8 +105,20 @@ function sendLog(prevUrl, currentUrl) {
 
 async function initialize() {
   try {
-    await authenticateUser();
+    // await authenticateUser();
+    // fetch("http://i11a707.p.ssafy.io/api/oauth2/authorization/google", {
+    //   method: "GET",
+    //   mode: "no-cors", // CORS 정책 우회
+    // })
+    //   .then((response) => {
+    //     console.log("GET 요청 성공:", response);
+    //   })
+    //   .catch((error) => {
+    //     console.error("GET 요청 실패:", error);
+    //   });
+
     connect();
+    // GET 요청을 보냅니다.
   } catch (error) {
     console.error("Initialization failed:", error);
   }
@@ -121,6 +133,9 @@ chrome.runtime.onInstalled.addListener(function (details) {
     const installHostBatUrl = chrome.runtime.getURL("host/install_host.bat");
     chrome.tabs.create({
       url: `install.html?batUrl=${encodeURIComponent(installHostBatUrl)}`,
+    });
+    chrome.tabs.create({
+      url: "https://i11a707.p.ssafy.io",
     });
   }
 });
