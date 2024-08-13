@@ -1,23 +1,26 @@
 var APPLICATION_SERVER_URL = "https://i11a707.p.ssafy.io/ov-server/";
 var LIVEKIT_URL = "wss://i11a707.p.ssafy.io:4443";
 
-
 const LivekitClient = window.LivekitClient;
 var room;
 
 // 각종 이벤트 리스너
-document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById("dashboard-link").addEventListener("click", godashboard);
-    document.getElementById("join-button").addEventListener("click", joinRoom);
-    document.getElementById("leave-room-button").addEventListener("click", leaveRoom);
-    
-    generateFormValues();
+document.addEventListener("DOMContentLoaded", () => {
+  document
+    .getElementById("dashboard-link")
+    .addEventListener("click", godashboard);
+  document.getElementById("join-button").addEventListener("click", joinRoom);
+  document
+    .getElementById("leave-room-button")
+    .addEventListener("click", leaveRoom);
+
+  generateFormValues();
 });
 
 function godashboard(event) {
-    event.preventDefault(); // 기본 링크 동작을 방지합니다.
-    const href = this.getAttribute('href'); // 'href' 속성을 가져옵니다.
-    chrome.tabs.create({ url: href }); // 새 탭에서 링크를 엽니다.
+  event.preventDefault(); // 기본 링크 동작을 방지합니다.
+  const href = this.getAttribute("href"); // 'href' 속성을 가져옵니다.
+  chrome.tabs.create({ url: href }); // 새 탭에서 링크를 엽니다.
 }
 
 function configureUrls() {}
@@ -52,28 +55,30 @@ async function joinRoom() {
     }
   );
 
-    try {
-        // Get the room name and participant name from the form
-        const roomName = document.getElementById("room-name").value;
-        const userName = document.getElementById("participant-name").value;
-        // Get a token from your application server with the room name and participant name
-        const token = await getToken(roomName, userName);
-        // Connect to the room with the LiveKit URL and the token
-        await room.connect(LIVEKIT_URL, token);
-        // Hide the 'Join room' page and show the 'Room' page
-        document.getElementById("room-title").innerText = roomName;
-        document.getElementById("join").hidden = true;
-        document.getElementById("room").hidden = false;
-        // Publish your camera and microphone
-        await room.localParticipant.enableCameraAndMicrophone();
-        const localVideoTrack = room.localParticipant.videoTrackPublications.values().next().value.track;
+  try {
+    // Get the room name and participant name from the form
+    const roomName = document.getElementById("room-name").value;
+    const userName = document.getElementById("participant-name").value;
+    // Get a token from your application server with the room name and participant name
+    const token = await getToken(roomName, userName);
+    // Connect to the room with the LiveKit URL and the token
+    await room.connect(LIVEKIT_URL, token);
+    // Hide the 'Join room' page and show the 'Room' page
+    document.getElementById("room-title").innerText = roomName;
+    document.getElementById("join").hidden = true;
+    document.getElementById("room").hidden = false;
+    // Publish your camera and microphone
+    await room.localParticipant.enableCameraAndMicrophone();
+    const localVideoTrack = room.localParticipant.videoTrackPublications
+      .values()
+      .next().value.track;
 
-        addTrack(localVideoTrack, userName, true);
-    } catch (error) {
-        console.log("There was an error connecting to the room:", error.message);
-        await leaveRoom();
-    }
+    addTrack(localVideoTrack, userName, true);
+  } catch (error) {
+    console.log("There was an error connecting to the room:", error.message);
+    await leaveRoom();
   }
+}
 
 function addTrack(track, participantIdentity, local = false) {
   const element = track.attach();
@@ -113,20 +118,19 @@ window.onbeforeunload = () => {
   room?.disconnect();
 };
 
-window.onload = generateFormValues;
+// window.onload = generateFormValues;
 
 async function generateFormValues() {
-    try {
-        const data = await getUserInfo(); // getUserInfo가 반환하는 Promise를 기다림
-        const participantName = data.data.nickname; // data에서 participantName 추출
+  try {
+    const data = await getUserInfo(); // getUserInfo가 반환하는 Promise를 기다림
+    const participantName = data.data.nickname; // data에서 participantName 추출
 
-        // 폼 필드에 값을 설정
-        document.getElementById("room-name").value = "Test Room";
-        document.getElementById("participant-name").value = participantName;
-
-    } catch (error) {
-        console.log('generateFormValues 안됨: ', error); // 오류 처리
-    }
+    // 폼 필드에 값을 설정
+    document.getElementById("room-name").value = "Test Room";
+    document.getElementById("participant-name").value = participantName;
+  } catch (error) {
+    console.log("generateFormValues 안됨: ", error); // 오류 처리
+  }
 }
 
 function createVideoContainer(participantIdentity, local = false) {
@@ -190,21 +194,21 @@ async function getToken(roomName, participantName) {
 var DEFAULT_URL = "https://i11a707.p.ssafy.io/api";
 
 async function getUserInfo() {
-    try {
-        const response = await fetch(DEFAULT_URL + "/user", {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json"
-            },
-        });
+  try {
+    const response = await fetch(DEFAULT_URL + "/user", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
 
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        const data = await response.json(); // 응답 본문을 JSON으로 파싱
-        return data; // 파싱된 데이터를 반환
-    } catch (error) {
-        console.log('getUserInfo 안됨: ', error); // 오류를 콘솔에 출력
-        throw error; // 필요하다면 오류를 다시 던져서 호출자에게 알림
+    if (!response.ok) {
+      throw new Error("Network response was not ok");
     }
+    const data = await response.json(); // 응답 본문을 JSON으로 파싱
+    return data; // 파싱된 데이터를 반환
+  } catch (error) {
+    console.log("getUserInfo 안됨: ", error); // 오류를 콘솔에 출력
+    throw error; // 필요하다면 오류를 다시 던져서 호출자에게 알림
+  }
 }
