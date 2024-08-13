@@ -1,4 +1,4 @@
-package com.ssafy.top.onedays.dto.response;
+package com.ssafy.top.appfocustimes.dto.response;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;

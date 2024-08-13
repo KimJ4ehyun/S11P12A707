@@ -1,4 +1,4 @@
-package com.ssafy.top.onedays.dto.response;
+package com.ssafy.top.appfocustimes.dto.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AccessLevel;
@@ -6,15 +6,15 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@Schema(description = "캘린더 집중 시간 통계 조회 응답 DTO")
+@Schema(description = "스트릭에 사용되는 집중시간 응답 DTO")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class FocusTimeListCalendarResponse {
+public class FocusTimeListResponse {
 
     @Schema(description = "해당되는 일자")
-    private int day;
+    private String day;
 
-    @Schema(description = "해당 일자의 집중 시간")
+    @Schema(description = "집중 시간")
     private int focusTime;
 }
