@@ -1,6 +1,6 @@
 let port = null;
 let previousUrl = null;
-let previousTimestamp = null;
+let previousTimestamp = new Date().getTime();
 
 function connect() {
   try {
