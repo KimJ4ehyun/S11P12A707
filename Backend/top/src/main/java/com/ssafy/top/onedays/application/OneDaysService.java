@@ -57,8 +57,8 @@ public class OneDaysService {
             lastEndDay = lastStartDay.with(TemporalAdjusters.lastDayOfMonth());
         }
 
-        totalFocusTime += getTotalFocusTime(userId, today, yesterday);
-        int lastTotalFocusTime = getTotalFocusTime(userId, lastStartDay, lastEndDay);
+        totalFocusTime += oneDaysRepository.findTotalFocusTimeByUserIdAndDateDataBetween(userId, today, yesterday);
+        int lastTotalFocusTime = oneDaysRepository.findTotalFocusTimeByUserIdAndDateDataBetween(userId, lastStartDay, lastEndDay);
 
         PeriodTotalFocusTimeResponse totalFocusTimeResponse =
                 new PeriodTotalFocusTimeResponse(formatTime(totalFocusTime), formatTime(lastTotalFocusTime));
@@ -69,13 +69,8 @@ public class OneDaysService {
     public CommonResponseDto<?> findWholeTotalFocusTimeByEmail(String email){
 
         Long userId = getUserByEmail(email).getId();
-        LocalDate today = LocalDate.now(ZoneId.of("Asia/Seoul"));
 
-        // 오늘 꺼는 app_focus_times 에서 따로 계산
-        int totalFocusTime = findTodayTotalFocusTimeByUserIdAndDateData(userId, today);
-
-        // one_Days에서 이전 날짜의 합 계산, 오늘 꺼는 0으로 표시되기 때문에 상관 x
-        totalFocusTime += oneDaysRepository.findWholeTotalFocusTimeByUserIdExcludingToday(userId, today);
+        int totalFocusTime = oneDaysRepository.findWholeTotalFocusTimeByUserIdExcludingToday(userId);
 
         TotalFocusTimeResponse totalFocusTimeResponse = new TotalFocusTimeResponse(formatTime(totalFocusTime));
 
@@ -312,15 +307,6 @@ public class OneDaysService {
         int minutes = (totalSeconds % 3600) / 60;
         int seconds = totalSeconds % 60;
         return String.format("%02d:%02d:%02d", hours, minutes, seconds);
-    }
-
-    private int getTotalFocusTime(Long userId, LocalDate startDate, LocalDate endDate) {
-        List<OneDays> oneDaysList = oneDaysRepository.findByUserIdAndDateDataBetween(userId, startDate, endDate);
-        int totalFocusTime = 0;
-        for (OneDays oneDays : oneDaysList) {
-            totalFocusTime += oneDays.getFocusTime();
-        }
-        return totalFocusTime;
     }
 
     public OneDays findOneDayByUserAndDateData(Users user, LocalDate date){

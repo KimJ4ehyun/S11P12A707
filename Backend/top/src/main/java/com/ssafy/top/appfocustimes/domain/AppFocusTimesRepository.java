@@ -12,21 +12,19 @@ import java.util.Optional;
 
 public interface AppFocusTimesRepository extends JpaRepository<AppFocusTimes, Long> {
 
-    List<AppFocusTimes> findByOneDaysIdAndApp(Long oneDayId, String app);
-
     Optional<AppFocusTimes> findByOneDaysIdAndTimeUnitAndApp(Long id, int timeUnit, String app);
-
-    Optional<AppFocusTimes> findByOneDaysAndTimeUnit(OneDays oneDays, int timeUnit);
 
     @Query("SELECT a.timeUnit, COALESCE(SUM(a.focusTime), 0) " +
             "FROM AppFocusTimes a " +
-            "WHERE a.oneDays.id = :oneDayId " +
+            "LEFT JOIN Bans b ON b.name = a.app " +
+            "WHERE a.oneDays.id = :oneDayId AND (b.isBan = false OR b.name IS NULL) " +
             "GROUP BY a.timeUnit")
     List<Object[]> findUnitFocusTimeByOneDayId(@Param("oneDayId") Long oneDayId);
 
     @Query("SELECT COALESCE(SUM(a.focusTime), 0) " +
             "FROM AppFocusTimes a " +
-            "WHERE a.oneDays.id = :oneDayId")
+            "LEFT JOIN Bans b ON b.name = a.app " +
+            "WHERE a.oneDays.id = :oneDayId AND (b.isBan = false OR b.name IS NULL)")
     int findTodayTotalFocusTimeByOneDayId(@Param("oneDayId") Long oneDayId);
 
     // 일일 앱 시간 합
@@ -40,15 +38,12 @@ public interface AppFocusTimesRepository extends JpaRepository<AppFocusTimes, Lo
     @Query("SELECT MAX(a.startTime) FROM AppFocusTimes a WHERE a.oneDays.id = :oneDaysId AND a.app = :app")
     Optional<Integer> findLatestStartTimeByOneDaysIdAndApp(@Param("oneDaysId") Long oneDaysId, @Param("app") String app);
 
-    @Query("SELECT MAX(a.startTime) FROM AppFocusTimes a WHERE a.oneDays.id = :oneDaysId")
-    Optional<Integer> findLatestStartTimeByOneDaysId(@Param("oneDaysId") Long oneDaysId);
-
     @Query("SELECT new com.ssafy.top.appfocustimes.dao.AppFocusTimeSumDao(a.oneDays.user.id, SUM(a.focusTime)) " +
             "FROM AppFocusTimes a " +
-            "WHERE a.oneDays.dateData = :today " +
+            "LEFT JOIN Bans b ON b.name = a.app " +
+            "WHERE a.oneDays.dateData = :today AND (b.isBan = false OR b.name IS NULL) " +
             "GROUP BY a.oneDays.user.id " +
             "ORDER BY SUM(a.focusTime) DESC")
     List<AppFocusTimeSumDao> findAllUsersFocusTimeSum(@Param("today") LocalDate today);
-
 
 }
