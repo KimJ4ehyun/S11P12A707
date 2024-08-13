@@ -235,7 +235,7 @@ public class AppFocusTimesService {
      * @param startTime 어플 시작 시간
      * @return AppFocusTime 객체
      */
-    public AppFocusTimes findAppFocusTimeByOneDaysAndNameAndTimeUnit(OneDays oneDay, String app, int hour, int startTime) {
+    public synchronized AppFocusTimes findAppFocusTimeByOneDaysAndNameAndTimeUnit(OneDays oneDay, String app, int hour, int startTime) {
 
         return appFocusTimesRepository.findByOneDaysIdAndTimeUnitAndApp(oneDay.getId(), hour, app)
                 .orElseGet(() -> {
