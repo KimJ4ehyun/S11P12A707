@@ -168,23 +168,6 @@ public class OneDaysController {
         return ResponseEntity.ok().body(response);
     }
 
-    @Operation(summary = "목표 집중 시간 추가",
-            description = "오늘의 목표 집중 시간을 추가한다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "201",
-                    description = "목표 시간 추가 성공",
-                    content = @Content(schema = @Schema(implementation = TimeGoalResponse.class)))
-    })
-    @PostMapping("/focus-time/goal")
-    public ResponseEntity<?> saveTimeGoal(@RequestBody TimeGoalRequest timeGoal, HttpSession session) {
-
-        SessionUser sessionUser = (SessionUser) session.getAttribute("user");
-
-        CommonResponseDto<?> response = oneDaysService.saveTimeGoal(sessionUser.getEmail(), timeGoal);
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
-    }
-
     @Operation(summary = "목표 집중 시간 수정",
             description = "오늘의 목표 집중 시간을 수정한다.")
     @ApiResponses(value = {

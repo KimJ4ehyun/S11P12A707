@@ -168,44 +168,15 @@ public class OneDaysService {
         return new CommonResponseDto<>(timeGoalAndDayResponses, "목표 시간을 조회했습니다.", 200);
     }
 
-    public CommonResponseDto<?> saveTimeGoal(String email, TimeGoalRequest timeGoal){
-
-        Users user = getUserByEmail(email);
-        validateTimeGoal(timeGoal.getTimeGoal());
-
-        Optional<OneDays> oneDays = oneDaysRepository.findByUserIdAndDateData(user.getId(), LocalDate.now(ZoneId.of("Asia/Seoul")));
-        if(oneDays.isPresent()){
-            throw new CustomException(ALREADY_EXISTS);
-        }
-
-        OneDays oneDay = OneDays.builder()
-                .user(user)
-                .dateData(LocalDate.now(ZoneId.of("Asia/Seoul")))
-                .focusTime(0)
-                .targetTime(timeGoal.getTimeGoal()*60)
-                .build();
-        TimeGoalResponse timeGoalResponse = new TimeGoalResponse(oneDaysRepository.save(oneDay).getTargetTime() / 60);
-        return new CommonResponseDto<>(timeGoalResponse, "정상적으로 목표가 설정되었습니다.", 201);
-    }
-
     public CommonResponseDto<?> updateTimeGoal(String email, TimeGoalRequest timeGoal){
 
         Users user = getUserByEmail(email);
         validateTimeGoal(timeGoal.getTimeGoal());
 
         OneDays oneDays = findOneDayByUserAndDateData(user, LocalDate.now(ZoneId.of("Asia/Seoul")));
+        oneDays.updateTargetTime(timeGoal.getTimeGoal());
 
-        OneDays oneDay = OneDays.builder()
-                .id(oneDays.getId())
-                .user(oneDays.getUser())
-                .dateData(oneDays.getDateData())
-                .focusTime(oneDays.getFocusTime())
-                .targetTime(timeGoal.getTimeGoal()*60)
-                .build();
-
-        TimeGoalResponse timeGoalResponse = new TimeGoalResponse(oneDaysRepository.save(oneDay).getTargetTime() / 60);
-
-        return new CommonResponseDto<>(timeGoalResponse, "정상적으로 목표 시간이 수정되었습니다.", 200);
+        return new CommonResponseDto<>("정상적으로 목표 시간이 수정되었습니다.", 200);
     }
 
     public CommonResponseDto<?> findFocusTimePercentByEmail(String email) {
