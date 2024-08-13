@@ -19,21 +19,21 @@ public interface AppFocusTimesRepository extends JpaRepository<AppFocusTimes, Lo
 
     @Query("SELECT a.timeUnit, COALESCE(SUM(a.focusTime), 0) " +
             "FROM AppFocusTimes a " +
-            "LEFT JOIN Bans b ON b.name = a.app " +
+            "LEFT JOIN Bans b ON b.name = a.app AND a.oneDays.user.id =  b.user.id " +
             "WHERE a.oneDays.id = :oneDayId AND b.name IS NULL " +
             "GROUP BY a.timeUnit")
     List<Object[]> findUnitFocusTimeByOneDayId(@Param("oneDayId") Long oneDayId);
 
     @Query("SELECT COALESCE(SUM(a.focusTime), 0) " +
             "FROM AppFocusTimes a " +
-            "LEFT JOIN Bans b ON b.name = a.app " +
+            "LEFT JOIN Bans b ON b.name = a.app AND a.oneDays.user.id =  b.user.id " +
             "WHERE a.oneDays.id = :oneDayId AND b.name IS NULL")
     int findTodayTotalFocusTimeByOneDayId(@Param("oneDayId") Long oneDayId);
 
     // 일일 앱 시간 합
     @Query("SELECT new com.ssafy.top.appfocustimes.dao.AppAndTimeDao(a.app, SUM(a.focusTime)) " +
             "FROM AppFocusTimes a " +
-            "LEFT JOIN Bans b ON b.name = a.app " +
+            "LEFT JOIN Bans b ON b.name = a.app AND a.oneDays.user.id =  b.user.id " +
             "WHERE a.oneDays.id = :oneDayId AND b.name IS NULL " +
             "GROUP BY a.app")
     List<AppAndTimeDao>  findAppTimeByOneDaysId(@Param("oneDayId") Long oneDayId);
@@ -43,7 +43,7 @@ public interface AppFocusTimesRepository extends JpaRepository<AppFocusTimes, Lo
 
     @Query("SELECT new com.ssafy.top.appfocustimes.dao.AppFocusTimeSumDao(a.oneDays.user.id, SUM(a.focusTime)) " +
             "FROM AppFocusTimes a " +
-            "LEFT JOIN Bans b ON b.name = a.app " +
+            "LEFT JOIN Bans b ON b.name = a.app AND a.oneDays.user.id =  b.user.id " +
             "WHERE a.oneDays.dateData = :today AND b.name IS NULL " +
             "GROUP BY a.oneDays.user.id " +
             "ORDER BY SUM(a.focusTime) DESC")
