@@ -17,6 +17,16 @@ public interface AppFocusTimesRepository extends JpaRepository<AppFocusTimes, Lo
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     Optional<AppFocusTimes> findByOneDaysIdAndTimeUnitAndApp(Long id, int timeUnit, String app);
 
+    // 해당 기간의 집중 시간 합 구하기
+    @Query("SELECT COALESCE(SUM(a.focusTime), 0) " +
+            "FROM AppFocusTimes a " +
+            "LEFT JOIN Bans b ON b.name = a.app AND a.oneDays.user.id =  b.user.id " +
+            "WHERE a.oneDays.user.id = :userId AND b.name IS NULL AND a.oneDays.dateData BETWEEN :startDate AND :endDate ")
+    int findTotalFocusTimeByUserIdAndDateDataBetween(@Param("userId") Long userId,
+                                                     @Param("startDate") LocalDate startDate,
+                                                     @Param("endDate") LocalDate endDate);
+
+    // 각 단위 시간 집중 시간 구하기
     @Query("SELECT a.timeUnit, COALESCE(SUM(a.focusTime), 0) " +
             "FROM AppFocusTimes a " +
             "LEFT JOIN Bans b ON b.name = a.app AND a.oneDays.user.id =  b.user.id " +
@@ -24,29 +34,58 @@ public interface AppFocusTimesRepository extends JpaRepository<AppFocusTimes, Lo
             "GROUP BY a.timeUnit")
     List<Object[]> findUnitFocusTimeByOneDayId(@Param("oneDayId") Long oneDayId);
 
+    // 해당 기간의 집중 시간 합 구하기
+    @Query("SELECT a.oneDays.dateData, COALESCE(SUM(a.focusTime), 0) " +
+            "FROM AppFocusTimes a " +
+            "WHERE a.oneDays.user.id = :userId AND a.oneDays.dateData BETWEEN :startDate AND :endDate " +
+            "GROUP BY a.oneDays.dateData " +
+            "ORDER BY a.oneDays.dateData ASC")
+    List<Object[]> findFocusTimeListByUserIdAndDateDataBetween(@Param("userId") Long userId,
+                                                               @Param("startDate") LocalDate startDate,
+                                                               @Param("endDate") LocalDate endDate);
+
+    // 하루 전체 집중 시간 구하기
     @Query("SELECT COALESCE(SUM(a.focusTime), 0) " +
             "FROM AppFocusTimes a " +
             "LEFT JOIN Bans b ON b.name = a.app AND a.oneDays.user.id =  b.user.id " +
             "WHERE a.oneDays.id = :oneDayId AND b.name IS NULL")
     int findTodayTotalFocusTimeByOneDayId(@Param("oneDayId") Long oneDayId);
 
-    // 일일 앱 시간 합
+    @Query("SELECT COALESCE(SUM(a.focusTime), 0) " +
+            "FROM AppFocusTimes a " +
+            "LEFT JOIN Bans b ON b.name = a.app AND a.oneDays.user.id =  b.user.id " +
+            "WHERE a.oneDays.user.id = :userId AND b.name IS NULL")
+    int findWholeTotalFocusTimeByUserIdExcludingToday(@Param("userId") Long userId);
+
+    // 백분율 구할 때 사용할 순위 구하기
+    @Query(value = "SELECT r.rank " +
+            "FROM ( " +
+            "    SELECT a.one_days_user_id AS userId, " +
+            "           RANK() OVER (ORDER BY SUM(a.focus_time) DESC) AS rank " +
+            "    FROM app_focus_times a " +
+            "    LEFT JOIN bans b ON b.name = a.app AND a.one_days_user_id = b.user_id " +
+            "    WHERE a.one_days_date BETWEEN :startDate AND :endDate " +
+            "      AND b.name IS NULL " +
+            "    GROUP BY a.one_days_user_id " +
+            ") r " +
+            "WHERE r.userId = :userId", nativeQuery = true)
+    int findRankByDateDataBetween(@Param("userId") Long userId,
+                                  @Param("startDate") LocalDate startDate,
+                                  @Param("endDate") LocalDate endDate);
+
+    @Query("SELECT COALESCE(SUM(a.focusTime), 0) " +
+            "FROM AppFocusTimes a " +
+            "LEFT JOIN Bans b ON b.name = a.app AND a.oneDays.user.id =  b.user.id " +
+            "WHERE a.oneDays.user.id = :userId AND b.name IS NULL " +
+            "AND a.oneDays.dateData = :date")
+    int findTotalFocusTimeByUserIdAndDateData(@Param("userId") Long userId, @Param("date") LocalDate date);
+
+    // 일일 앱 사용량 구하기
     @Query("SELECT new com.ssafy.top.appfocustimes.dao.AppAndTimeDao(a.app, SUM(a.focusTime)) " +
             "FROM AppFocusTimes a " +
             "LEFT JOIN Bans b ON b.name = a.app AND a.oneDays.user.id =  b.user.id " +
             "WHERE a.oneDays.id = :oneDayId AND b.name IS NULL " +
             "GROUP BY a.app")
     List<AppAndTimeDao>  findAppTimeByOneDaysId(@Param("oneDayId") Long oneDayId);
-
-    @Query("SELECT MAX(a.startTime) FROM AppFocusTimes a WHERE a.oneDays.id = :oneDaysId AND a.app = :app")
-    Optional<Integer> findLatestStartTimeByOneDaysIdAndApp(@Param("oneDaysId") Long oneDaysId, @Param("app") String app);
-
-    @Query("SELECT new com.ssafy.top.appfocustimes.dao.AppFocusTimeSumDao(a.oneDays.user.id, SUM(a.focusTime)) " +
-            "FROM AppFocusTimes a " +
-            "LEFT JOIN Bans b ON b.name = a.app AND a.oneDays.user.id =  b.user.id " +
-            "WHERE a.oneDays.dateData = :today AND b.name IS NULL " +
-            "GROUP BY a.oneDays.user.id " +
-            "ORDER BY SUM(a.focusTime) DESC")
-    List<AppFocusTimeSumDao> findAllUsersFocusTimeSum(@Param("today") LocalDate today);
 
 }
