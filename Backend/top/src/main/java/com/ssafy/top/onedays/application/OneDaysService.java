@@ -32,7 +32,6 @@ public class OneDaysService {
 
     private final AppFocusTimesRepository appFocusTimesRepository;
 
-    @Transactional(readOnly = true)
     public CommonResponseDto<?> findTotalFocusTimeByEmailAndPeriod(String email, String period) {
 
         Long userId = getUserByEmail(email).getId();
@@ -67,7 +66,6 @@ public class OneDaysService {
         return new CommonResponseDto<>(totalFocusTimeResponse, "집중시간 통계 조회에 성공했습니다.", 200);
     }
 
-    @Transactional(readOnly = true)
     public CommonResponseDto<?> findWholeTotalFocusTimeByEmail(String email){
 
         Long userId = getUserByEmail(email).getId();
@@ -84,7 +82,6 @@ public class OneDaysService {
         return new CommonResponseDto<>(totalFocusTimeResponse, "전체 집중시간의 합을 조회했습니다.", 200);
     }
 
-    @Transactional(readOnly = true)
     public CommonResponseDto<?> findFocusTimeListByEmailAndPeriod(String email, String period) {
 
         if (!(period.equals("day") || period.equals("week") || period.equals("month"))) {
@@ -94,7 +91,6 @@ public class OneDaysService {
         return findFocusTimeList(email, period, null);
     }
 
-    @Transactional(readOnly = true)
     public CommonResponseDto<?> findFocusTimeListByEmailAndMonth(String email, int month) {
 
         if(!(month == 1 || month == 6)){
@@ -104,7 +100,6 @@ public class OneDaysService {
         return findFocusTimeList(email, null, month);
     }
 
-    @Transactional(readOnly = true)
     public CommonResponseDto<?> findFocusTimeList(String email, String period, Integer month) {
         Users user = getUserByEmail(email);
         LocalDate currentDay = LocalDate.now(ZoneId.of("Asia/Seoul"));
@@ -149,7 +144,6 @@ public class OneDaysService {
         return new CommonResponseDto<>(focusTimeListResponses, "집중시간 통계 조회에 성공했습니다.", 200);
     }
 
-    @Transactional(readOnly = true)
     public CommonResponseDto<?> findTimeGoalByEmailAndPeriod(String email, String period) {
 
         Long userId = getUserByEmail(email).getId();
@@ -214,7 +208,6 @@ public class OneDaysService {
         return new CommonResponseDto<>(timeGoalResponse, "정상적으로 목표 시간이 수정되었습니다.", 200);
     }
 
-    @Transactional(readOnly = true)
     public CommonResponseDto<?> findFocusTimePercentByEmail(String email) {
 
         Long userId = getUserByEmail(email).getId();
@@ -239,8 +232,6 @@ public class OneDaysService {
         return new CommonResponseDto<>(focusTimePercentResponse, "일간, 주간, 월간 백분율 조회에 성공했습니다.", 200);
     }
 
-    // 어쩌다보니 우리 안 쓰고 있음
-    @Transactional(readOnly = true)
     public CommonResponseDto<?> findFocusTimeListByEmailAndYearAndMonth(String email, int year, int month){
         Long userId = getUserByEmail(email).getId();
 
