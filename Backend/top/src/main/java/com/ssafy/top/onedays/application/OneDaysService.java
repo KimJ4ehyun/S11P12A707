@@ -310,20 +310,32 @@ public class OneDaysService {
     }
 
     public synchronized OneDays findOneDayByUserAndDateData(Users user, LocalDate date) {
-        return oneDaysRepository.findByUserIdAndDateData(user.getId(), date)
-                .orElseGet(() -> {
-                    if (oneDaysRepository.findByUserIdAndDateData(user.getId(), date).isPresent()) {
-                        return oneDaysRepository.findByUserIdAndDateData(user.getId(), date).get();
-                    }
-                    OneDays newOneDay = OneDays.builder()
-                            .dateData(date)
-                            .focusTime(0)
-                            .targetTime(0)
-                            .user(user)
-                            .build();
-                    oneDaysRepository.save(newOneDay);
-                    return newOneDay;
-                });
+        OneDays findOneDays = oneDaysRepository.findByUserIdAndDateData(user.getId(), date);
+        if(findOneDays==null){
+            OneDays newOneDay = OneDays.builder()
+                    .dateData(date)
+                    .focusTime(0)
+                    .targetTime(0)
+                    .user(user)
+                    .build();
+            oneDaysRepository.save(newOneDay);
+            return newOneDay;
+        }
+        return findOneDays;
+//        return oneDaysRepository.findByUserIdAndDateData(user.getId(), date)
+//                .orElseGet(() -> {
+//                    if (oneDaysRepository.findByUserIdAndDateData(user.getId(), date).isPresent()) {
+//                        return oneDaysRepository.findByUserIdAndDateData(user.getId(), date).get();
+//                    }
+//                    OneDays newOneDay = OneDays.builder()
+//                            .dateData(date)
+//                            .focusTime(0)
+//                            .targetTime(0)
+//                            .user(user)
+//                            .build();
+//                    oneDaysRepository.save(newOneDay);
+//                    return newOneDay;
+//                });
     }
 
 

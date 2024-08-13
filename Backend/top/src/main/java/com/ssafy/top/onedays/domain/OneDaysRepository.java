@@ -4,13 +4,13 @@ import com.ssafy.top.onedays.dto.response.FocusTimeSumResponse;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 public interface OneDaysRepository extends JpaRepository<OneDays, Long> {
 
-    Optional<OneDays> findByUserIdAndDateData(Long userId, LocalDate today);
+    OneDays findByUserIdAndDateData(Long userId, LocalDate today);
 
     List<OneDays> findByUserIdAndDateDataBetween(Long userId, LocalDate startDate, LocalDate endDate);
 
