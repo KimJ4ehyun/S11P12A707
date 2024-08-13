@@ -27,15 +27,7 @@ public class BansService {
         Users user = usersRepository.findByEmail(email)
                 .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
 
-        // 소문자로 변환 + 공백 삭제
-        String name = banRequest.getName().toLowerCase().replace(" ", "");
-
-        // URL or App
-        if(name.contains(".")) { // URL
-            if(!isValidDomain(name)) {
-                throw new CustomException(INVALID_DOMAIN);
-            }
-        }
+        String name = banRequest.getName();
 
         // 이미 사용자가 등록한 경우
         Optional<Bans> ban = bansRepository.findByUserIdAndName(user.getId(), name);
@@ -93,24 +85,5 @@ public class BansService {
         bansRepository.delete(existingBan);
 
         return new CommonResponseDto<>("금지 목록 프로그램 삭제에 성공했습니다.", 204);
-    }
-
-    private boolean isValidDomain(String domain) {
-        // 도메인 이름의 정규 표현식
-        String DOMAIN_REGEX = "^(?!-)[A-Za-z0-9]([A-Za-z0-9-]{0,61}[A-Za-z0-9])?(\\.[A-Za-z]{2,})+$";
-
-        // 정규 표현식 패턴 컴파일
-        Pattern DOMAIN_PATTERN = Pattern.compile(DOMAIN_REGEX);
-
-        // 각 항목의 길이 체크
-        String[] parts = domain.split("\\.");
-        for (String part : parts) {
-            if (part.length() < 2 || part.length() > 63) {
-                return false;
-            }
-        }
-
-        // 정규 표현식으로 도메인 체크
-        return DOMAIN_PATTERN.matcher(domain).matches();
     }
 }
