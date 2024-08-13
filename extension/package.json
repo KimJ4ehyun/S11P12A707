@@ -1,8 +1,0 @@
-{
-  "dependencies": {
-    "@fortawesome/fontawesome-free": "^6.6.0",
-    "bootstrap": "^5.3.3",
-    "livekit-client": "^2.1.5"
-  },
-  "type": "module"
-}

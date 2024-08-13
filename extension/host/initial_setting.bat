@@ -19,7 +19,7 @@ IF %ERRORLEVEL% EQU 0 (
 ) ELSE (
     echo Pip is not installed. Installing now...
 
-    timeout /t 5
+    timeout /t 10
 
     curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
     python get-pip.py

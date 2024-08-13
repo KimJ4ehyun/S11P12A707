@@ -1,32 +1,32 @@
 let port = null;
 let previousUrl = null;
 
-async function authenticateUser() {
-  return new Promise((resolve, reject) => {
-    chrome.identity.getAuthToken({ interactive: true }, function (token) {
-      if (chrome.runtime.lastError || !token) {
-        console.error(chrome.runtime.lastError);
-        return reject(chrome.runtime.lastError);
-      }
+// async function authenticateUser() {
+//   return new Promise((resolve, reject) => {
+//     chrome.identity.getAuthToken({ interactive: true }, function (token) {
+//       if (chrome.runtime.lastError || !token) {
+//         console.error(chrome.runtime.lastError);
+//         return reject(chrome.runtime.lastError);
+//       }
 
-      fetch("https://www.googleapis.com/oauth2/v1/userinfo?alt=json", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-        .then((response) => response.json())
-        .then((userInfo) => {
-          console.log(`User Email: ${userInfo.email}`);
-          chrome.storage.local.set({ userInfo });
-          resolve();
-        })
-        .catch((error) => {
-          console.error("Failed to get user info:", error);
-          reject(error);
-        });
-    });
-  });
-}
+//       fetch("https://www.googleapis.com/oauth2/v1/userinfo?alt=json", {
+//         headers: {
+//           Authorization: `Bearer ${token}`,
+//         },
+//       })
+//         .then((response) => response.json())
+//         .then((userInfo) => {
+//           console.log(`User Email: ${userInfo.email}`);
+//           chrome.storage.local.set({ userInfo });
+//           resolve();
+//         })
+//         .catch((error) => {
+//           console.error("Failed to get user info:", error);
+//           reject(error);
+//         });
+//     });
+//   });
+// }
 
 function connect() {
   const hostName = "com.google.chrome.top";
@@ -103,7 +103,7 @@ function sendLog(prevUrl, currentUrl) {
 
 async function initialize() {
   try {
-    await authenticateUser();
+    // await authenticateUser();
     connect();
   } catch (error) {
     console.error("Initialization failed:", error);
