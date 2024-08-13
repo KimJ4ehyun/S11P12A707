@@ -14,11 +14,19 @@ public interface OneDaysRepository extends JpaRepository<OneDays, Long> {
 
     List<OneDays> findByUserIdAndDateDataBetween(Long userId, LocalDate startDate, LocalDate endDate);
 
-    @Query("SELECT COALESCE(SUM(o.focusTime), 0) " +
-            "FROM OneDays o " +
-            "WHERE o.user.id = :userId " +
-            "AND o.dateData <> :today")
-    int findWholeTotalFocusTimeByUserIdExcludingToday(@Param("userId") Long userId, @Param("today") LocalDate today);
+    @Query("SELECT COALESCE(SUM(a.focusTime), 0) " +
+            "FROM AppFocusTimes a " +
+            "LEFT JOIN Bans b ON b.name = a.app " +
+            "WHERE a.oneDays.user.id = :userId AND (b.isBan = false OR b.name IS NULL) AND a.oneDays.dateData BETWEEN :startDate AND :endDate ")
+    int findTotalFocusTimeByUserIdAndDateDataBetween(@Param("userId") Long userId,
+                                       @Param("startDate") LocalDate startDate,
+                                       @Param("endDate") LocalDate endDate);
+
+    @Query("SELECT COALESCE(SUM(a.focusTime), 0) " +
+            "FROM AppFocusTimes a " +
+            "LEFT JOIN Bans b ON b.name = a.app " +
+            "WHERE a.oneDays.user.id = :userId AND (b.isBan = false OR b.name IS NULL)")
+    int findWholeTotalFocusTimeByUserIdExcludingToday(@Param("userId") Long userId);
 
     @Query("SELECT new com.ssafy.top.onedays.dto.response.FocusTimeSumResponse(o.user.id, SUM(o.focusTime)) " +
             "FROM OneDays o " +
