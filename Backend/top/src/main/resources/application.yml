@@ -1,0 +1,13 @@
+server:
+  url: ${SERVER_URL}
+  port: 8083
+  servlet:
+    context-path: /api
+
+spring:
+  application:
+    name: top
+  profiles:
+    active: dev
+    include: oauth
+
