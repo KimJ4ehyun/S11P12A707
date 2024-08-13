@@ -309,6 +309,7 @@ public class OneDaysService {
         return String.format("%02d:%02d:%02d", hours, minutes, seconds);
     }
 
+    @Transactional
     public OneDays findOneDayByUserAndDateData(Users user, LocalDate date) {
         return oneDaysRepository.findByUserIdAndDateData(user.getId(), date)
                 .orElseGet(() -> {
