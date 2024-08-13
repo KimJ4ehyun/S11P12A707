@@ -312,7 +312,6 @@ public class OneDaysService {
         }
     }
 
-    @Transactional(readOnly = true)
     private Users getUserByEmail(String email) {
         return usersRepository.findByEmail(email)
                 .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
@@ -325,7 +324,6 @@ public class OneDaysService {
         return String.format("%02d:%02d:%02d", hours, minutes, seconds);
     }
 
-    @Transactional(readOnly = true)
     private int getTotalFocusTime(Long userId, LocalDate startDate, LocalDate endDate) {
         List<OneDays> oneDaysList = oneDaysRepository.findByUserIdAndDateDataBetween(userId, startDate, endDate);
         int totalFocusTime = 0;
@@ -335,7 +333,6 @@ public class OneDaysService {
         return totalFocusTime;
     }
 
-    @Transactional(readOnly = true)
     public OneDays findOneDayByUserAndDateData(Users user, LocalDate date){
         return oneDaysRepository.findByUserIdAndDateData(user.getId(), date)
                 .orElseGet(() -> {

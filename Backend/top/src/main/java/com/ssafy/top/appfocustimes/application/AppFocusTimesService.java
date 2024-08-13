@@ -64,7 +64,6 @@ public class AppFocusTimesService {
         return new CommonResponseDto<>(appListResponses, "프로그램별 통계 조회에 성공했습니다.", 200);
     }
 
-    @Transactional(readOnly = true)
     private List<AppFocusTimes> findAppFocusTimesByEmail(String email) {
         Users user = usersRepository.findByEmail(email)
                 .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
