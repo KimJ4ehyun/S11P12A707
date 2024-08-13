@@ -1,4 +1,4 @@
-package com.ssafy.top.appfocustimes.dto.response;
+package com.ssafy.top.appfocustimes.dao;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AccessLevel;
@@ -10,11 +10,11 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class AppAndTimeResponse {
+public class AppAndTimeDao {
 
     @Schema(description = "APP 이름")
     private String appName;
 
     @Schema(description = "집중 시간")
-    private int focusTime;
+    private Long focusTime;
 }

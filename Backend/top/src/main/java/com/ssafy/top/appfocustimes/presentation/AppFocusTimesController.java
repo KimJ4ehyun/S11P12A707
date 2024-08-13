@@ -2,6 +2,7 @@ package com.ssafy.top.appfocustimes.presentation;
 
 import com.ssafy.top.appfocustimes.application.AppFocusTimesService;
 import com.ssafy.top.appfocustimes.dto.request.AppNameAndTimeRequest;
+import com.ssafy.top.appfocustimes.dto.request.AppNamePeriodRequest;
 import com.ssafy.top.appfocustimes.dto.request.AppNameRequest;
 import com.ssafy.top.appfocustimes.dto.response.AppListResponse;
 import com.ssafy.top.global.auth.domain.SessionUser;
@@ -39,6 +40,26 @@ public class AppFocusTimesController {
         return ResponseEntity.ok().body(response);
     }
 
+    @Operation(summary = "APP 집중 시간 저장", description = "APP에 집중을 하고 있다 창이 바뀌면 집중 시간을 저장 또는 업데이트")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201",
+                    description = "집중 시간 저장 성공",
+                    content = @Content(schema = @Schema(implementation = CommonResponseDto.class))),
+            @ApiResponse(responseCode = "404",
+                    description = "집중 시간 저장 실패"),
+    })
+    @PutMapping("/focus-time/app")
+    public ResponseEntity<?> updateAppFocusTime(@RequestBody AppNameRequest appNameRequest, HttpSession session){
+        SessionUser sessionUser = (SessionUser) session.getAttribute("user");
+        CommonResponseDto<?> response = appFocusTimesService.updateAppFocusTime(sessionUser.getEmail(), appNameRequest);
+
+        if (response.getStatusCode() == 201) {
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } else {
+            return ResponseEntity.ok().body(response);
+        }
+    }
+
     @Operation(summary = "스톱워치 APP 집중 시간 저장", description = "스톱 워치를 사용해 APP 집중 시간 저장")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201",
@@ -53,30 +74,15 @@ public class AppFocusTimesController {
 
         CommonResponseDto<?> response = appFocusTimesService.saveCustomApp(sessionUser.getEmail(), appNameAndTimeRequest);
 
-        if (response.getStatusCode() == 201) {
-            return ResponseEntity.status(HttpStatus.CREATED).body(response);
-        } else {
-            return ResponseEntity.ok().body(response);
-        }
+        return ResponseEntity.ok().body(response);
     }
 
-    @Operation(summary = "APP 집중 시간 저장", description = "APP에 집중을 하고 있다 창이 바뀌면 집중 시간을 저장 또는 업데이트")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "201",
-                    description = "집중 시간 저장 성공",
-                    content = @Content(schema = @Schema(implementation = CommonResponseDto.class))),
-            @ApiResponse(responseCode = "404",
-                    description = "집중 시간 저장 실패"),
-    })
-    @PutMapping("/focus-time/app")
-    public ResponseEntity<?> save(@RequestBody AppNameRequest appNameRequest, HttpSession session){
+    @PutMapping("/focus-time")
+    public ResponseEntity<?> updateFocusTimePeriodically(@RequestBody AppNamePeriodRequest appNamePeriodRequest, HttpSession session){
         SessionUser sessionUser = (SessionUser) session.getAttribute("user");
-        CommonResponseDto<?> response = appFocusTimesService.save(sessionUser.getEmail(), appNameRequest);
 
-        if (response.getStatusCode() == 201) {
-            return ResponseEntity.status(HttpStatus.CREATED).body(response);
-        } else {
-            return ResponseEntity.ok().body(response);
-        }
+        CommonResponseDto<?> response = appFocusTimesService.updateFocusTimePeriodically(sessionUser.getEmail(), appNamePeriodRequest);
+
+        return ResponseEntity.ok().body(response);
     }
 }

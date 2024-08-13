@@ -1,15 +1,14 @@
 package com.ssafy.top.appfocustimes.application;
 
+import com.ssafy.top.appfocustimes.dao.AppAndTimeDao;
 import com.ssafy.top.appfocustimes.domain.AppFocusTimes;
 import com.ssafy.top.appfocustimes.domain.AppFocusTimesRepository;
 import com.ssafy.top.appfocustimes.dto.request.AppNameAndTimeRequest;
+import com.ssafy.top.appfocustimes.dto.request.AppNamePeriodRequest;
 import com.ssafy.top.appfocustimes.dto.request.AppNameRequest;
 import com.ssafy.top.appfocustimes.dto.response.AppListResponse;
-import com.ssafy.top.bans.domain.Bans;
-import com.ssafy.top.bans.domain.BansRepository;
 import com.ssafy.top.global.domain.CommonResponseDto;
 import com.ssafy.top.global.exception.CustomException;
-import com.ssafy.top.hourfocustimes.application.HourFocusTimesService;
 import com.ssafy.top.onedays.application.OneDaysService;
 import com.ssafy.top.onedays.domain.OneDays;
 import com.ssafy.top.users.domain.Users;
@@ -32,48 +31,47 @@ import static com.ssafy.top.global.exception.ErrorCode.*;
 @RequiredArgsConstructor
 public class AppFocusTimesService {
 
-    private final HourFocusTimesService hourFocusTimesService;
-
     private final OneDaysService oneDaysService;
-
-    private final BansRepository bansRepository;
 
     private final AppFocusTimesRepository appFocusTimesRepository;
 
     private final UsersRepository usersRepository;
 
-    @Transactional(readOnly = true)
     public CommonResponseDto<?> findAppFocusTimeListByEmail(String email) {
-        List<AppFocusTimes> appFocusTimesList = findAppFocusTimesByEmail(email);
-        int totalFocusTime = appFocusTimesList.stream()
-                .mapToInt(AppFocusTimes::getFocusTime)
+
+        List<AppAndTimeDao> appFocusTimesList = findAppFocusTimesAndRateByEmail(email);
+        Long totalFocusTime = appFocusTimesList.stream()
+                .mapToLong(AppAndTimeDao::getFocusTime)
                 .sum();
 
         AppListResponse[] appListResponses = appFocusTimesList.stream()
-                .sorted(Comparator.comparingInt(AppFocusTimes::getFocusTime).reversed())
+                .sorted(Comparator.comparingLong(AppAndTimeDao::getFocusTime).reversed())
                 .map(appFocusTimes -> {
-                    int focusTime = appFocusTimes.getFocusTime();
+                    long focusTime = appFocusTimes.getFocusTime();
                     int percentage = (int) Math.round((double) focusTime * 100 / totalFocusTime);
                     return new AppListResponse(
-                            appFocusTimes.getApp(),
-                            focusTime,
+                            appFocusTimes.getAppName(),
+                            (int) focusTime,
                             percentage
                     );
                 })
                 .toArray(AppListResponse[]::new);
+
         return new CommonResponseDto<>(appListResponses, "프로그램별 통계 조회에 성공했습니다.", 200);
     }
 
-    private List<AppFocusTimes> findAppFocusTimesByEmail(String email) {
+    private List<AppAndTimeDao> findAppFocusTimesAndRateByEmail(String email) {
+
         Users user = usersRepository.findByEmail(email)
                 .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
 
         OneDays oneDay = oneDaysService.findOneDayByUserAndDateData(user, LocalDate.now(ZoneId.of("Asia/Seoul")));
 
-        return appFocusTimesRepository.findByOneDaysId(oneDay.getId());
+        return appFocusTimesRepository.findAppTimeByOneDaysId(oneDay.getId());
     }
 
-    public CommonResponseDto<?> save(String email, AppNameRequest appNameRequest) {
+    public CommonResponseDto<?> updateAppFocusTime(String email, AppNameRequest appNameRequest) {
+
         Users user = usersRepository.findByEmail(email)
                 .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
 
@@ -82,10 +80,11 @@ public class AppFocusTimesService {
         String prevAppName = getProcessedAppName(appNameRequest.getPrevAppName()).toLowerCase();
         String nowAppName = getProcessedAppName(appNameRequest.getNowAppName()).toLowerCase();
 
-        return saveFocusTime(prevAppName, oneDay, nowAppName);
+        return updateFocusTime(prevAppName, oneDay, nowAppName);
     }
 
-    private CommonResponseDto<?> saveFocusTime(String prevAppName, OneDays oneDay, String nowAppName) {
+    private CommonResponseDto<?> updateFocusTime(String prevAppName, OneDays oneDay, String nowAppName) {
+
         int timeInSeconds = LocalTime.now(ZoneId.of("Asia/Seoul")).toSecondOfDay();
         saveFocusTimePreviousApp(prevAppName, oneDay, timeInSeconds);
         boolean isCreated = isNowAppFocusTimeCreated(oneDay, timeInSeconds, nowAppName);
@@ -97,39 +96,27 @@ public class AppFocusTimesService {
     }
 
     private void saveFocusTimePreviousApp(String prevAppName, OneDays oneDay, int timeInSeconds) {
-        if (prevAppName != null && !"None".equals(prevAppName)) {
-            Optional<AppFocusTimes> optionalPrevAppFocusTime = appFocusTimesRepository.findByOneDaysIdAndApp(oneDay.getId(), prevAppName);
-            if(optionalPrevAppFocusTime.isPresent()){
-                AppFocusTimes prevAppFocusTime = optionalPrevAppFocusTime.get();
-                int focusTime = timeInSeconds - prevAppFocusTime.getStartTime() + prevAppFocusTime.getFocusTime();
-                prevAppFocusTime.updateFocusTime(focusTime);
-                prevAppFocusTime.updateStartTime(timeInSeconds);
-                Optional<Bans> ban = bansRepository.findByUserIdAndNameAndIsBanTrue(oneDay.getUser().getId(), prevAppName);
-                if (ban.isEmpty()) {
-                    hourFocusTimesService.updateFocusTime(oneDay, prevAppFocusTime.getStartTime(), timeInSeconds);
-                }
 
+        if (prevAppName != null && !"none".equals(prevAppName)) {
+            Optional<Integer> optionalPrevAppFocusTime =
+                    appFocusTimesRepository.findLatestStartTimeByOneDaysIdAndApp(oneDay.getId(), prevAppName);
+
+            if(optionalPrevAppFocusTime.isPresent()){
+                Integer prevAppStartTime = optionalPrevAppFocusTime.get();
+                updateFocusTime(oneDay, prevAppName, prevAppStartTime, timeInSeconds);
             } else {
                 int appFocusTime = appFocusTimesRepository.findLatestStartTimeByOneDaysId(oneDay.getId())
                         .orElse(timeInSeconds);
-                AppFocusTimes newAppFocusTime = AppFocusTimes.builder()
-                        .app(prevAppName)
-                        .startTime(timeInSeconds)
-                        .focusTime(timeInSeconds - appFocusTime)
-                        .oneDays(oneDay)
-                        .build();
-                Optional<Bans> ban = bansRepository.findByUserIdAndNameAndIsBanTrue(oneDay.getUser().getId(), prevAppName);
-                if (ban.isEmpty()) {
-                    hourFocusTimesService.updateFocusTime(oneDay, appFocusTime, timeInSeconds);
-                }
-                appFocusTimesRepository.save(newAppFocusTime);
+                updateFocusTime(oneDay, prevAppName, appFocusTime, timeInSeconds);
             }
         }
     }
 
     private boolean isNowAppFocusTimeCreated(OneDays oneDay, int timeInSeconds, String nowAppName) {
-        if (nowAppName != null && !"None".equals(nowAppName)) {
-            Optional<AppFocusTimes> appFocusTimesOptional = appFocusTimesRepository.findByOneDaysIdAndApp(oneDay.getId(), nowAppName);
+
+        if (nowAppName != null && !"none".equals(nowAppName)) {
+            Optional<AppFocusTimes> appFocusTimesOptional =
+                    appFocusTimesRepository.findByOneDaysIdAndTimeUnitAndApp(oneDay.getId(), timeInSeconds / 3600, nowAppName);
 
             if (appFocusTimesOptional.isPresent()) {
                 AppFocusTimes nowAppFocusTimes = appFocusTimesOptional.get();
@@ -139,9 +126,9 @@ public class AppFocusTimesService {
                         .app(nowAppName)
                         .startTime(timeInSeconds)
                         .focusTime(0)
+                        .timeUnit(timeInSeconds / 3600)
                         .oneDays(oneDay)
                         .build();
-
                 appFocusTimesRepository.save(newAppFocusTimes);
                 return true;
             }
@@ -150,29 +137,80 @@ public class AppFocusTimesService {
     }
 
     public CommonResponseDto<?> saveCustomApp(String email, AppNameAndTimeRequest appNameAndTimeRequest){
+
         Users user = usersRepository.findByEmail(email)
                 .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
 
         OneDays oneDay = oneDaysService.findOneDayByUserAndDateData(user, LocalDate.now(ZoneId.of("Asia/Seoul")));
         int nowTime = LocalTime.now(ZoneId.of("Asia/Seoul")).toSecondOfDay();
-        Optional<AppFocusTimes> appFocusTimes = appFocusTimesRepository.findByOneDaysIdAndApp(oneDay.getId(), appNameAndTimeRequest.getAppName());
-        hourFocusTimesService.updateFocusTime(oneDay, nowTime - appNameAndTimeRequest.getFocusTime() ,nowTime);
-        if(appFocusTimes.isPresent()){
-            AppFocusTimes app = appFocusTimes.get();
-            app.updateFocusTime(app.getFocusTime() + appNameAndTimeRequest.getFocusTime());
-            return new CommonResponseDto<>(appFocusTimesRepository.save(app).getFocusTime(), "집중시간 데이터가 갱신되었습니다.", 200);
+
+        updateFocusTime(oneDay, appNameAndTimeRequest.getAppName(), nowTime - appNameAndTimeRequest.getFocusTime() ,nowTime);
+
+        return new CommonResponseDto<>("집중시간 데이터가 처리되었습니다.", 200);
+    }
+
+    public CommonResponseDto<?> updateFocusTimePeriodically(String email, AppNamePeriodRequest appNamePeriodRequest){
+
+        Users user = usersRepository.findByEmail(email)
+                .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+
+        OneDays oneDay = oneDaysService.findOneDayByUserAndDateData(user, LocalDate.now(ZoneId.of("Asia/Seoul")));
+
+        AppFocusTimes appFocusTimes =
+                findAppFocusTimeByOneDaysAndNameAndTimeUnit(oneDay, appNamePeriodRequest.getAppName(), LocalTime.now(ZoneId.of("Asia/Seoul")).getHour());
+
+        int nowTime = LocalTime.now(ZoneId.of("Asia/Seoul")).toSecondOfDay();
+        appFocusTimes.updateFocusTime(nowTime - appFocusTimes.getStartTime() + appFocusTimes.getFocusTime());
+        appFocusTimes.updateStartTime(nowTime);
+
+        return new CommonResponseDto<>("집중 시간이 업데이트 되었습니다.", 200);
+    }
+
+    public void updateFocusTime(OneDays oneDay, String app, int startTime, int endTime){
+
+        if(startTime < 0) startTime += 3600 * 24;
+        if(endTime < 0) endTime += 3600 * 24;
+
+        if (startTime > endTime) {
+            updateFocusTime(oneDay, app, startTime, 3600 * 24);
+            updateFocusTime(oneDay, app,0, endTime);
+            return;
+        }
+
+        int startHour = startTime / 3600;
+        int endHour = endTime / 3600;
+
+        if (startHour == endHour) {
+            AppFocusTimes appFocusTimes = findAppFocusTimeByOneDaysAndNameAndTimeUnit(oneDay, app, startHour);
+            appFocusTimes.updateFocusTime(endTime - startTime + appFocusTimes.getFocusTime());
+
         } else {
-            AppFocusTimes newAppFocusTimes = AppFocusTimes.builder()
-                    .app(appNameAndTimeRequest.getAppName())
-                    .startTime(0)
-                    .focusTime(appNameAndTimeRequest.getFocusTime())
-                    .oneDays(oneDay)
-                    .build();
-            return new CommonResponseDto<>(appFocusTimesRepository.save(newAppFocusTimes).getFocusTime(), "집중시간 데이터가 추가되었습니다.", 201);
+            AppFocusTimes appFocusTimeStart = findAppFocusTimeByOneDaysAndNameAndTimeUnit(oneDay, app, startHour);
+            appFocusTimeStart.updateFocusTime((startHour + 1) * 3600 - startTime + appFocusTimeStart.getFocusTime());
+
+            AppFocusTimes appFocusTimeEnd = findAppFocusTimeByOneDaysAndNameAndTimeUnit(oneDay, app, endHour);
+            appFocusTimeEnd.updateFocusTime(endTime - endHour * 3600 + appFocusTimeEnd.getFocusTime());
         }
     }
 
+    public AppFocusTimes findAppFocusTimeByOneDaysAndNameAndTimeUnit(OneDays oneDay, String app, int hour){
+
+        return appFocusTimesRepository.findByOneDaysIdAndTimeUnitAndApp(oneDay.getId(), hour, app)
+                .orElseGet(() -> {
+                    AppFocusTimes newHourFocusTimes = AppFocusTimes.builder()
+                            .app(app)
+                            .startTime(0)
+                            .focusTime(0)
+                            .timeUnit(hour)
+                            .oneDays(oneDay)
+                            .build();
+                    appFocusTimesRepository.save(newHourFocusTimes);
+                    return newHourFocusTimes;
+                });
+    }
+
     private static String getProcessedAppName(String appName) {
+
         if (!"None".equals(appName)) {
             return getDomainName(appName);
         }
@@ -180,6 +218,7 @@ public class AppFocusTimesService {
     }
 
     private static String getDomainName(String url) {
+
         try {
             URI uri = new URI(url);
             String domain = uri.getHost();
@@ -191,5 +230,4 @@ public class AppFocusTimesService {
            return url;
         }
     }
-
 }

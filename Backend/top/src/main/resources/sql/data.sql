@@ -34,39 +34,23 @@ values ('2023-12-25', 2550, 5, 1),
        ('2024-08-04', 0, 5, 3),
        ('2024-08-01', 4500, 5, 4),
        ('2024-08-02', 500, 5, 5),
-       ('2024-08-03', 100000, 5, 6),
+       ('2024-08-03', 0, 5, 6),
        ('2024-08-08', 0, 5, 6),
        ('2024-08-08', 0, 5, 5);
 
-insert into hour_focus_times (focus_time, time_unit, one_day_id)
-values (1800, 1, 23),
-       (2000, 2, 23),
-       (3000, 5, 23),
-       (500, 8, 23),
-       (1500, 12, 23),
-       (1200, 13, 23),
-       (3000, 14, 23),
-       (2300, 16, 23),
-       (1500, 17, 23),
-       (1231, 20, 23),
-       (2500, 21, 23),
-       (3800, 3, 29),
-       (1222, 2, 30)
-       ;
-
-insert into app_focus_times (app, start_time, focus_time, one_day_id)
-values ('Youtube', 3800, 3600, 23),
-       ('Mattermost', 3580, 3800, 23),
-       ('YoutubeMusic', 3600, 5000, 23),
-       ('SSAFY', 3620, 2400, 23),
-       ('IntelliJ', 3640, 2000, 23),
-       ('YoutubeMusic', 3600, 5000, 21),
-       ('YoutubeMusic', 3600, 5000, 22),
-       ('Mattermost', 3600, 5000, 21),
-       ('Mattermost', 3600, 5000, 22),
-       ('leagueoflegends', 3640, 1234, 23),
-       ('maplestory', 3640, 2351, 23),
-       ('battleground', 3640, 752, 23)
+insert into app_focus_times (app, start_time, focus_time, time_unit, one_day_id)
+values ('Youtube', 3800, 3600, 1, 23),
+       ('Mattermost', 3580, 3800, 1, 23),
+       ('YoutubeMusic', 3600, 5000, 2, 23),
+       ('SSAFY', 3620, 2400, 2, 23),
+       ('IntelliJ', 3640, 2000, 5, 23),
+       ('YoutubeMusic', 3600, 5000, 4, 21),
+       ('YoutubeMusic', 3600, 5000, 2, 22),
+       ('Mattermost', 3600, 5000, 6, 21),
+       ('Mattermost', 3600, 5000, 7, 22),
+       ('leagueoflegends', 3640, 1234, 17, 23),
+       ('maplestory', 3640, 2351, 18, 23),
+       ('battleground', 3640, 752, 19, 23)
        ;
 
 insert into friends (user_id, friend_id, relation)
