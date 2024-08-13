@@ -85,7 +85,7 @@ main {
   font-weight: bold;
 }
 
-.btn-success {
+/* .btn-success {
   background-color: #06d362;
   border-color: #06d362;
 }
@@ -93,12 +93,7 @@ main {
 .btn-success:hover {
   background-color: #1abd61;
   border-color: #1abd61;
-}
-
-#dashboard-link {
-  font-weight: bold;
-  font-size: 20px;
-}
+} */
 
 #room {
   display: flex;

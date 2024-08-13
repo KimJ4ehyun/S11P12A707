@@ -44,7 +44,7 @@ def main():
         if current_process_name != last_process_name:
             send_message(last_process_name, current_process_name)
             last_process_name = current_process_name
-        time.sleep(1)
+        time.sleep(0.5)
 
 if __name__ == '__main__':
     main()
