@@ -6,8 +6,7 @@
     "nativeMessaging",
     "tabs",
     "storage",
-    "identity",
-    "scripting"
+    "identity"
   ],
   "background": {
     "service_worker": "background.js"
