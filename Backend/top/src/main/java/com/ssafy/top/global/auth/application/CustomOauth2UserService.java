@@ -4,6 +4,7 @@ import com.ssafy.top.bans.domain.Bans;
 import com.ssafy.top.bans.domain.BansRepository;
 import com.ssafy.top.global.auth.domain.OauthAttributes;
 import com.ssafy.top.global.auth.domain.SessionUser;
+import com.ssafy.top.onedays.application.OneDaysService;
 import com.ssafy.top.users.domain.Users;
 import com.ssafy.top.users.domain.UsersRepository;
 import com.ssafy.top.widgets.domain.WidgetType;
@@ -22,6 +23,9 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -38,6 +42,7 @@ public class CustomOauth2UserService implements OAuth2UserService<OAuth2UserRequ
     private final BansRepository bansRepository;
     private final WidgetsRepository widgetsRepository;
     private final HttpSession httpSession;
+    private final OneDaysService oneDaysService;
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
@@ -75,7 +80,14 @@ public class CustomOauth2UserService implements OAuth2UserService<OAuth2UserRequ
         // 초기 URL 또는 프로그램
         initBan(newUser);
 
+        // 초기 oneDay
+        initOneDay(newUser);
+
         return newUser;
+    }
+
+    private void initOneDay (Users user) {
+        oneDaysService.findOneDayByUserAndDateData(user, LocalDate.now(ZoneId.of("Asia/Seoul")));
     }
 
     private void initWidget(Users user) {
