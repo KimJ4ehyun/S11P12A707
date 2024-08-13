@@ -31,7 +31,7 @@ public class BansController {
                     description = "시간 측정 금지 목록 추가 성공"),
             @ApiResponse(responseCode = "400",
                     description = "시간 측정 금지 목록 추가 실패(올바르지 않는 도메인 형식)"),
-            @ApiResponse(responseCode = "400",
+            @ApiResponse(responseCode = "409",
                     description = "시간 측정 금지 목록 추가 실패(이미 등록된 URL 또는 프로그램)")
     })
     @PostMapping("/ban")
