@@ -1,7 +1,9 @@
 package com.ssafy.top.onedays.domain;
 
 import com.ssafy.top.onedays.dto.response.FocusTimeSumResponse;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -11,6 +13,7 @@ import java.util.Optional;
 
 public interface OneDaysRepository extends JpaRepository<OneDays, Long> {
 
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
     Optional<OneDays> findByUserIdAndDateData(Long userId, LocalDate today);
 
     List<OneDays> findByUserIdAndDateDataBetween(Long userId, LocalDate startDate, LocalDate endDate);
