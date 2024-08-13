@@ -42,7 +42,6 @@ public class CustomOauth2UserService implements OAuth2UserService<OAuth2UserRequ
     private final BansRepository bansRepository;
     private final WidgetsRepository widgetsRepository;
     private final HttpSession httpSession;
-    private final OneDaysService oneDaysService;
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
@@ -80,14 +79,7 @@ public class CustomOauth2UserService implements OAuth2UserService<OAuth2UserRequ
         // 초기 URL 또는 프로그램
         initBan(newUser);
 
-        // 초기 oneDay
-        initOneDay(newUser);
-
         return newUser;
-    }
-
-    private void initOneDay (Users user) {
-        oneDaysService.findOneDayByUserAndDateData(user, LocalDate.now(ZoneId.of("Asia/Seoul")));
     }
 
     private void initWidget(Users user) {

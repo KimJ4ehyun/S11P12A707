@@ -3,7 +3,9 @@ package com.ssafy.top.appfocustimes.domain;
 import com.ssafy.top.appfocustimes.dao.AppAndTimeDao;
 import com.ssafy.top.appfocustimes.dao.AppFocusTimeSumDao;
 import com.ssafy.top.onedays.domain.OneDays;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import java.time.LocalDate;
@@ -12,6 +14,7 @@ import java.util.Optional;
 
 public interface AppFocusTimesRepository extends JpaRepository<AppFocusTimes, Long> {
 
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
     Optional<AppFocusTimes> findByOneDaysIdAndTimeUnitAndApp(Long id, int timeUnit, String app);
 
     @Query("SELECT a.timeUnit, COALESCE(SUM(a.focusTime), 0) " +
