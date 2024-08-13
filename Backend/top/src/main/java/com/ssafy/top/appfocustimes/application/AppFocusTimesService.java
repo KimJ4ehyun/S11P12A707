@@ -22,6 +22,7 @@ import java.net.URISyntaxException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -82,69 +83,32 @@ public class AppFocusTimesService {
         OneDays oneDay = oneDaysService.findOneDayByUserAndDateData(user, LocalDate.now(ZoneId.of("Asia/Seoul")));
 
         //URI 소문자 변경
-        String prevAppName = getProcessedAppName(appNameRequest.getPrevAppName()).toLowerCase();
-        String nowAppName = getProcessedAppName(appNameRequest.getNowAppName()).toLowerCase();
-
-        return updateFocusTime(prevAppName, oneDay, nowAppName);
-    }
-
-    private CommonResponseDto<?> updateFocusTime(String prevAppName, OneDays oneDay, String nowAppName) {
-
-        //현재 시간(이전 앱 종료 시간, 현재 앱 시작 시간)
-        int timeInSeconds = LocalTime.now(ZoneId.of("Asia/Seoul")).toSecondOfDay();
-
-        //이전 앱 집중 시간 저장
-        saveFocusTimePreviousApp(prevAppName, oneDay, timeInSeconds);
-
-        //현재 앱 시작 시간 저장(상태코드)
-        boolean isCreated = isNowAppFocusTimeCreated(oneDay, timeInSeconds, nowAppName);
-
-        String message = isCreated ? "집중시간 데이터가 생성되었습니다." : "집중시간 데이터가 갱신되었습니다.";
-        int statusCode = isCreated ? 201 : 200;
-
-        return new CommonResponseDto<>(message, statusCode);
-    }
-
-    /**
-     * @param prevAppName   창 전환 전 집중하고 있었던 앱
-     * @param oneDay        집중 시간을 저장할 하루 데이터
-     * @param timeInSeconds 창 전환할 때의 시간
-     */
-    private void saveFocusTimePreviousApp(String prevAppName, OneDays oneDay, int timeInSeconds) {
+        String appName = appNameRequest.getAppName();
 
         // case: 이전 앱이 있을 경우
-        if (prevAppName != null && !"none".equals(prevAppName)) {
+        if (appName != null && !"None".equals(appName)) {
             //이전 앱 이름과 같은 시간 중에 가장 최근의 시작 시간인 데이터 조회
-            int prevAppStartTime = appFocusTimesRepository.findLatestStartTimeByOneDaysIdAndApp(oneDay.getId(), prevAppName)
-                    .orElseGet(() -> timeInSeconds);
+            appName = getProcessedAppName(appName).toLowerCase();
+
+            int startTime = convertToSeconds(appNameRequest.getStartTime());
+            int endTime = convertToSeconds(appNameRequest.getEndTime());
 
             //하루를 기준으로 업데이트
-            updateFocusTime(oneDay, prevAppName, prevAppStartTime, timeInSeconds);
+            updateFocusTime(oneDay, appName, startTime, endTime);
         }
+        return new CommonResponseDto<>("집중시간 데이터가 갱신되었습니다.", 200);
     }
 
-    private boolean isNowAppFocusTimeCreated(OneDays oneDay, int timeInSeconds, String nowAppName) {
+    public int convertToSeconds(String dateTimeString) {
+        // 시간 부분만 추출
+        String timePart = dateTimeString.substring(11, 19);
 
-        if (nowAppName != null && !"none".equals(nowAppName)) {
-            Optional<AppFocusTimes> appFocusTimesOptional =
-                    appFocusTimesRepository.findByOneDaysIdAndTimeUnitAndApp(oneDay.getId(), timeInSeconds / 3600, nowAppName);
+        // 문자열을 LocalTime 객체로 변환
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+        LocalTime time = LocalTime.parse(timePart, timeFormatter);
 
-            if (appFocusTimesOptional.isPresent()) {
-                AppFocusTimes nowAppFocusTimes = appFocusTimesOptional.get();
-                nowAppFocusTimes.updateStartTime(timeInSeconds);
-            } else {
-                AppFocusTimes newAppFocusTimes = AppFocusTimes.builder()
-                        .app(nowAppName)
-                        .startTime(timeInSeconds)
-                        .focusTime(0)
-                        .timeUnit(timeInSeconds / 3600)
-                        .oneDays(oneDay)
-                        .build();
-                appFocusTimesRepository.save(newAppFocusTimes);
-                return true;
-            }
-        }
-        return false;
+        // 초 단위로 변환
+        return time.toSecondOfDay();
     }
 
     public CommonResponseDto<?> saveCustomApp(String email, AppNameAndTimeRequest appNameAndTimeRequest) {
@@ -185,7 +149,6 @@ public class AppFocusTimesService {
      * @param startTime 앱 시작 시간
      * @param endTime   앱 종료 시간
      */
-
     public void updateFocusTime(OneDays oneDay, String app, int startTime, int endTime) {
 
         if (startTime < 0) startTime += 3600 * 24;
