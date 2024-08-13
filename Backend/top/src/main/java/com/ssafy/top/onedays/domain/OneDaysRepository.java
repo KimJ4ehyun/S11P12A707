@@ -38,4 +38,11 @@ public interface OneDaysRepository extends JpaRepository<OneDays, Long> {
             "GROUP BY o.user.id")
     List<FocusTimeSumResponse> findAllUsersFocusTimeSumByDateDataBetween(@Param("startDate") LocalDate startDate,
                                                                          @Param("endDate") LocalDate endDate);
+
+    @Query("SELECT COALESCE(SUM(o.targetTime), 0) " +
+           "FROM OneDays o " +
+           "WHERE o.user.id = :userId AND o.dateData BETWEEN :startDate AND :endDate ")
+    int findTotalTimeGoalByUserIdAndDateDataBetween(@Param("userId") Long userId,
+                                                @Param("startDate") LocalDate startDate,
+                                                @Param("endDate") LocalDate endDate);
 }
