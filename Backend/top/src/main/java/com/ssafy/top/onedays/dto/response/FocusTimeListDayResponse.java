@@ -16,5 +16,5 @@ public class FocusTimeListDayResponse {
     private int startTime;
 
     @Schema(description = "집중 시간")
-    private int focusTime;
+    private Long focusTime;
 }
