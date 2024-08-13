@@ -69,7 +69,6 @@ function onTabActivated(activeInfo) {
 }
 
 function sendLog(prevUrl, prevTime, currentTime) {
-  // KST로 시간 변환
   const prevTimeKST = new Date(prevTime + 9 * 60 * 60 * 1000).toISOString();
   const currentTimeKST = new Date(
     currentTime + 9 * 60 * 60 * 1000
