@@ -4,10 +4,9 @@ import com.ssafy.top.appfocustimes.application.AppFocusTimesService;
 import com.ssafy.top.appfocustimes.dto.request.AppNameAndTimeRequest;
 import com.ssafy.top.appfocustimes.dto.request.AppNamePeriodRequest;
 import com.ssafy.top.appfocustimes.dto.request.AppNameRequest;
-import com.ssafy.top.appfocustimes.dto.response.AppListResponse;
+import com.ssafy.top.appfocustimes.dto.response.*;
 import com.ssafy.top.global.auth.domain.SessionUser;
 import com.ssafy.top.global.domain.CommonResponseDto;
-import com.ssafy.top.onedays.dto.response.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -73,10 +72,9 @@ public class AppFocusTimesController {
             @RequestParam(name = "day") int day
     ){
         SessionUser sessionUser = (SessionUser) session.getAttribute("user");
-        String email = "Timo1@gmail.com";
 
         CommonResponseDto<?> response = appFocusTimesService
-                .findFocusTimeListByEmailAndYearAndMonth(email, year, month, day);
+                .findFocusTimeListByEmailAndYearAndMonth(sessionUser.getEmail(), year, month, day);
 
         return ResponseEntity.ok().body(response);
     }
@@ -171,8 +169,6 @@ public class AppFocusTimesController {
 
         return ResponseEntity.ok().body(response);
     }
-
-
 
     @Operation(summary = "APP 집중 시간 저장", description = "APP에 집중을 하고 있다 창이 바뀌면 집중 시간을 저장 또는 업데이트")
     @ApiResponses(value = {

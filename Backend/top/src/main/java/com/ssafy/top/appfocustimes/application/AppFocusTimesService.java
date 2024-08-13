@@ -1,18 +1,16 @@
 package com.ssafy.top.appfocustimes.application;
 
 import com.ssafy.top.appfocustimes.dao.AppAndTimeDao;
-import com.ssafy.top.appfocustimes.dao.AppFocusTimeSumDao;
 import com.ssafy.top.appfocustimes.domain.AppFocusTimes;
 import com.ssafy.top.appfocustimes.domain.AppFocusTimesRepository;
 import com.ssafy.top.appfocustimes.dto.request.AppNameAndTimeRequest;
 import com.ssafy.top.appfocustimes.dto.request.AppNamePeriodRequest;
 import com.ssafy.top.appfocustimes.dto.request.AppNameRequest;
-import com.ssafy.top.appfocustimes.dto.response.AppListResponse;
+import com.ssafy.top.appfocustimes.dto.response.*;
 import com.ssafy.top.global.domain.CommonResponseDto;
 import com.ssafy.top.global.exception.CustomException;
 import com.ssafy.top.onedays.application.OneDaysService;
 import com.ssafy.top.onedays.domain.OneDays;
-import com.ssafy.top.onedays.dto.response.*;
 import com.ssafy.top.users.domain.Users;
 import com.ssafy.top.users.domain.UsersRepository;
 import lombok.RequiredArgsConstructor;

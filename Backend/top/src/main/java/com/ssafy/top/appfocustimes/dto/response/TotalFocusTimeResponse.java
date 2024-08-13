@@ -1,4 +1,4 @@
-package com.ssafy.top.onedays.dto.response;
+package com.ssafy.top.appfocustimes.dto.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AccessLevel;
