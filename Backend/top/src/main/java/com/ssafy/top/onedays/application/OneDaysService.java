@@ -155,14 +155,10 @@ public class OneDaysService {
             default -> today;
         };
 
-        List<OneDays> oneDaysList = oneDaysRepository.findByUserIdAndDateDataBetween(userId, startDay, today);
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM-dd");
+        int totalTimeGoal = oneDaysRepository.findTotalTimeGoalByUserIdAndDateDataBetween(userId, startDay, today);
+        TimeGoalResponse timeGoalResponse = new TimeGoalResponse(totalTimeGoal);
 
-        TimeGoalAndDayResponse[] timeGoalAndDayResponses = oneDaysList.stream()
-                .map(oneDay -> new TimeGoalAndDayResponse(oneDay.getDateData().format(formatter), oneDay.getTargetTime()))
-                .toArray(TimeGoalAndDayResponse[]::new);
-
-        return new CommonResponseDto<>(timeGoalAndDayResponses, "목표 시간을 조회했습니다.", 200);
+        return new CommonResponseDto<>(timeGoalResponse, "목표 시간을 조회했습니다.", 200);
     }
 
     public CommonResponseDto<?> updateTimeGoal(String email, TimeGoalRequest timeGoal){
@@ -171,7 +167,7 @@ public class OneDaysService {
         validateTimeGoal(timeGoal.getTimeGoal());
 
         OneDays oneDays = findOneDayByUserAndDateData(user, LocalDate.now(ZoneId.of("Asia/Seoul")));
-        oneDays.updateTargetTime(timeGoal.getTimeGoal());
+        oneDays.updateTargetTime(timeGoal.getTimeGoal() * 60);
 
         return new CommonResponseDto<>("정상적으로 목표 시간이 수정되었습니다.", 200);
     }

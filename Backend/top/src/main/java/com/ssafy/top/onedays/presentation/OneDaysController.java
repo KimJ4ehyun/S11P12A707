@@ -94,7 +94,7 @@ public class OneDaysController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     description = "목표 집중 시간 조회 성공",
-                    content = @Content(schema = @Schema(implementation = TimeGoalAndDayResponse.class))),
+                    content = @Content(schema = @Schema(implementation = TimeGoalResponse.class))),
             @ApiResponse(responseCode = "400",
                     description = "캘린더 데이터 조회 실패(부적절한 period 값)")
     })
