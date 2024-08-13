@@ -33,4 +33,8 @@ public class OneDays {
     public void updateFocusTime(int focusTime) {
         this.focusTime = focusTime;
     }
+
+    public void updateTargetTime(int targetTime) {
+        this.targetTime = targetTime;
+    }
 }
