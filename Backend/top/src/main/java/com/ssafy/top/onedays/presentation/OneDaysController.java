@@ -98,22 +98,32 @@ public class OneDaysController {
     }
 
     @Operation(summary = "캘린더에 표시할 데이터 조회",
-            description = "year, month 파라미터에 따라 캘린더 집중시간 통계를 조회한다.")
+            description = "year, month, day 파라미터에 따라 해당 날짜 집중시간을 조회한다.")
     @Parameters(value = {
             @Parameter(name = "year", description = "year = 2024"),
-            @Parameter(name = "month", description = "month = 8")
+            @Parameter(name = "month", description = "month = 8"),
+            @Parameter(name = "day", description = "month = 8")
     })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     description = "캘린더 데이터 조회 성공",
-                    content = @Content(schema = @Schema(implementation = FocusTimeListCalendarResponse.class))),
+                    content = @Content(schema = @Schema(implementation = Integer.class))),
             @ApiResponse(responseCode = "400",
-                    description = "캘린더 데이터 조회 실패(부적절한 year/month 값)")
+                    description = "캘린더 데이터 조회 실패(부적절한 year/month/day 값)")
     })
     @GetMapping("/dash/calendar")
-    public ResponseEntity<?> findFocusTimeListByYearAndMonth(@RequestParam(name="year") int year, @RequestParam(name="month") int month, HttpSession session){
+    public ResponseEntity<?> findFocusTimeListByYearAndMonth(
+            HttpSession session,
+            @RequestParam(name = "year") int year,
+            @RequestParam(name = "month") int month,
+            @RequestParam(name = "day") int day
+    ){
         SessionUser sessionUser = (SessionUser) session.getAttribute("user");
-        CommonResponseDto<?> response = oneDaysService.findFocusTimeListByEmailAndYearAndMonth(sessionUser.getEmail(), year, month);
+        String email = "Timo1@gmail.com";
+        
+        CommonResponseDto<?> response = oneDaysService
+                .findFocusTimeListByEmailAndYearAndMonth(email, year, month, day);
+        
         return ResponseEntity.ok().body(response);
     }
 
