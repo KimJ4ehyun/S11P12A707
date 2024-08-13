@@ -117,7 +117,7 @@ public class OneDaysService {
                 List<Object[]> appFocusTimesList = appFocusTimesRepository.findUnitFocusTimeByOneDayId(oneDay.getId());
 
                 FocusTimeListDayResponse[] focusTimeListDayResponses = appFocusTimesList.stream()
-                        .map(appFocusTime -> new FocusTimeListDayResponse((int)appFocusTime[0], (int)appFocusTime[1]))
+                        .map(appFocusTime -> new FocusTimeListDayResponse((int)appFocusTime[0], (long)appFocusTime[1]))
                         .toArray(FocusTimeListDayResponse[]::new);
 
                 return new CommonResponseDto<>(focusTimeListDayResponses, "집중시간 통계 조회에 성공했습니다.", 200);
