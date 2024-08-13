@@ -309,9 +309,12 @@ public class OneDaysService {
         return String.format("%02d:%02d:%02d", hours, minutes, seconds);
     }
 
-    public synchronized OneDays findOneDayByUserAndDateData(Users user, LocalDate date){
+    public synchronized OneDays findOneDayByUserAndDateData(Users user, LocalDate date) {
         return oneDaysRepository.findByUserIdAndDateData(user.getId(), date)
                 .orElseGet(() -> {
+                    if (oneDaysRepository.findByUserIdAndDateData(user.getId(), date).isPresent()) {
+                        return oneDaysRepository.findByUserIdAndDateData(user.getId(), date).get();
+                    }
                     OneDays newOneDay = OneDays.builder()
                             .dateData(date)
                             .focusTime(0)
@@ -322,5 +325,6 @@ public class OneDaysService {
                     return newOneDay;
                 });
     }
+
 
 }
