@@ -10,6 +10,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Table(name = "one_days", uniqueConstraints = {@UniqueConstraint(columnNames = {"user_id", "date_data"})})
 public class OneDays {
 
     @Id
