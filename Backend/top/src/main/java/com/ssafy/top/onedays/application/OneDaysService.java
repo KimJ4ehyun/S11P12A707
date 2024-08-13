@@ -13,6 +13,8 @@ import com.ssafy.top.users.domain.UsersRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.DateTimeException;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -198,36 +200,21 @@ public class OneDaysService {
         return new CommonResponseDto<>(focusTimePercentResponse, "일간, 주간, 월간 백분율 조회에 성공했습니다.", 200);
     }
 
-    public CommonResponseDto<?> findFocusTimeListByEmailAndYearAndMonth(String email, int year, int month){
+    @Transactional(readOnly = true)
+    public CommonResponseDto<?> findFocusTimeListByEmailAndYearAndMonth(String email, int year, int month, int day){
         Long userId = getUserByEmail(email).getId();
 
-        if(!(1 <= month && month <= 12)){
-            throw new CustomException(INVALID_QUERY_STRING);
-        }
-
-        LocalDate startDate = LocalDate.of(year, month, 1);
-        LocalDate endDate = startDate.with(TemporalAdjusters.lastDayOfMonth());
         LocalDate today = LocalDate.now(ZoneId.of("Asia/Seoul"));
+        isValidDate(year, month, day, today);
 
-        List<OneDays> oneDaysList = oneDaysRepository.findByUserIdAndDateDataBetween(userId, startDate, endDate);
-        if (!today.isBefore(startDate) && !today.isAfter(endDate)) {
-            int todayTotalFocusTime = findTodayTotalFocusTimeByUserIdAndDateData(userId, today);
-            for (int i = 0; i < oneDaysList.size(); i++) {
-                if (oneDaysList.get(i).getDateData().equals(today)) {
-                    oneDaysList.set(i, OneDays.builder().dateData(today).focusTime(todayTotalFocusTime).build());
-                    break;
-                }
-            }
+        LocalDate date = LocalDate.of(year, month, day);
+        Optional<OneDays> target = oneDaysRepository.findByUserIdAndDateData(userId, date);
+        if(target.isEmpty()) {
+            throw new CustomException(ONE_DAY_NOT_FOUND);
         }
 
-        FocusTimeListCalendarResponse[] responseData = oneDaysList.stream()
-                .map(oneDays -> new FocusTimeListCalendarResponse(
-                        oneDays.getDateData().getDayOfMonth(),
-                        oneDays.getFocusTime()
-                ))
-                .toArray(FocusTimeListCalendarResponse[]::new);
-
-        return new CommonResponseDto<>(responseData, "캘린더 데이터 조회에 성공했습니다.", 200);
+        int time = target.get().getFocusTime();
+        return new CommonResponseDto<>(time, "캘린더 데이터 조회에 성공했습니다.", 200);
     }
 
     private int calculatePercent(List<AppFocusTimeSumDao> focusTimeList, Map<Long, Long> focusTimeMap, Long userId) {
@@ -324,5 +311,15 @@ public class OneDaysService {
                 });
     }
 
+    private static void isValidDate(int year, int month, int day, LocalDate today) {
+        try {
+            LocalDate date = LocalDate.of(year, month, day);
 
+            if(date.isAfter(today)) { // 오늘 이후 날짜
+                throw new CustomException(INVALID_QUERY_STRING);
+            }
+        } catch (DateTimeException e) { // 유효하지 않는 날짜 형식
+            throw new CustomException(INVALID_QUERY_STRING);
+        }
+    }
 }
