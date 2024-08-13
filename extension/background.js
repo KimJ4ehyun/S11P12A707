@@ -1,60 +1,46 @@
 let port = null;
 let previousUrl = null;
-
-// async function authenticateUser() {
-//   return new Promise((resolve, reject) => {
-//     chrome.identity.getAuthToken({ interactive: true }, function (token) {
-//       if (chrome.runtime.lastError || !token) {
-//         console.error(chrome.runtime.lastError);
-//         return reject(chrome.runtime.lastError);
-//       }
-
-//       fetch("https://www.googleapis.com/oauth2/v1/userinfo?alt=json", {
-//         headers: {
-//           Authorization: `Bearer ${token}`,
-//         },
-//       })
-//         .then((response) => response.json())
-//         .then((userInfo) => {
-//           console.log(`User Email: ${userInfo.email}`);
-//           chrome.storage.local.set({ userInfo });
-//           resolve();
-//         })
-//         .catch((error) => {
-//           console.error("Failed to get user info:", error);
-//           reject(error);
-//         });
-//     });
-//   });
-// }
+let previousTimestamp = null;
 
 function connect() {
-  const hostName = "com.google.chrome.top";
-  console.log("Connecting to native messaging host" + hostName);
-  port = chrome.runtime.connectNative(hostName);
-  port.onMessage.addListener(onNativeMessage);
-  port.onDisconnect.addListener(onDisconnected);
+  try {
+    const hostName = "com.google.chrome.top";
+    console.log("Connecting to native messaging host " + hostName);
+    port = chrome.runtime.connectNative(hostName);
+    port.onMessage.addListener(onNativeMessage);
+    port.onDisconnect.addListener(onDisconnected);
 
-  chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-    if (tabs.length > 0) {
-      previousUrl = tabs[0].url;
-    }
-  });
+    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+      if (tabs.length > 0) {
+        previousUrl = tabs[0].url;
+        previousTimestamp = new Date().getTime(); // 기본 UTC 시간
+      }
+    });
+  } catch (error) {
+    console.error("Connect failed:", error);
+  }
 }
 
 function onNativeMessage(message) {
   let prevAppName = message["prevAppName"];
   let nowAppName = message["nowAppName"];
+  const currentTimestamp = new Date().getTime(); // 기본 UTC 시간
+
   if (nowAppName === "chrome.exe") {
     chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
       if (tabs.length > 0) {
         nowAppName = tabs[0].url;
+        sendLog(prevAppName, previousTimestamp, currentTimestamp);
+        previousUrl = tabs[0].url;
+        previousTimestamp = currentTimestamp;
       }
     });
   } else if (prevAppName === "chrome.exe") {
     prevAppName = previousUrl;
+    sendLog(prevAppName, previousTimestamp, currentTimestamp);
+    previousUrl = nowAppName;
+    previousTimestamp = currentTimestamp;
   }
-  sendLog(prevAppName, nowAppName);
 }
 
 function onDisconnected() {
@@ -63,24 +49,35 @@ function onDisconnected() {
 }
 
 function logTabUrl(tabId, changeInfo, tab) {
+  const currentTimestamp = new Date().getTime(); // 기본 UTC 시간
   if (changeInfo.url) {
-    sendLog(previousUrl, changeInfo.url);
+    sendLog(previousUrl, previousTimestamp, currentTimestamp);
     previousUrl = changeInfo.url;
+    previousTimestamp = currentTimestamp;
   }
 }
 
 function onTabActivated(activeInfo) {
   chrome.tabs.get(activeInfo.tabId, function (tab) {
+    const currentTimestamp = new Date().getTime(); // 기본 UTC 시간
     if (tab.url) {
-      sendLog(previousUrl, tab.url);
+      sendLog(previousUrl, previousTimestamp, currentTimestamp);
       previousUrl = tab.url;
+      previousTimestamp = currentTimestamp;
     }
   });
 }
 
-function sendLog(prevUrl, currentUrl) {
-  console.log("이전 최상단 프로그램: ", prevUrl);
-  console.log("현재 최상단 프로그램: ", currentUrl);
+function sendLog(prevUrl, prevTime, currentTime) {
+  // KST로 시간 변환
+  const prevTimeKST = new Date(prevTime + 9 * 60 * 60 * 1000).toISOString();
+  const currentTimeKST = new Date(
+    currentTime + 9 * 60 * 60 * 1000
+  ).toISOString();
+
+  console.log("최상단 프로그램 이었던 것: ", prevUrl);
+  console.log("이전 시간 (KST): ", prevTimeKST);
+  console.log("현재 시간 (KST): ", currentTimeKST);
 
   fetch("https://i11a707.p.ssafy.io/api/focus-time/app", {
     method: "PUT",
@@ -88,8 +85,9 @@ function sendLog(prevUrl, currentUrl) {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      prevAppName: prevUrl,
-      nowAppName: currentUrl,
+      appName: prevUrl,
+      startTime: prevTimeKST,
+      endTime: currentTimeKST,
     }),
   })
     .then((response) => response.json())
@@ -101,19 +99,10 @@ function sendLog(prevUrl, currentUrl) {
     });
 }
 
-async function initialize() {
-  try {
-    // await authenticateUser();
-    connect();
-  } catch (error) {
-    console.error("Initialization failed:", error);
-  }
-}
-
 chrome.tabs.onUpdated.addListener(logTabUrl);
 chrome.tabs.onActivated.addListener(onTabActivated);
-chrome.runtime.onStartup.addListener(initialize);
-chrome.runtime.onInstalled.addListener(initialize);
+chrome.runtime.onStartup.addListener(connect);
+chrome.runtime.onInstalled.addListener(connect);
 chrome.runtime.onInstalled.addListener(function (details) {
   if (details.reason === "install") {
     const installHostBatUrl = chrome.runtime.getURL("host/install_host.bat");
