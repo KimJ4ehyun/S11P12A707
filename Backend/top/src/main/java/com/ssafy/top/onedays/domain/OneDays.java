@@ -22,18 +22,11 @@ public class OneDays {
     private LocalDate dateData;
 
     @Column(nullable = false)
-    private int focusTime;
-
-    @Column(nullable = false)
     private int targetTime;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="user_id")
     private Users user;
-
-    public void updateFocusTime(int focusTime) {
-        this.focusTime = focusTime;
-    }
 
     public void updateTargetTime(int targetTime) {
         this.targetTime = targetTime;

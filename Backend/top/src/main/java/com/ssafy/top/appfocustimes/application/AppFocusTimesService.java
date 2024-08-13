@@ -1,6 +1,7 @@
 package com.ssafy.top.appfocustimes.application;
 
 import com.ssafy.top.appfocustimes.dao.AppAndTimeDao;
+import com.ssafy.top.appfocustimes.dao.AppFocusTimeSumDao;
 import com.ssafy.top.appfocustimes.domain.AppFocusTimes;
 import com.ssafy.top.appfocustimes.domain.AppFocusTimesRepository;
 import com.ssafy.top.appfocustimes.dto.request.AppNameAndTimeRequest;
@@ -11,6 +12,7 @@ import com.ssafy.top.global.domain.CommonResponseDto;
 import com.ssafy.top.global.exception.CustomException;
 import com.ssafy.top.onedays.application.OneDaysService;
 import com.ssafy.top.onedays.domain.OneDays;
+import com.ssafy.top.onedays.dto.response.*;
 import com.ssafy.top.users.domain.Users;
 import com.ssafy.top.users.domain.UsersRepository;
 import lombok.RequiredArgsConstructor;
@@ -19,13 +21,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.time.ZoneId;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.time.temporal.TemporalAdjusters;
+import java.util.*;
 
 import static com.ssafy.top.global.exception.ErrorCode.*;
 
@@ -40,8 +39,123 @@ public class AppFocusTimesService {
 
     private final UsersRepository usersRepository;
 
-    public CommonResponseDto<?> findAppFocusTimeListByEmail(String email) {
+    public CommonResponseDto<?> findTotalFocusTimeByEmailAndPeriod(String email, String period) {
 
+        Long userId = getUserByEmail(email).getId();
+
+        if (!(period.equals("day") || period.equals("week") || period.equals("month"))) {
+            throw new CustomException(INVALID_QUERY_STRING);
+        }
+
+        LocalDate today = LocalDate.now(ZoneId.of("Asia/Seoul"));
+        LocalDate yesterday = today.minusDays(1);
+        LocalDate lastStartDay = yesterday;
+        LocalDate lastEndDay = yesterday;
+
+        int totalFocusTime = findTodayTotalFocusTimeByUserIdAndDateData(userId, today);
+
+        if (period.equals("week")) {
+            today = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+            lastStartDay = today.minusWeeks(1);
+            lastEndDay = today.minusDays(1);
+        } else if(period.equals("month")) {
+            today = today.withDayOfMonth(1);
+            lastStartDay = today.minusMonths(1);
+            lastEndDay = lastStartDay.with(TemporalAdjusters.lastDayOfMonth());
+        }
+
+        totalFocusTime += appFocusTimesRepository.findTotalFocusTimeByUserIdAndDateDataBetween(userId, today, yesterday);
+        int lastTotalFocusTime = appFocusTimesRepository.findTotalFocusTimeByUserIdAndDateDataBetween(userId, lastStartDay, lastEndDay);
+
+        PeriodTotalFocusTimeResponse totalFocusTimeResponse =
+                new PeriodTotalFocusTimeResponse(formatTime(totalFocusTime), formatTime(lastTotalFocusTime));
+
+        return new CommonResponseDto<>(totalFocusTimeResponse, "집중시간 통계 조회에 성공했습니다.", 200);
+    }
+
+    public CommonResponseDto<?> findFocusTimeList(String email, String period, Integer month) {
+        Users user = getUserByEmail(email);
+        LocalDate currentDay = LocalDate.now(ZoneId.of("Asia/Seoul"));
+        LocalDate today = currentDay;
+
+        if(period != null){
+            if (period.equals("day")) {
+                OneDays oneDay = oneDaysService.findOneDayByUserAndDateData(user, LocalDate.now(ZoneId.of("Asia/Seoul")));
+
+                List<Object[]> appFocusTimesList = appFocusTimesRepository.findUnitFocusTimeByOneDayId(oneDay.getId());
+
+                FocusTimeListDayResponse[] focusTimeListDayResponses = appFocusTimesList.stream()
+                        .map(appFocusTime -> new FocusTimeListDayResponse((int)appFocusTime[0], (long)appFocusTime[1]))
+                        .toArray(FocusTimeListDayResponse[]::new);
+
+                return new CommonResponseDto<>(focusTimeListDayResponses, "집중시간 통계 조회에 성공했습니다.", 200);
+
+            } else if (period.equals("week")) {
+                currentDay = currentDay.minusWeeks(1).plusDays(1);
+            } else if (period.equals("month")) {
+                currentDay = currentDay.minusMonths(1).plusDays(1);
+            }
+        } else if (month != null) {
+            currentDay = currentDay.minusMonths(month).plusDays(1);
+        }
+
+        Long userId = user.getId();
+        LocalDate yesterday = today.minusDays(1);
+
+        List<Object[]> focusTimeList = appFocusTimesRepository.findFocusTimeListByUserIdAndDateDataBetween(userId, currentDay, yesterday);
+
+        FocusTimeListResponse[] focusTimeListResponses = new FocusTimeListResponse[focusTimeList.size()+1];
+
+        for(int i = 0; i < focusTimeListResponses.length-1; i++){
+            LocalDate dateData = (LocalDate) focusTimeList.get(i)[0];
+            String formattedDate = dateData.format(DateTimeFormatter.ofPattern("MM-dd"));
+            focusTimeListResponses[i] = new FocusTimeListResponse(formattedDate, (int)focusTimeList.get(i)[1]);
+        }
+
+        String formattedDateToday = today.format(DateTimeFormatter.ofPattern("MM-dd"));
+        focusTimeListResponses[focusTimeListResponses.length-1] = new FocusTimeListResponse(formattedDateToday, findTodayTotalFocusTimeByUserIdAndDateData(userId, today));
+
+        return new CommonResponseDto<>(focusTimeListResponses, "집중시간 통계 조회에 성공했습니다.", 200);
+    }
+
+    public int findTodayTotalFocusTimeByUserIdAndDateData(Long userId, LocalDate today){
+        Users user = usersRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+        Long oneDayId = oneDaysService.findOneDayByUserAndDateData(user, today).getId();
+
+        return appFocusTimesRepository.findTodayTotalFocusTimeByOneDayId(oneDayId);
+    }
+
+    public CommonResponseDto<?> findWholeTotalFocusTimeByEmail(String email){
+
+        Long userId = getUserByEmail(email).getId();
+
+        int totalFocusTime = appFocusTimesRepository.findWholeTotalFocusTimeByUserIdExcludingToday(userId);
+
+        TotalFocusTimeResponse totalFocusTimeResponse = new TotalFocusTimeResponse(formatTime(totalFocusTime));
+
+        return new CommonResponseDto<>(totalFocusTimeResponse, "전체 집중시간의 합을 조회했습니다.", 200);
+    }
+
+    public CommonResponseDto<?> findFocusTimeListByEmailAndPeriod(String email, String period) {
+
+        if (!(period.equals("day") || period.equals("week") || period.equals("month"))) {
+            throw new CustomException(INVALID_QUERY_STRING);
+        }
+
+        return findFocusTimeList(email, period, null);
+    }
+
+    public CommonResponseDto<?> findFocusTimeListByEmailAndMonth(String email, int month) {
+
+        if(!(month == 1 || month == 6)){
+            throw new CustomException(INVALID_QUERY_STRING);
+        }
+
+        return findFocusTimeList(email, null, month);
+    }
+
+    public CommonResponseDto<?> findAppFocusTimeListByEmail(String email) {
         List<AppAndTimeDao> appFocusTimesList = findAppFocusTimesAndRateByEmail(email);
         Long totalFocusTime = appFocusTimesList.stream()
                 .mapToLong(AppAndTimeDao::getFocusTime)
@@ -61,6 +175,38 @@ public class AppFocusTimesService {
                 .toArray(AppListResponse[]::new);
 
         return new CommonResponseDto<>(appListResponses, "프로그램별 통계 조회에 성공했습니다.", 200);
+    }
+
+    public CommonResponseDto<?> findFocusTimePercentByEmail(String email) {
+        Long userId = getUserByEmail(email).getId();
+
+        LocalDate today = LocalDate.now(ZoneId.of("Asia/Seoul"));
+
+        int totalUser = usersRepository.findTotalUserCount();
+
+        int dayPercent = appFocusTimesRepository.findRankByDateDataBetween(userId, today, today) * 100 / totalUser;
+
+        LocalDate weekFirstDate = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+        int weekPercent = appFocusTimesRepository.findRankByDateDataBetween(userId, weekFirstDate, today) * 100 / totalUser;
+
+        LocalDate monthFirstDate = today.withDayOfMonth(1);
+        int monthPercent = appFocusTimesRepository.findRankByDateDataBetween(userId, monthFirstDate, today) * 100 / totalUser;
+
+        FocusTimePercentResponse focusTimePercentResponse = new FocusTimePercentResponse(dayPercent, weekPercent, monthPercent);
+        return new CommonResponseDto<>(focusTimePercentResponse, "일간, 주간, 월간 백분율 조회에 성공했습니다.", 200);
+    }
+
+    @Transactional(readOnly = true)
+    public CommonResponseDto<?> findFocusTimeListByEmailAndYearAndMonth(String email, int year, int month, int day){
+        Long userId = getUserByEmail(email).getId();
+
+        LocalDate today = LocalDate.now(ZoneId.of("Asia/Seoul"));
+        isValidDate(year, month, day, today);
+
+        LocalDate date = LocalDate.of(year, month, day);
+        int time = appFocusTimesRepository.findTotalFocusTimeByUserIdAndDateData(userId, date);
+
+        return new CommonResponseDto<>(time, "캘린더 데이터 조회에 성공했습니다.", 200);
     }
 
     private List<AppAndTimeDao> findAppFocusTimesAndRateByEmail(String email) {
@@ -234,5 +380,29 @@ public class AppFocusTimesService {
         } catch (URISyntaxException e) {
             return url;
         }
+    }
+
+    private static void isValidDate(int year, int month, int day, LocalDate today) {
+        try {
+            LocalDate date = LocalDate.of(year, month, day);
+
+            if(date.isAfter(today)) { // 오늘 이후 날짜
+                throw new CustomException(INVALID_QUERY_STRING);
+            }
+        } catch (DateTimeException e) { // 유효하지 않는 날짜 형식
+            throw new CustomException(INVALID_QUERY_STRING);
+        }
+    }
+
+    private String formatTime(int totalSeconds) {
+        int hours = totalSeconds / 3600;
+        int minutes = (totalSeconds % 3600) / 60;
+        int seconds = totalSeconds % 60;
+        return String.format("%02d:%02d:%02d", hours, minutes, seconds);
+    }
+
+    private Users getUserByEmail(String email) {
+        return usersRepository.findByEmail(email)
+                .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
     }
 }
