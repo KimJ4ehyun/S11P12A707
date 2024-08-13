@@ -60,13 +60,14 @@ public interface AppFocusTimesRepository extends JpaRepository<AppFocusTimes, Lo
     // 백분율 구할 때 사용할 순위 구하기
     @Query(value = "SELECT r.rank " +
             "FROM ( " +
-            "    SELECT a.one_days_user_id AS userId, " +
+            "    SELECT o.user_id AS userId, " +
             "           RANK() OVER (ORDER BY SUM(a.focus_time) DESC) AS rank " +
             "    FROM app_focus_times a " +
-            "    LEFT JOIN bans b ON b.name = a.app AND a.one_days_user_id = b.user_id " +
-            "    WHERE a.one_days_date BETWEEN :startDate AND :endDate " +
+            "    LEFT JOIN one_days o ON a.one_day_id = o.one_day_id " +
+            "    LEFT JOIN bans b ON b.name = a.app AND o.user_id = b.user_id " +
+            "    WHERE o.date_data BETWEEN :startDate AND :endDate " +
             "      AND b.name IS NULL " +
-            "    GROUP BY a.one_days_user_id " +
+            "    GROUP BY o.user_id " +
             ") r " +
             "WHERE r.userId = :userId", nativeQuery = true)
     int findRankByDateDataBetween(@Param("userId") Long userId,
