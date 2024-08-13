@@ -1,4 +1,4 @@
-package com.ssafy.top.hourfocustimes.dto.request;
+package com.ssafy.top.appfocustimes.dto.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AccessLevel;
@@ -10,8 +10,8 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class FocusTimeRequest {
+public class AppNamePeriodRequest {
 
-    @Schema(description = "업데이트 할 누적된 집중시간")
-    private int focusTime;
+    @Schema(description = "업데이트 할 앱 이름")
+    private String appName;
 }

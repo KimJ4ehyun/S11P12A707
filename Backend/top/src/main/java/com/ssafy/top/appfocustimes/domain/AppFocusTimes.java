@@ -25,6 +25,8 @@ public class AppFocusTimes {
 
     private int focusTime;
 
+    private int timeUnit;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="one_day_id")
     private OneDays oneDays;

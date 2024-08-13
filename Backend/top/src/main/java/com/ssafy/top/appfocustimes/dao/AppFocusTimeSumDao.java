@@ -1,4 +1,4 @@
-package com.ssafy.top.hourfocustimes.dao;
+package com.ssafy.top.appfocustimes.dao;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -8,8 +8,9 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class HourFocusTimeSumDao {
+public class AppFocusTimeSumDao {
 
     private Long userId;
+
     private Long focusTimeSum;
 }

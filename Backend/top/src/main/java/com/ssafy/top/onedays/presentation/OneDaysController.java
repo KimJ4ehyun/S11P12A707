@@ -40,8 +40,11 @@ public class OneDaysController {
     })
     @GetMapping("/dash/stats/focus-time")
     public ResponseEntity<?> findTotalFocusTimeByPeriod(@RequestParam(name = "period") String period, HttpSession session) {
+
         SessionUser sessionUser = (SessionUser) session.getAttribute("user");
+
         CommonResponseDto<?> response = oneDaysService.findTotalFocusTimeByEmailAndPeriod(sessionUser.getEmail(), period);
+
         return ResponseEntity.ok().body(response);
     }
 
@@ -53,9 +56,12 @@ public class OneDaysController {
                     content = @Content(schema = @Schema(implementation = TotalFocusTimeResponse.class)))
     })
     @GetMapping("/dash/stats/focus-time/total")
-    public ResponseEntity<?> findTotalFocusTime(HttpSession session) {
+    public ResponseEntity<?> findWholeTotalFocusTime(HttpSession session) {
+
         SessionUser sessionUser = (SessionUser) session.getAttribute("user");
-        CommonResponseDto<?> response = oneDaysService.findTotalFocusTimeByEmail(sessionUser.getEmail());
+
+        CommonResponseDto<?> response = oneDaysService.findWholeTotalFocusTimeByEmail(sessionUser.getEmail());
+
         return ResponseEntity.ok().body(response);
     }
 
@@ -74,60 +80,9 @@ public class OneDaysController {
     @GetMapping("/dash/stats/focus-time/detail")
     public ResponseEntity<CommonResponseDto<?>> findFocusTimeListByPeriod(@RequestParam(name = "period") String period, HttpSession session) {
         SessionUser sessionUser = (SessionUser) session.getAttribute("user");
+
         CommonResponseDto<?> response = oneDaysService.findFocusTimeListByEmailAndPeriod(sessionUser.getEmail(), period);
-        return ResponseEntity.ok().body(response);
-    }
 
-    @Operation(summary = "스트릭에 표시할 데이터 조회",
-            description = "month 파라미터에 따라 1개월/6개월 집중시간 통계를 조회한다.")
-    @Parameters(value = {
-            @Parameter(name = "month", description = "1개월 = 1, 6개월 = 6")
-    })
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200",
-                    description = "스트릭 데이터 조회 성공",
-                    content = @Content(schema = @Schema(implementation = FocusTimeListResponse.class))),
-            @ApiResponse(responseCode = "400",
-                    description = "스트릭 데이터 조회 실패(부적절한 month 값)")
-    })
-    @GetMapping("/dash/streak")
-    public ResponseEntity<CommonResponseDto<?>> findFocusTimeListByMonth(@RequestParam(name="month") int month, HttpSession session){
-        SessionUser sessionUser = (SessionUser) session.getAttribute("user");
-        CommonResponseDto<?> response = oneDaysService.findFocusTimeListByEmailAndMonth(sessionUser.getEmail(), month);
-        return ResponseEntity.ok().body(response);
-    }
-
-    @Operation(summary = "캘린더에 표시할 데이터 조회",
-            description = "year, month 파라미터에 따라 캘린더 집중시간 통계를 조회한다.")
-    @Parameters(value = {
-            @Parameter(name = "year", description = "year = 2024"),
-            @Parameter(name = "month", description = "month = 8")
-    })
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200",
-                    description = "캘린더 데이터 조회 성공",
-                    content = @Content(schema = @Schema(implementation = FocusTimeListCalendarResponse.class))),
-            @ApiResponse(responseCode = "400",
-                    description = "캘린더 데이터 조회 실패(부적절한 year/month 값)")
-    })
-    @GetMapping("/dash/calendar")
-    public ResponseEntity<?> findFocusTimeListByYearAndMonth(@RequestParam(name="year") int year, @RequestParam(name="month") int month, HttpSession session){
-        SessionUser sessionUser = (SessionUser) session.getAttribute("user");
-        CommonResponseDto<?> response = oneDaysService.findFocusTimeListByEmailAndYearAndMonth(sessionUser.getEmail(), year, month);
-        return ResponseEntity.ok().body(response);
-    }
-
-    @Operation(summary = "전체 인원 대비 집중 시간 백분율 조회",
-            description = "전체 인원 대비 일간/주간/월간 백분율을 조회한다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200",
-                    description = "백분율 조회 성공",
-                    content = @Content(schema = @Schema(implementation = FocusTimePercentResponse.class)))
-    })
-    @GetMapping("/dash/stats/focus-time/percent")
-    public ResponseEntity<?> findFocusTimePercent(HttpSession session){
-        SessionUser sessionUser = (SessionUser) session.getAttribute("user");
-        CommonResponseDto<?> response = oneDaysService.findFocusTimePercentByEmail(sessionUser.getEmail());
         return ResponseEntity.ok().body(response);
     }
 
@@ -150,6 +105,69 @@ public class OneDaysController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
+    @Operation(summary = "스트릭에 표시할 데이터 조회",
+            description = "month 파라미터에 따라 1개월/6개월 집중시간 통계를 조회한다.")
+    @Parameters(value = {
+            @Parameter(name = "month", description = "1개월 = 1, 6개월 = 6")
+    })
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "스트릭 데이터 조회 성공",
+                    content = @Content(schema = @Schema(implementation = FocusTimeListResponse.class))),
+            @ApiResponse(responseCode = "400",
+                    description = "스트릭 데이터 조회 실패(부적절한 month 값)")
+    })
+    @GetMapping("/dash/streak")
+    public ResponseEntity<CommonResponseDto<?>> findFocusTimeListByMonth(@RequestParam(name="month") int month, HttpSession session){
+
+        SessionUser sessionUser = (SessionUser) session.getAttribute("user");
+
+        CommonResponseDto<?> response = oneDaysService.findFocusTimeListByEmailAndMonth(sessionUser.getEmail(), month);
+
+        return ResponseEntity.ok().body(response);
+    }
+
+    @Operation(summary = "전체 인원 대비 집중 시간 백분율 조회",
+            description = "전체 인원 대비 일간/주간/월간 백분율을 조회한다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "백분율 조회 성공",
+                    content = @Content(schema = @Schema(implementation = FocusTimePercentResponse.class)))
+    })
+    @GetMapping("/dash/stats/focus-time/percent")
+    public ResponseEntity<?> findFocusTimePercent(HttpSession session){
+
+        SessionUser sessionUser = (SessionUser) session.getAttribute("user");
+
+        CommonResponseDto<?> response = oneDaysService.findFocusTimePercentByEmail(sessionUser.getEmail());
+
+        return ResponseEntity.ok().body(response);
+    }
+
+    // 어쩌다보니 우리 안 쓰고 있음
+    @Operation(summary = "캘린더에 표시할 데이터 조회",
+            description = "year, month 파라미터에 따라 캘린더 집중시간 통계를 조회한다.")
+    @Parameters(value = {
+            @Parameter(name = "year", description = "year = 2024"),
+            @Parameter(name = "month", description = "month = 8")
+    })
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "캘린더 데이터 조회 성공",
+                    content = @Content(schema = @Schema(implementation = FocusTimeListCalendarResponse.class))),
+            @ApiResponse(responseCode = "400",
+                    description = "캘린더 데이터 조회 실패(부적절한 year/month 값)")
+    })
+    @GetMapping("/dash/calendar")
+    public ResponseEntity<?> findFocusTimeListByYearAndMonth(@RequestParam(name="year") int year, @RequestParam(name="month") int month, HttpSession session){
+
+        SessionUser sessionUser = (SessionUser) session.getAttribute("user");
+
+        CommonResponseDto<?> response = oneDaysService.findFocusTimeListByEmailAndYearAndMonth(sessionUser.getEmail(), year, month);
+
+        return ResponseEntity.ok().body(response);
+    }
+
     @Operation(summary = "목표 집중 시간 추가",
             description = "오늘의 목표 집중 시간을 추가한다.")
     @ApiResponses(value = {
@@ -159,8 +177,11 @@ public class OneDaysController {
     })
     @PostMapping("/focus-time/goal")
     public ResponseEntity<?> saveTimeGoal(@RequestBody TimeGoalRequest timeGoal, HttpSession session) {
+
         SessionUser sessionUser = (SessionUser) session.getAttribute("user");
+
         CommonResponseDto<?> response = oneDaysService.saveTimeGoal(sessionUser.getEmail(), timeGoal);
+
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -173,8 +194,11 @@ public class OneDaysController {
     })
     @PutMapping("/focus-time/goal")
     public ResponseEntity<?> updateTimeGoal(@RequestBody TimeGoalRequest timeGoal, HttpSession session) {
+
         SessionUser sessionUser = (SessionUser) session.getAttribute("user");
+
         CommonResponseDto<?> response = oneDaysService.updateTimeGoal(sessionUser.getEmail(), timeGoal);
+
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 

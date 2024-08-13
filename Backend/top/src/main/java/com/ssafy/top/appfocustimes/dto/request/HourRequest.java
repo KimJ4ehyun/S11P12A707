@@ -1,4 +1,4 @@
-package com.ssafy.top.hourfocustimes.dto.request;
+package com.ssafy.top.appfocustimes.dto.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
