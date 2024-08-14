@@ -11,6 +11,9 @@ import com.ssafy.top.users.domain.UsersRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
 
@@ -45,7 +48,8 @@ public class BansService {
         Users user = usersRepository.findByEmail(email)
                 .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
 
-        List<Object[]> banList = bansRepository.findBanListByUserId(user.getId());
+        LocalDate now = LocalDate.now(ZoneId.of("Asia/Seoul"));
+        List<Object[]> banList = bansRepository.findBanListByUserIdAndDateData(user.getId(), now);
 
         AppNameAndTimeResponse[] appNameAndTimeResponses = banList.stream()
                 .map(result -> new AppNameAndTimeResponse((String) result[0], ((Long) result[1])))
