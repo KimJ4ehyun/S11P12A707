@@ -107,11 +107,11 @@ public class AppFocusTimesService {
         for(int i = 0; i < focusTimeListResponses.length-1; i++){
             LocalDate dateData = (LocalDate) focusTimeList.get(i)[0];
             String formattedDate = dateData.format(DateTimeFormatter.ofPattern("MM-dd"));
-            focusTimeListResponses[i] = new FocusTimeListResponse(formattedDate, (int)focusTimeList.get(i)[1]);
+            focusTimeListResponses[i] = new FocusTimeListResponse(formattedDate, (long)focusTimeList.get(i)[1]);
         }
 
         String formattedDateToday = today.format(DateTimeFormatter.ofPattern("MM-dd"));
-        focusTimeListResponses[focusTimeListResponses.length-1] = new FocusTimeListResponse(formattedDateToday, findTodayTotalFocusTimeByUserIdAndDateData(userId, today));
+        focusTimeListResponses[focusTimeListResponses.length-1] = new FocusTimeListResponse(formattedDateToday, (long)findTodayTotalFocusTimeByUserIdAndDateData(userId, today));
 
         return new CommonResponseDto<>(focusTimeListResponses, "집중시간 통계 조회에 성공했습니다.", 200);
     }
