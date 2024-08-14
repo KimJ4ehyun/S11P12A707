@@ -58,12 +58,12 @@ public interface AppFocusTimesRepository extends JpaRepository<AppFocusTimes, Lo
     int findWholeTotalFocusTimeByUserIdExcludingToday(@Param("userId") Long userId);
 
     // 백분율 구할 때 사용할 순위 구하기
-    @Query(value = "SELECT r.rank " +
+    @Query(value = "SELECT r.ranking " +
             "FROM ( " +
             "    SELECT o.user_id AS userId, " +
-            "           RANK() OVER (ORDER BY SUM(a.focus_time) DESC) AS rank " +
-            "    FROM app_focus_times a " +
-            "    LEFT JOIN one_days o ON a.one_day_id = o.one_day_id " +
+            "           RANK() OVER (ORDER BY SUM(COALESCE(a.focus_time, 0)) DESC) AS ranking " +
+            "    FROM one_days o " +
+            "    LEFT JOIN app_focus_times a ON a.one_day_id = o.one_day_id " +
             "    LEFT JOIN bans b ON b.name = a.app AND o.user_id = b.user_id " +
             "    WHERE o.date_data BETWEEN :startDate AND :endDate " +
             "      AND b.name IS NULL " +
