@@ -19,8 +19,8 @@ public interface BansRepository extends JpaRepository<Bans, Long> {
 
     @Query("SELECT b.name, COALESCE(SUM(a.focusTime), 0) AS totalFocusTime " +
             "FROM Bans b " +
-            "LEFT JOIN AppFocusTimes a ON a.oneDays.user.id = b.user.id AND b.name = a.app " +
-            "WHERE a.oneDays.dateData = :dateData and b.user.id = :userId " +
+            "LEFT JOIN AppFocusTimes a ON a.oneDays.user.id = b.user.id AND b.name = a.app AND a.oneDays.dateData = :dateData " +
+            "WHERE b.user.id = :userId " +
             "GROUP BY b.name " +
             "ORDER BY totalFocusTime DESC ")
     List<Object[]> findBanListByUserIdAndDateData(@Param("userId") Long userId, @Param("dateData") LocalDate dateData);
