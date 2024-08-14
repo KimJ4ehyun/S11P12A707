@@ -89,6 +89,8 @@ public class CustomOauth2UserService implements OAuth2UserService<OAuth2UserRequ
                 .name(WidgetType.TodayFocusBigWithoutComparison)
                 .x(0)
                 .y(0)
+                .width(3)
+                .height(1)
                 .user(user)
                 .build();
         widgets.add(w1);
@@ -97,6 +99,8 @@ public class CustomOauth2UserService implements OAuth2UserService<OAuth2UserRequ
                 .name(WidgetType.WeekFocusBigWithoutComparison)
                 .x(3)
                 .y(0)
+                .width(3)
+                .height(1)
                 .user(user)
                 .build();
         widgets.add(w2);
@@ -105,6 +109,8 @@ public class CustomOauth2UserService implements OAuth2UserService<OAuth2UserRequ
                 .name(WidgetType.MonthFocusBigWithoutComparison)
                 .x(6)
                 .y(0)
+                .width(3)
+                .height(1)
                 .user(user)
                 .build();
         widgets.add(w3);
@@ -113,6 +119,8 @@ public class CustomOauth2UserService implements OAuth2UserService<OAuth2UserRequ
                 .name(WidgetType.TotalFocusBig)
                 .x(9)
                 .y(0)
+                .width(3)
+                .height(1)
                 .user(user)
                 .build();
         widgets.add(w4);
@@ -121,6 +129,8 @@ public class CustomOauth2UserService implements OAuth2UserService<OAuth2UserRequ
                 .name(WidgetType.TimeLine)
                 .x(0)
                 .y(1)
+                .width(7)
+                .height(4)
                 .user(user)
                 .build();
         widgets.add(w5);
@@ -129,6 +139,8 @@ public class CustomOauth2UserService implements OAuth2UserService<OAuth2UserRequ
                 .name(WidgetType.BannedProgramList)
                 .x(7)
                 .y(1)
+                .width(5)
+                .height(4)
                 .user(user)
                 .build();
         widgets.add(w6);
@@ -137,6 +149,8 @@ public class CustomOauth2UserService implements OAuth2UserService<OAuth2UserRequ
                 .name(WidgetType.FocusTimeEachProgramsPercentage)
                 .x(0)
                 .y(5)
+                .width(7)
+                .height(4)
                 .user(user)
                 .build();
         widgets.add(w7);
@@ -145,6 +159,8 @@ public class CustomOauth2UserService implements OAuth2UserService<OAuth2UserRequ
                 .name(WidgetType.CalendarCheck)
                 .x(7)
                 .y(5)
+                .width(5)
+                .height(4)
                 .user(user)
                 .build();
         widgets.add(w8);
