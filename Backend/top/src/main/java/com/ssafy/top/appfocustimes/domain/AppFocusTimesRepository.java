@@ -17,15 +17,6 @@ public interface AppFocusTimesRepository extends JpaRepository<AppFocusTimes, Lo
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     Optional<AppFocusTimes> findByOneDaysIdAndTimeUnitAndApp(Long id, int timeUnit, String app);
 
-    // 해당 기간의 집중 시간 합 구하기
-    @Query("SELECT COALESCE(SUM(a.focusTime), 0) " +
-            "FROM AppFocusTimes a " +
-            "LEFT JOIN Bans b ON b.name = a.app AND a.oneDays.user.id =  b.user.id " +
-            "WHERE a.oneDays.user.id = :userId AND b.name IS NULL AND a.oneDays.dateData BETWEEN :startDate AND :endDate ")
-    int findTotalFocusTimeByUserIdAndDateDataBetween(@Param("userId") Long userId,
-                                                     @Param("startDate") LocalDate startDate,
-                                                     @Param("endDate") LocalDate endDate);
-
     // 각 단위 시간 집중 시간 구하기
     @Query("SELECT a.timeUnit, COALESCE(SUM(a.focusTime), 0) " +
             "FROM AppFocusTimes a " +
@@ -34,20 +25,6 @@ public interface AppFocusTimesRepository extends JpaRepository<AppFocusTimes, Lo
             "GROUP BY a.timeUnit")
     List<Object[]> findUnitFocusTimeByOneDayId(@Param("oneDayId") Long oneDayId);
 
-    // 해당 기간의 집중 시간 합 구하기
-    @Query("SELECT a.oneDays.dateData, COALESCE(SUM(a.focusTime), 0) " +
-            "FROM AppFocusTimes a " +
-            "LEFT JOIN Bans b ON b.name = a.app AND a.oneDays.user.id = b.user.id " +
-            "WHERE a.oneDays.user.id = :userId " +
-            "AND b.name IS NULL " +
-            "AND a.oneDays.dateData BETWEEN :startDate AND :endDate " +
-            "GROUP BY a.oneDays.dateData " +
-            "ORDER BY a.oneDays.dateData ASC")
-    List<Object[]> findFocusTimeListByUserIdAndDateDataBetween(@Param("userId") Long userId,
-                                                               @Param("startDate") LocalDate startDate,
-                                                               @Param("endDate") LocalDate endDate);
-
-
     // 하루 전체 집중 시간 구하기
     @Query("SELECT COALESCE(SUM(a.focusTime), 0) " +
             "FROM AppFocusTimes a " +
@@ -55,28 +32,34 @@ public interface AppFocusTimesRepository extends JpaRepository<AppFocusTimes, Lo
             "WHERE a.oneDays.id = :oneDayId AND b.name IS NULL")
     int findTodayTotalFocusTimeByOneDayId(@Param("oneDayId") Long oneDayId);
 
-    @Query("SELECT COALESCE(SUM(a.focusTime), 0) " +
-            "FROM AppFocusTimes a " +
-            "LEFT JOIN Bans b ON b.name = a.app AND a.oneDays.user.id =  b.user.id " +
-            "WHERE a.oneDays.user.id = :userId AND b.name IS NULL")
-    int findWholeTotalFocusTimeByUserIdExcludingToday(@Param("userId") Long userId);
-
     // 백분율 구할 때 사용할 순위 구하기
     @Query(value = "SELECT r.ranking " +
             "FROM ( " +
             "    SELECT o.user_id AS userId, " +
-            "           RANK() OVER (ORDER BY SUM(COALESCE(a.focus_time, 0)) DESC) AS ranking " +
-            "    FROM one_days o " +
-            "    LEFT JOIN app_focus_times a ON a.one_day_id = o.one_day_id " +
-            "    LEFT JOIN bans b ON b.name = a.app AND o.user_id = b.user_id " +
-            "    WHERE o.date_data BETWEEN :startDate AND :endDate " +
-            "      AND b.name IS NULL " +
+            "           RANK() OVER (ORDER BY SUM(COALESCE(a.today_focus_time, 0) + COALESCE(o.past_focus_time, 0)) DESC) AS ranking " +
+            "    FROM ( " +
+            "        SELECT o.user_id, " +
+            "               SUM(CASE WHEN o.date_data = :endDate THEN 0 ELSE o.focus_time END) AS past_focus_time " +
+            "        FROM one_days o " +
+            "        WHERE o.date_data BETWEEN :startDate AND DATE_SUB(:endDate, INTERVAL 1 DAY) " +
+            "        GROUP BY o.user_id " +
+            "    ) o " +
+            "    LEFT JOIN ( " +
+            "        SELECT o.user_id, SUM(a.focus_time) AS today_focus_time " +
+            "        FROM app_focus_times a " +
+            "        JOIN one_days o ON a.one_day_id = o.one_day_id " +
+            "        LEFT JOIN bans b ON b.name = a.app AND o.user_id = b.user_id " +
+            "        WHERE o.date_data = :endDate " +
+            "        AND b.name IS NULL " +
+            "        GROUP BY o.user_id " +
+            "    ) a ON a.user_id = o.user_id " +
             "    GROUP BY o.user_id " +
             ") r " +
             "WHERE r.userId = :userId", nativeQuery = true)
     int findRankByDateDataBetween(@Param("userId") Long userId,
-                                  @Param("startDate") LocalDate startDate,
-                                  @Param("endDate") LocalDate endDate);
+                                        @Param("startDate") LocalDate startDate,
+                                        @Param("endDate") LocalDate endDate);
+
 
     @Query("SELECT COALESCE(SUM(a.focusTime), 0) " +
             "FROM AppFocusTimes a " +
