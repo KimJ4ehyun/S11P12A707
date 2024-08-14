@@ -25,6 +25,10 @@ public class Widgets {
 
     private int y;
 
+    private int height;
+
+    private int width;
+
     @ManyToOne
     @JoinColumn(name = "user_id")
     private Users user;

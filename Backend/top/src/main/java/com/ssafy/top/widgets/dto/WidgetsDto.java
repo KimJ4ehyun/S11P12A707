@@ -33,8 +33,8 @@ public class WidgetsDto {
     public static WidgetsDto toDto(Widgets widget) {
         return WidgetsDto.builder()
                 .name(String.valueOf(widget.getName()))
-                .width(0)
-                .height(0)
+                .width(widget.getWidth())
+                .height(widget.getHeight())
                 .x(widget.getX())
                 .y(widget.getY())
                 .build();
@@ -45,6 +45,8 @@ public class WidgetsDto {
                 .name(WidgetType.valueOf(name))
                 .x(x)
                 .y(y)
+                .width(width)
+                .height(height)
                 .user(user)
                 .build();
     }
