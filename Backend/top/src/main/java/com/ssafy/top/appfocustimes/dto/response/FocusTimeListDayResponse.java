@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 public class FocusTimeListDayResponse {
 
     @Schema(description = "단위 시간")
-    private int startTime;
+    private Long startTime;
 
     @Schema(description = "집중 시간")
     private Long focusTime;
