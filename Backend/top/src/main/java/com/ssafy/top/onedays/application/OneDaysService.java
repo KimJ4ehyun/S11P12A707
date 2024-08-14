@@ -78,6 +78,7 @@ public class OneDaysService {
                     OneDays newOneDay = OneDays.builder()
                             .dateData(date)
                             .targetTime(0)
+                            .focusTime(0)
                             .user(user)
                             .build();
                     oneDaysRepository.save(newOneDay);
