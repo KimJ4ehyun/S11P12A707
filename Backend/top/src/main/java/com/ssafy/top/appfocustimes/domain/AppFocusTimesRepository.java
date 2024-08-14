@@ -37,12 +37,16 @@ public interface AppFocusTimesRepository extends JpaRepository<AppFocusTimes, Lo
     // 해당 기간의 집중 시간 합 구하기
     @Query("SELECT a.oneDays.dateData, COALESCE(SUM(a.focusTime), 0) " +
             "FROM AppFocusTimes a " +
-            "WHERE a.oneDays.user.id = :userId AND a.oneDays.dateData BETWEEN :startDate AND :endDate " +
+            "LEFT JOIN Bans b ON b.name = a.app AND a.oneDays.user.id = b.user.id " +
+            "WHERE a.oneDays.user.id = :userId " +
+            "AND b.name IS NULL " +
+            "AND a.oneDays.dateData BETWEEN :startDate AND :endDate " +
             "GROUP BY a.oneDays.dateData " +
             "ORDER BY a.oneDays.dateData ASC")
     List<Object[]> findFocusTimeListByUserIdAndDateDataBetween(@Param("userId") Long userId,
                                                                @Param("startDate") LocalDate startDate,
                                                                @Param("endDate") LocalDate endDate);
+
 
     // 하루 전체 집중 시간 구하기
     @Query("SELECT COALESCE(SUM(a.focusTime), 0) " +
