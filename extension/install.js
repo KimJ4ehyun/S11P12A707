@@ -8,6 +8,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const profilePathInput = document.getElementById("profilePathInput");
   const generatePathButton = document.getElementById("generatePathButton");
   const finalPath = document.getElementById("finalPath");
+  const extensionsLink = document.getElementById("extensionsLink");
 
   const extensionId = "jckihcjdfohdkbnfaapkddekkgjheakg"; // 확장 프로그램 ID를 적절히 변경
   const extensionVersion = "1.1_0"; // 확장 프로그램 버전을 적절히 변경
@@ -48,6 +49,20 @@ document.addEventListener("DOMContentLoaded", function () {
       })
       .catch(function (error) {
         alert("경로 복사에 실패했습니다.");
+        console.error("복사 실패:", error);
+      });
+  });
+
+  extensionsLink.addEventListener("click", function () {
+    const textToCopy = "chrome://extensions/";
+    navigator.clipboard
+      .writeText(textToCopy)
+      .then(function () {
+        copyStatus2.innerText = "URL이 클립보드에 복사되었습니다.";
+        setTimeout(() => (copyStatus2.innerText = ""), 5000);
+      })
+      .catch(function (error) {
+        copyStatus2.innerText = "URL 복사에 실패했습니다.";
         console.error("복사 실패:", error);
       });
   });
