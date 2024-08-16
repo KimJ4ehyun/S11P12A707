@@ -10,5 +10,5 @@
 ## BackEnd 빌드 파일
 - build 폴더 안의 jar 파일
 
-## FrontEnd 빌드 파일
-- build 폴더 안의 dist 파일
+## FrontEnd 빌드 폴더
+- build 폴더 안의 dist 폴더
