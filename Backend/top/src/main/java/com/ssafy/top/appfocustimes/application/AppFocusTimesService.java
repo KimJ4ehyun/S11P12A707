@@ -127,18 +127,6 @@ public class AppFocusTimesService {
         return appFocusTimesRepository.findTodayTotalFocusTimeByOneDayId(oneDayId);
     }
 
-    public int findTodayTotalFocusTimeForScheduleByUserIdAndDateData(Long userId, LocalDate today){
-        Optional<OneDays> oneDaysOptional = oneDaysRepository.findByUserIdAndDateData(userId, today);
-
-        if (oneDaysOptional.isEmpty()) {
-            return 0;
-        }
-
-        Long oneDayId = oneDaysOptional.get().getId();
-
-        return appFocusTimesRepository.findTodayTotalFocusTimeByOneDayId(oneDayId);
-    }
-
     public CommonResponseDto<?> findWholeTotalFocusTimeByEmail(String email){
 
         Long userId = getUserByEmail(email).getId();
