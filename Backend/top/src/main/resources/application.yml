@@ -11,3 +11,10 @@ spring:
     active: dev
     include: oauth
 
+
+logging:
+  file:
+    name: /path/to/your/logfile.log
+  level:
+    com.ssafy.top: INFO
+
