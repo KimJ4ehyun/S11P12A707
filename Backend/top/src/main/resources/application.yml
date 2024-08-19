@@ -10,12 +10,3 @@ spring:
   profiles:
     active: dev
     include: oauth
-
-
-logging:
-  file:
-    name: /home/ubuntu/myapp.log
-  level:
-    com.ssafy.top: INFO
-
-
