@@ -19,12 +19,12 @@ public class ScheduledTasks {
 
     private final UsersRepository usersRepository;
 
-    @Scheduled(cron = "0 50 16 * * ?", zone = "Asia/Seoul")
+    @Scheduled(cron = "0 30 16 * * ?", zone = "Asia/Seoul")
     public void updateAllUsersOneDayFocusTime() {
 //        LocalDate yesterday = LocalDate.now(ZoneId.of("Asia/Seoul")).minusDays(1);
-        LocalDate yesterday = LocalDate.of(2024, 8, 13);
+        LocalDate yesterday = LocalDate.of(2024, 8, 12);
         usersRepository.findAll().forEach(user -> {
-            int totalFocusTime = appFocusTimesService.findTodayTotalFocusTimeForScheduleByUserIdAndDateData(user.getId(), yesterday);
+            int totalFocusTime = appFocusTimesService.findTodayTotalFocusTimeByUserIdAndDateData(user.getId(), yesterday);
             if (totalFocusTime != 0) {
                 oneDaysRepository.findByUserIdAndDateData(user.getId(), yesterday).ifPresent(oneDays -> {
                     oneDays.updateFocusTime(totalFocusTime);
