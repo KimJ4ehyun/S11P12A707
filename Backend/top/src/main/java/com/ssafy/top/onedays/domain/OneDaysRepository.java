@@ -21,7 +21,6 @@ public interface OneDaysRepository extends JpaRepository<OneDays, Long> {
                                                 @Param("startDate") LocalDate startDate,
                                                 @Param("endDate") LocalDate endDate);
 
-
     // 해당 기간의 집중 시간 합 구하기
     @Query("SELECT COALESCE(SUM(o.focusTime), 0) " +
             "FROM OneDays o " +
