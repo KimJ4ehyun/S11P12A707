@@ -163,9 +163,9 @@ public class AppFocusTimesController {
     @GetMapping("/dash/stats/focus-time/percent")
     public ResponseEntity<?> findFocusTimePercent(HttpSession session){
 
-//        SessionUser sessionUser = (SessionUser) session.getAttribute("user");
+        SessionUser sessionUser = (SessionUser) session.getAttribute("user");
 
-        CommonResponseDto<?> response = appFocusTimesService.findFocusTimePercentByEmail("Timo1@gmail.com");
+        CommonResponseDto<?> response = appFocusTimesService.findFocusTimePercentByEmail(sessionUser.getEmail());
 
         return ResponseEntity.ok().body(response);
     }
