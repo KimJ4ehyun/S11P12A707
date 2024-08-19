@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import java.time.LocalDate;
+import java.time.ZoneId;
 
 @Component
 @RequiredArgsConstructor
@@ -18,10 +19,9 @@ public class ScheduledTasks {
 
     private final UsersRepository usersRepository;
 
-    @Scheduled(cron = "0 9 20 * * *", zone = "Asia/Seoul")
+    @Scheduled(cron = "0 5 0 * * *", zone = "Asia/Seoul")
     public void updateAllUsersOneDayFocusTime() {
-//        LocalDate yesterday = LocalDate.now(ZoneId.of("Asia/Seoul")).minusDays(1);
-        LocalDate yesterday = LocalDate.of(2024, 8, 13);
+        LocalDate yesterday = LocalDate.now(ZoneId.of("Asia/Seoul")).minusDays(1);
         usersRepository.findAll().forEach(user -> {
             int totalFocusTime = appFocusTimesService.findTodayTotalFocusTimeForScheduleByUserIdAndDateData(user.getId(), yesterday);
             if (totalFocusTime != 0) {
