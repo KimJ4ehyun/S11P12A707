@@ -43,7 +43,7 @@ public interface AppFocusTimesRepository extends JpaRepository<AppFocusTimes, Lo
             "            o.user_id, " +
             "            SUM(CASE WHEN o.date_data = :endDate THEN 0 ELSE o.focus_time END) AS past_focus_time " +
             "        FROM one_days o " +
-            "        WHERE o.date_data BETWEEN :startDate AND DATE_SUB(:endDate, INTERVAL 1 DAY) " +
+            "        WHERE o.date_data BETWEEN :startDate AND :endDate " +  // :endDate 포함
             "        GROUP BY o.user_id " +
             "    ) o " +
             "    LEFT JOIN ( " +
@@ -64,6 +64,7 @@ public interface AppFocusTimesRepository extends JpaRepository<AppFocusTimes, Lo
     int findRankByDateDataBetween(@Param("userId") Long userId,
                                   @Param("startDate") LocalDate startDate,
                                   @Param("endDate") LocalDate endDate);
+
 
     @Query("SELECT COALESCE(SUM(a.focusTime), 0) " +
             "FROM AppFocusTimes a " +
