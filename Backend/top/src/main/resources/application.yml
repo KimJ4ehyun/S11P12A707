@@ -14,7 +14,7 @@ spring:
 
 logging:
   file:
-    name: /path/to/your/logfile.log
+    name: /home/ec2-user/myapp.log
   level:
     com.ssafy.top: INFO
 
