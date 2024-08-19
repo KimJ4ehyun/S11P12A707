@@ -18,7 +18,7 @@ public class ScheduledTasks {
 
     private final UsersRepository usersRepository;
 
-    @Scheduled(cron = "0 43 19 * * *", zone = "Asia/Seoul")
+    @Scheduled(cron = "0 9 20 * * *", zone = "Asia/Seoul")
     public void updateAllUsersOneDayFocusTime() {
 //        LocalDate yesterday = LocalDate.now(ZoneId.of("Asia/Seoul")).minusDays(1);
         LocalDate yesterday = LocalDate.of(2024, 8, 13);

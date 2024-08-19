@@ -28,8 +28,9 @@ public interface AppFocusTimesRepository extends JpaRepository<AppFocusTimes, Lo
     // 하루 전체 집중 시간 구하기
     @Query("SELECT COALESCE(SUM(a.focusTime), 0) " +
             "FROM AppFocusTimes a " +
-            "LEFT JOIN Bans b ON b.name = a.app AND a.oneDays.user.id =  b.user.id " +
-            "WHERE a.oneDays.id = :oneDayId AND b.name IS NULL")
+            "JOIN a.oneDays o " +
+            "LEFT JOIN Bans b ON b.name = a.app AND o.user.id = b.user.id " +
+            "WHERE o.id = :oneDayId AND b.name IS NULL")
     int findTodayTotalFocusTimeByOneDayId(@Param("oneDayId") Long oneDayId);
 
     // 백분율 구할 때 사용할 순위 구하기
