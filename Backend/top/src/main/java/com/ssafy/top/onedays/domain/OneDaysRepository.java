@@ -14,6 +14,8 @@ public interface OneDaysRepository extends JpaRepository<OneDays, Long> {
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     Optional<OneDays> findByUserIdAndDateData(Long userId, LocalDate today);
 
+    Optional<OneDays> findOneDaysByUserIdAndDateData(Long userId, LocalDate today);
+
     @Query("SELECT COALESCE(SUM(o.targetTime), 0) " +
            "FROM OneDays o " +
            "WHERE o.user.id = :userId AND o.dateData BETWEEN :startDate AND :endDate ")

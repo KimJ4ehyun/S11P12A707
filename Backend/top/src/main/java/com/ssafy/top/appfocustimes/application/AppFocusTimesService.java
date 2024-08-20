@@ -220,7 +220,7 @@ public class AppFocusTimesService {
         isValidDate(year, month, day, today);
 
         LocalDate date = LocalDate.of(year, month, day);
-        int time = 0;
+        int time;
         if (!date.equals(LocalDate.now(ZoneId.of("Asia/Seoul")))) {
             time = appFocusTimesRepository.findTotalFocusTimeByUserIdAndDateData(userId, date);
         } else {

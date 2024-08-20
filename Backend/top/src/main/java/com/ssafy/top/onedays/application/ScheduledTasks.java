@@ -25,7 +25,7 @@ public class ScheduledTasks {
         usersRepository.findAll().forEach(user -> {
             int totalFocusTime = appFocusTimesService.findTodayTotalFocusTimeForScheduleByUserIdAndDateData(user.getId(), yesterday);
             if (totalFocusTime != 0) {
-                oneDaysRepository.findByUserIdAndDateData(user.getId(), yesterday).ifPresent(oneDays -> oneDays.updateFocusTime(totalFocusTime));
+                oneDaysRepository.findOneDaysByUserIdAndDateData(user.getId(), yesterday).ifPresent(oneDays -> oneDays.updateFocusTime(totalFocusTime));
             }
         });
     }

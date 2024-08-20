@@ -8,6 +8,7 @@ import com.ssafy.top.onedays.dto.request.TimeGoalRequest;
 import com.ssafy.top.onedays.dto.response.*;
 import com.ssafy.top.users.domain.Users;
 import com.ssafy.top.users.domain.UsersRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
